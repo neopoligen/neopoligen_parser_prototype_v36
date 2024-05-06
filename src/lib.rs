@@ -369,7 +369,8 @@ fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
 //     ))
 // }
 
-fn pre_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let category = "raw";
     // dbg!("basic_section_full");
     // dbg!(source);
     let (source, _) = tag("-- ").context("").parse(source)?;
@@ -386,7 +387,7 @@ fn pre_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Wrapper {
             start_tag: Some(format!("<{}>", r#type)),
             end_tag: Some(format!("</{}>", r#type)),
-            category: "basic".to_string(),
+            category: category.to_string(),
             r#type: r#type.to_string(),
             children: vec![Node::Raw { text: text.trim_end().to_string() }],
             bounds: "full".to_string(),
@@ -394,36 +395,37 @@ fn pre_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-// fn pre_section_start<'a>(
-//     source: &'a str,
-// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-//     let category = "basic";
-//     let (source, _) = tag("-- ").context("").parse(source)?;
-//     let (source, r#type) = basic_section_tag.context("").parse(source)?;
-//     let (source, _) = tag("/").context("").parse(source)?;
-//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-//     let (source, _) = multispace0.context("").parse(source)?;
-//     let (source, mut children) = many0(alt((basic_block, |src| {
-//         start_or_full_section(src)
-//     })))
-//     .context("")
-//     .parse(source)?;
-//     let (source, end_section) = basic_section_end(source, r#type)?;
-//     children.push(end_section);
-//     Ok((
-//         source,
-//         Node::Wrapper {
-//             start_tag: Some(format!("<{}>", r#type)),
-//             end_tag: None,
-//             category: category.to_string(),
-//             r#type: r#type.to_string(),
-//             children,
-//             bounds: "start".to_string(),
-//         },
-//     ))
-// }
-
+fn raw_section_start<'a>(
+    source: &'a str,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    let category = "raw";
+    let (source, _) = tag("-- ").context("").parse(source)?;
+    let (source, r#type) = basic_section_tag.context("").parse(source)?;
+    let (source, _) = tag("/").context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    // TODO: Chomp preceeding empty lines here instead of multieplace
+    // so things can start with a space on the first line that won't get eaten
+    let (source, _) = multispace0.context("").parse(source)?;
+    let (source, mut children) = many0(alt((basic_block, |src| {
+        start_or_full_section(src)
+    })))
+    .context("")
+    .parse(source)?;
+    let (source, end_section) = basic_section_end(source, r#type)?;
+    children.push(end_section);
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: Some(format!("<{}>", r#type)),
+            end_tag: None,
+            category: category.to_string(),
+            r#type: r#type.to_string(),
+            children,
+            bounds: "start".to_string(),
+        },
+    ))
+}
 
 
 fn pre_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
@@ -435,7 +437,6 @@ fn pre_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&
 
 
 
-
 fn start_or_full_section<'a>(
     source: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
@@ -444,7 +445,8 @@ fn start_or_full_section<'a>(
         |src| basic_section_full(src),
         |src| basic_section_start(src),
         |src| list_section_full(src),
-        |src| pre_section_full(src),
+        |src| raw_section_full(src),
+        |src| raw_section_start(src),
         // |src| list_section_start(src, inside.clone()),
     ))
     .context("")
