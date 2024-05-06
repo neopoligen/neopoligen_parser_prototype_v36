@@ -1,0 +1,17 @@
+-- title
+
+neopoligen_parser_prototype_v36
+
+The prototype for v36 of the parser
+
+GOAL: this version implements nesting
+inside lists
+
+-- notes
+
+- This parser is only focused on sections
+and nesting
+
+- Attributes aren't included
+
+- Content is slurped up instead of parsed
