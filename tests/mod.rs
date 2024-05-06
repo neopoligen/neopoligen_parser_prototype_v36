@@ -9,41 +9,8 @@ use std::fs;
 
 
 
-// #[case(
-//     "Basic Full Inside List Item Start/End",
-//     "-- list
 
-// -/ echo
 
-// -- div
-
-// foxtrot
-
-// //
-
-// - golf
-
-// ",
-//     "<ul><li><p>echo</p><div><p>foxtrot</p></div></li><li><p>golf</p></li></ul>"
-// )]
-// #[case("List Full Inside List Item Start/End",
-//     "-- list
-
-// -/ hotel
-
-// -- list
-
-// - india
-
-// - juliet
-
-// //
-
-// - kilo
-
-// ",
-//     "<ul><li><p>hotel</p><ul><li><p>india</p></li><li><p>juliet</p></li></ul></li><li><p>kilo</p></li></ul>"
-// )]
 // #[case(
 //     "Three levels of Basic Start/End",
 //     r#"-- div/

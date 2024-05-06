@@ -150,3 +150,78 @@ List With Start/End Item
 
 
 
+
+################################################
+
+Basic Full Inside List Item Start/End
+
+------------------------------------------------
+
+-- list
+
+-/ echo
+
+-- div
+
+foxtrot
+
+//
+
+- golf
+
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>echo</p>
+        <div class="basic-full-div">
+            <p>foxtrot</p>
+        </div>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>golf</p>
+    </li>
+</ul>
+
+
+################################################
+
+List Full Inside List Item Start/End
+
+------------------------------------------------
+
+-- list
+
+-/ hotel
+
+-- list
+
+- india
+
+- juliet
+
+//
+
+- kilo
+
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>hotel</p>
+        <ul class="list-full-list">
+            <li class="list_item-full-list_item">
+                <p>india</p>
+            </li>
+            <li class="list_item-full-list_item">
+                <p>juliet</p>
+            </li>
+        </ul>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>kilo</p>
+    </li>
+</ul>
+
