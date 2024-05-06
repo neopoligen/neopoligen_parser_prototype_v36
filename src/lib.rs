@@ -144,6 +144,111 @@ fn basic_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree
     Ok((source, r#type))
 }
 
+fn checklist_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    // dbg!("checklist_item_block");
+    // dbg!(source);
+    let (source, _) = not(tag("--")).context("").parse(source)?;
+    let (source, _) = not(tag("[")).context("").parse(source)?;
+    let (source, _) = not(tag("//")).context("").parse(source)?;
+    // using take_until isn't robust but works for this prototype
+    let (source, text) = take_until("\n\n").context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    Ok((
+        source,
+        Node::Block {
+            spans: text.to_string(),
+        },
+    ))
+}
+
+fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    // dbg!("list_item_end");
+    // dbg!(source);
+    let (source, _) = tag("//").context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: Some("".to_string()),
+            end_tag: Some("</li>".to_string()),
+            category: "checklist_item".to_string(),
+            r#type: "checklist_item_end".to_string(),
+            children: vec![],
+            bounds: "end".to_string(),
+        },
+    ))
+}
+
+fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    // NOTE: this prototype only looks for unchecked items
+    let (source, _) = tag("[] ").context("").parse(source)?;
+    let (source, children) = many0(checklist_item_block).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: Some("<li>".to_string()),
+            end_tag: Some("</li>".to_string()),
+            category: "list_item".to_string(),
+            r#type: "list_item".to_string(),
+            children,
+            bounds: "full".to_string(),
+        },
+    ))
+}
+
+fn checklist_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    // dbg!("list_item_start");
+    // dbg!(source);
+    // NOTE: this prototype only looks for unchecked items
+    let (source, _) = tag("[]/ ").context("").parse(source)?;
+    let (source, mut children) = many0(alt((checklist_item_block, |src| {
+        start_or_full_section(src)
+    })))
+    .context("")
+    .parse(source)?;
+    let (source, ending) = checklist_item_end.context("").parse(source)?;
+    children.push(ending);
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: Some("<li>".to_string()),
+            end_tag: Some("".to_string()),
+            category: "list_item".to_string(),
+            r#type: "list_item".to_string(),
+            children,
+            bounds: "full".to_string(),
+        },
+    ))
+}
+
+fn checklist_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let (source, _) = tag("-- ").context("").parse(source)?;
+    let (source, r#type) = checklist_section_tag.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    let (source, children) = many0(alt((checklist_item_full, checklist_item_start)))
+        .context("")
+        .parse(source)?;
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: Some("<ul>".to_string()),
+            end_tag: Some("</ul>".to_string()),
+            category: "list".to_string(),
+            r#type: r#type.to_string(),
+            children,
+            bounds: "full".to_string(),
+        },
+    ))
+}
+
+fn checklist_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    let (source, r#type) = alt((tag("checklist"),)).context("").parse(source)?;
+    Ok((source, r#type))
+}
+
 fn empty_until_newline_or_eof<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
     let (source, _) = alt((
         tuple((space0, newline.map(|_| ""))),
@@ -211,7 +316,7 @@ fn list_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
             category: "list_item".to_string(),
             r#type: "list_item_end".to_string(),
             children: vec![],
-            bounds: "full".to_string(),
+            bounds: "end".to_string(),
         },
     ))
 }
@@ -437,6 +542,7 @@ fn start_or_full_section<'a>(
     let (source, results) = alt((
         |src| basic_section_full(src),
         |src| basic_section_start(src),
+        |src| checklist_section_full(src),
         |src| list_section_full(src),
         |src| raw_section_full(src),
         |src| raw_section_start(src),

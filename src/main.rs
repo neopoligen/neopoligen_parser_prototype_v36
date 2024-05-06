@@ -3,9 +3,9 @@ use neopoligen_parser_prototype_v36::*;
 use std::fs;
 
 fn main() {
-    let content = r#"-- list
+    let content = r#"-- checklist
 
--/ a
+[]/ a
 
 -- pre/
 
@@ -15,7 +15,7 @@ asdf
 
 //
 
-- b
+[] b
 
 "#;
     match parse(content) {

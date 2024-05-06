@@ -209,6 +209,23 @@ b
 "#,
     "<ul><li><p>a</p><pre>b</pre></li><li><p>c</p></li></ul>"
 )]
+#[case("Checklist with start/end", 
+r#"-- checklist
+
+[]/ a
+
+    -- pre/
+
+b
+
+    -- /pre
+
+//
+
+[] c
+
+"#,
+"<ul><li><p>a</p><pre>b</pre></li><li><p>c</p></li></ul>")]
 fn run_tests(#[case] _x: &str, #[case] input: &str, #[case] left: &str) {
     let right = output(&parse(input).unwrap());
     assert_eq!(left, right);
