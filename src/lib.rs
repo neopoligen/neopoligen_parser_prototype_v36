@@ -536,15 +536,41 @@ pub fn output(ast: &Vec<Node>) -> String {
             ..
         } => {
 
-            response.push_str("<h2>");
-            response.push_str(kind);
-            response.push_str(" ");
-            response.push_str(r#type);
-            response.push_str("</h2>");
 
             if kind == "basic" {
                 if bounds == "full" {
                     response.push_str("<div>");
+                    response.push_str("<h2>");
+                    response.push_str(kind);
+                    response.push_str("-");
+                    response.push_str(bounds);
+                    response.push_str("-");
+                    response.push_str(r#type);
+                    response.push_str("</h2>");
+                    response.push_str(&output(&children));
+                    response.push_str("</div>");
+                }
+                if bounds == "start" {
+                    response.push_str("<div>");
+                    response.push_str("<h2>");
+                    response.push_str(kind);
+                    response.push_str("-");
+                    response.push_str(bounds);
+                    response.push_str("-");
+                    response.push_str(r#type);
+                    response.push_str("</h2>");
+                    response.push_str(&output(&children));
+                }
+                if bounds == "end" {
+                    response.push_str("</div>");
+                    response.push_str("<div>");
+                    response.push_str("<h2>");
+                    response.push_str(kind);
+                    response.push_str("-");
+                    response.push_str(bounds);
+                    response.push_str("-");
+                    response.push_str(r#type);
+                    response.push_str("</h2>");
                     response.push_str(&output(&children));
                     response.push_str("</div>");
                 }

@@ -1,254 +1,282 @@
 use neopoligen_parser_prototype_v36::*;
 use pretty_assertions::assert_eq;
 use rstest::rstest;
+use std::path::PathBuf;
+use walkdir::WalkDir;
+use std::fs;
 
-#[rstest]
-#[case(
-    "Basic Full Section",
-    "-- div
 
-alfa
+// #[rstest]
+// #[case(
+//     "Basic Full Section",
+//     "-- div
 
-",
-    "<div><p>alfa</p></div>"
-)]
-#[case(
-    "Basic Start/End Section",
-    "-- div/
+// alfa
 
-bravo
+// ",
+//     "<div><p>alfa</p></div>"
+// )]
+// #[case(
+//     "Basic Start/End Section",
+//     "-- div/
 
--- /div",
-    "<div><p>bravo</p></div>"
-)]
-#[case(
-    "Basic Full Inside Basic Start/End",
-    "-- div/
+// bravo
 
-charlie
+// -- /div",
+//     "<div><p>bravo</p></div>"
+// )]
+// #[case(
+//     "Basic Full Inside Basic Start/End",
+//     "-- div/
 
--- div
+// charlie
 
-delta
+// -- div
 
--- /div",
-    "<div><p>charlie</p><div><p>delta</p></div></div>"
-)]
-#[case(
-    "Basic Start/End Inside Basic Start/End",
-    "-- div/
+// delta
 
-echo
+// -- /div",
+//     "<div><p>charlie</p><div><p>delta</p></div></div>"
+// )]
+// #[case(
+//     "Basic Start/End Inside Basic Start/End",
+//     "-- div/
 
--- div/
+// echo
 
-foxtrot
+// -- div/
 
--- /div
+// foxtrot
 
-golf
+// -- /div
 
--- /div",
-    "<div><p>echo</p><div><p>foxtrot</p></div><p>golf</p></div>"
-)]
-#[case(
-    "List Full",
-    "-- list
+// golf
 
-- alfa
+// -- /div",
+//     "<div><p>echo</p><div><p>foxtrot</p></div><p>golf</p></div>"
+// )]
+// #[case(
+//     "List Full",
+//     "-- list
 
-- bravo
+// - alfa
 
-",
-    "<ul><li><p>alfa</p></li><li><p>bravo</p></li></ul>"
-)]
-#[case(
-    "List With Start/End Item",
-    "-- list
+// - bravo
 
--/ charlie
+// ",
+//     "<ul><li><p>alfa</p></li><li><p>bravo</p></li></ul>"
+// )]
+// #[case(
+//     "List With Start/End Item",
+//     "-- list
 
-//
+// -/ charlie
 
-- delta
+// //
 
-",
-    "<ul><li><p>charlie</p></li><li><p>delta</p></li></ul>"
-)]
-#[case(
-    "Basic Full Inside List Item Start/End",
-    "-- list
+// - delta
 
--/ echo
+// ",
+//     "<ul><li><p>charlie</p></li><li><p>delta</p></li></ul>"
+// )]
+// #[case(
+//     "Basic Full Inside List Item Start/End",
+//     "-- list
 
--- div
+// -/ echo
 
-foxtrot
+// -- div
 
-//
+// foxtrot
 
-- golf
+// //
 
-",
-    "<ul><li><p>echo</p><div><p>foxtrot</p></div></li><li><p>golf</p></li></ul>"
-)]
-#[case("List Full Inside List Item Start/End",
-    "-- list
+// - golf
 
--/ hotel
+// ",
+//     "<ul><li><p>echo</p><div><p>foxtrot</p></div></li><li><p>golf</p></li></ul>"
+// )]
+// #[case("List Full Inside List Item Start/End",
+//     "-- list
 
--- list
+// -/ hotel
 
-- india
+// -- list
 
-- juliet
+// - india
 
-//
+// - juliet
 
-- kilo
+// //
 
-",
-    "<ul><li><p>hotel</p><ul><li><p>india</p></li><li><p>juliet</p></li></ul></li><li><p>kilo</p></li></ul>"
-)]
-#[case(
-    "Three levels of Basic Start/End",
-    r#"-- div/
+// - kilo
 
-a
+// ",
+//     "<ul><li><p>hotel</p><ul><li><p>india</p></li><li><p>juliet</p></li></ul></li><li><p>kilo</p></li></ul>"
+// )]
+// #[case(
+//     "Three levels of Basic Start/End",
+//     r#"-- div/
 
-    -- div/
+// a
 
-    b
+//     -- div/
 
-        -- div/
+//     b
 
-        c
+//         -- div/
 
-        -- /div
+//         c
 
-    d
+//         -- /div
 
-    -- /div
+//     d
 
-e
+//     -- /div
 
--- /div
+// e
 
-"#,
-    "<div><p>a</p><div><p>b</p><div><p>c</p></div><p>d</p></div><p>e</p></div>"
-)]
-#[case("Three Levels Of List Item Start/End",
-    r#"-- list
+// -- /div
 
--/ a
+// "#,
+//     "<div><p>a</p><div><p>b</p><div><p>c</p></div><p>d</p></div><p>e</p></div>"
+// )]
+// #[case("Three Levels Of List Item Start/End",
+//     r#"-- list
 
-    -- list
+// -/ a
 
-    - c
+//     -- list
 
-    -/ d
+//     - c
 
-        -- list
+//     -/ d
 
-        - e
+//         -- list
 
-    //
+//         - e
 
-    -- div
+//     //
 
-    here
+//     -- div
 
-//
+//     here
 
-- b
+// //
 
-f
+// - b
 
-"#,
-    "<ul><li><p>a</p><ul><li><p>c</p></li><li><p>d</p><ul><li><p>e</p></li></ul></li></ul><div><p>here</p></div></li><li><p>b</p><p>f</p></li></ul>"
-)]
-#[case(
-    "Raw Full",
-    "-- pre
+// f
 
-b",
-    "<h2>pre</h2><pre>b</pre>"
-)]
-#[case(
-    "Raw Keep Leading Whitespace",
-    r#"-- pre
+// "#,
+//     "<ul><li><p>a</p><ul><li><p>c</p></li><li><p>d</p><ul><li><p>e</p></li></ul></li></ul><div><p>here</p></div></li><li><p>b</p><p>f</p></li></ul>"
+// )]
+// #[case(
+//     "Raw Full",
+//     "-- pre
 
-    c"#,
-    "<h2>pre</h2><pre>    c</pre>"
-)]
-#[case(
-    "Raw Start/End",
-    r#"-- pre/
+// b",
+//     "<h2>pre</h2><pre>b</pre>"
+// )]
+// #[case(
+//     "Raw Keep Leading Whitespace",
+//     r#"-- pre
 
-d
+//     c"#,
+//     "<h2>pre</h2><pre>    c</pre>"
+// )]
+// #[case(
+//     "Raw Start/End",
+//     r#"-- pre/
 
--- /pre"#,
-    "<h2>pre</h2><pre>d</pre>"
-)]
-#[case(
-    "Raw Start/End Inside List Item Start/End",
-    r#"-- list
+// d
 
--/ a
+// -- /pre"#,
+//     "<h2>pre</h2><pre>d</pre>"
+// )]
+// #[case(
+//     "Raw Start/End Inside List Item Start/End",
+//     r#"-- list
 
--- pre/
+// -/ a
 
-b
+// -- pre/
 
--- /pre
+// b
 
-//
+// -- /pre
 
-- c
+// //
 
-"#,
-    "<ul><li><p>a</p><h2>pre</h2><pre>b</pre></li><li><p>c</p></li></ul>"
-)]
-#[case(
-    "Checklist with start/end",
-    r#"-- checklist
+// - c
 
-[]/ a
+// "#,
+//     "<ul><li><p>a</p><h2>pre</h2><pre>b</pre></li><li><p>c</p></li></ul>"
+// )]
+// #[case(
+//     "Checklist with start/end",
+//     r#"-- checklist
 
-    -- pre/
+// []/ a
 
-b
+//     -- pre/
 
-    -- /pre
+// b
 
-//
+//     -- /pre
 
-[] c
+// //
 
-"#,
-    "<ul><li><p>a</p><h2>pre</h2><pre>b</pre></li><li><p>c</p></li></ul>"
-)]
-#[case(
-    "Generic Tag",
-    r#"-- unknown-tag
+// [] c
 
-a
+// "#,
+//     "<ul><li><p>a</p><h2>pre</h2><pre>b</pre></li><li><p>c</p></li></ul>"
+// )]
+// #[case(
+//     "Generic Tag",
+//     r#"-- unknown-tag
 
-"#,
-    "<unknown-tag><p>a</p></unknown-tag>"
-)]
-#[case(
-    "JSON Start/End",
-    r#"-- metadata/
+// a
 
-{}
+// "#,
+//     "<unknown-tag><p>a</p></unknown-tag>"
+// )]
+// #[case(
+//     "JSON Start/End",
+//     r#"-- metadata/
 
--- /metadata
+// {}
 
-"#,
-    "<h2>metadata</h2><pre>{}</pre>"
-)]
-fn run_tests(#[case] _x: &str, #[case] input: &str, #[case] left: &str) {
-    let right = output(&parse(input).unwrap());
-    assert_eq!(left, right);
+// -- /metadata
+
+// "#,
+//     "<h2>metadata</h2><pre>{}</pre>"
+// )]
+// fn run_tests(#[case] _x: &str, #[case] input: &str, #[case] left: &str) {
+//     let right = output(&parse(input).unwrap());
+//     assert_eq!(left, right);
+// }
+
+#[test]
+fn run_tests() {
+    let dir = PathBuf::from("tests");
+    get_files(&dir, vec!["txt"]).iter().for_each(|f| {
+        let content = fs::read_to_string(f).unwrap();
+        let parts = content.split("~~~").map(|p| p.trim_left()).collect::<Vec<&str>>();
+        let left = parts[2];
+        let right = output(&parse(parts[1]).unwrap());
+        assert_eq!(left, right);
+    });
 }
+
+fn get_files(dir: &PathBuf, exts: Vec<&str>) -> Vec<PathBuf> {
+    WalkDir::new(dir)
+        .into_iter()
+        .filter(|e| 
+            match e.as_ref().unwrap().path().extension() {
+                Some(x) => exts.contains(&x.to_str().unwrap()),
+                None => false
+    }).map(|e| e.unwrap().into_path()).collect()
+}
+
+
