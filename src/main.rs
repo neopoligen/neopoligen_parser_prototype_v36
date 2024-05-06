@@ -5,7 +5,11 @@ use std::fs;
 fn main() {
     let content = r#"-- pre
 
-this is some preformatted code
+a
+
+-- div
+
+b
 
 "#;
     match parse(content) {

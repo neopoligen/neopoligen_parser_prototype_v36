@@ -16,6 +16,7 @@ use nom_supreme::final_parser::final_parser;
 use nom_supreme::final_parser::Location;
 use nom_supreme::final_parser::RecreateContext;
 use nom_supreme::parser_ext::ParserExt;
+use nom::combinator::eof;
 
 #[derive(Debug)]
 pub struct ParserError {
@@ -66,8 +67,8 @@ fn basic_section_end<'a>(
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(basic_block).context("").parse(source)?;
     Ok((
@@ -88,8 +89,8 @@ fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     // dbg!(source);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(basic_block).context("").parse(source)?;
     Ok((
@@ -112,8 +113,8 @@ fn basic_section_start<'a>(
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, mut children) = many0(alt((basic_block, |src| {
         start_or_full_section(src)
@@ -141,6 +142,17 @@ fn basic_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree
         .parse(source)?;
     Ok((source, r#type))
 }
+
+fn empty_until_newline_or_eof<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    let (source, _) = alt((
+        tuple((space0, newline.map(|_| ""))),
+        tuple((multispace0, eof.map(|_| "")))
+    ))
+    .context("")
+    .parse(source)?;
+    Ok((source, ""))
+}
+
 
 fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
     match tree {
@@ -246,8 +258,8 @@ fn list_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 fn list_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = list_section_tag.context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(alt((list_item_full, list_item_start)))
         .context("")
@@ -361,10 +373,13 @@ fn pre_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     // dbg!(source);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = pre_section_tag.context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    // TODO: Chomp preceeding empty lines here instead of multieplace
+    // so things can start with a space on the first line that won't get eaten
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block).context("").parse(source)?;
+    let (source, text) = take_until("\n--").context("pre_section_full").parse(source)?;
+    let (source, _) = multispace0.context("pre_section_full").parse(source)?;
     Ok((
         source,
         Node::Wrapper {
@@ -372,7 +387,7 @@ fn pre_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
             end_tag: Some(format!("</{}>", r#type)),
             category: "basic".to_string(),
             r#type: r#type.to_string(),
-            children,
+            children: vec![Node::Raw { text: text.trim_end().to_string() }],
             bounds: "full".to_string(),
         },
     ))
