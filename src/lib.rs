@@ -73,8 +73,10 @@ fn basic_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 
 fn basic_section_end<'a>(
     source: &'a str,
+    mut inside: Vec<&'a str>,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    inside.pop();
     let kind = "basic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
@@ -96,7 +98,8 @@ fn basic_section_end<'a>(
     ))
 }
 
-fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+fn basic_section_full(source: &str,
+    ) -> IResult<&str, Node, ErrorTree<&str>> {
     let kind = "basic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
@@ -119,8 +122,10 @@ fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 
 fn basic_section_start<'a>(
     source: &'a str,
+    mut inside: Vec<&'a str>
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "basic";
+    inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
@@ -128,11 +133,11 @@ fn basic_section_start<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, mut children) = many0(alt((basic_block, |src| {
-        start_or_full_section(src)
+        start_or_full_section(src, inside.clone())
     })))
     .context("")
     .parse(source)?;
-    let (source, end_section) = basic_section_end(source, r#type)?;
+    let (source, end_section) = basic_section_end(source, inside.clone(), r#type)?;
     children.push(end_section);
     Ok((
         source,
@@ -205,11 +210,13 @@ fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-fn checklist_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+fn checklist_item_start<'a>(source: &'a str,
+    mut inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "checklist_item";
+    inside.push(kind);
     let (source, _) = tag("[]/ ").context("").parse(source)?;
     let (source, mut children) = many0(alt((checklist_item_block, |src| {
-        start_or_full_section(src)
+        start_or_full_section(src, inside.clone())
     })))
     .context("")
     .parse(source)?;
@@ -228,14 +235,19 @@ fn checklist_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-fn checklist_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+fn checklist_section_full<'a>(source: &'a str,
+    mut inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "checklist";
+    inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = checklist_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(alt((checklist_item_full, checklist_item_start)))
+    let (source, children) = many0(alt((
+        |src| checklist_item_full(src), 
+        |src| checklist_item_start(src, inside.clone())
+    )))
         .context("")
         .parse(source)?;
     Ok((
@@ -266,12 +278,13 @@ fn empty_until_newline_or_eof<'a>(source: &'a str) -> IResult<&'a str, &'a str, 
     Ok((source, ""))
 }
 
-
 fn generic_section_end<'a>(
     source: &'a str,
+    mut inside: Vec<&'a str>,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "generic";
+    inside.pop();
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -315,8 +328,10 @@ fn generic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 
 fn generic_section_start<'a>(
     source: &'a str,
+    mut inside: Vec<&'a str>
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "generic";
+    inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = is_not(" /\n").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
@@ -324,11 +339,11 @@ fn generic_section_start<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, mut children) = many0(alt((basic_block, |src| {
-        start_or_full_section(src)
+        start_or_full_section(src, inside.clone())
     })))
     .context("")
     .parse(source)?;
-    let (source, end_section) = generic_section_end(source, r#type)?;
+    let (source, end_section) = generic_section_end(source, inside.clone(), r#type)?;
     children.push(end_section);
     Ok((
         source,
@@ -371,6 +386,10 @@ fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
 }
 
 
+fn json_section_end() {
+    // TODO
+}
+
 fn json_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let kind = "json";
     // Note: this is not actually converted to json for the prototype, but
@@ -395,8 +414,10 @@ fn json_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 
 fn json_section_start<'a>(
     source: &'a str,
+    mut inside: Vec<&'a str>
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "json";
+    inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = json_section_tag.context("").parse(source)?;
     let end_key = format!("-- /{}", r#type);
@@ -439,8 +460,10 @@ fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-fn list_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+fn list_item_end<'a>(source: &'a str,
+    mut inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "list_item";
+    inside.pop();
     let (source, _) = tag("//").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -474,15 +497,17 @@ fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-fn list_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+fn list_item_start<'a>(source: &'a str,
+    mut inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "list_item";
+    inside.push(kind);
     let (source, _) = tag("-/ ").context("").parse(source)?;
     let (source, mut children) = many0(alt((list_item_block, |src| {
-        start_or_full_section(src)
+        start_or_full_section(src, inside.clone())
     })))
     .context("")
     .parse(source)?;
-    let (source, ending) = list_item_end.context("").parse(source)?;
+    let (source, ending) = (|src| list_item_end(src, inside.clone())).context("").parse(source)?;
     children.push(ending);
     Ok((
         source,
@@ -497,14 +522,16 @@ fn list_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-fn list_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+fn list_section_full<'a>(source: &'a str,
+    mut inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "list";
+    inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = list_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(alt((list_item_full, list_item_start)))
+    let (source, children) = many0(alt((list_item_full, |src| list_item_start(src, inside.clone()))))
         .context("")
         .parse(source)?;
     Ok((
@@ -535,8 +562,6 @@ pub fn output(ast: &Vec<Node>) -> String {
             r#type,
             ..
         } => {
-
-
             if kind == "basic" {
                 if bounds == "full" {
                     response.push_str("<div class=\"");
@@ -640,8 +665,6 @@ pub fn output(ast: &Vec<Node>) -> String {
                     response.push_str("</div>");
                 }
             }
-
-
         }
         Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
         Node::Json { data, r#type, .. } => response.push_str(format!("<h2>{}</h2><pre>{}</pre>", r#type, data).as_str()),
@@ -658,10 +681,15 @@ pub fn parse(source: &str) -> Result<Vec<Node>, ParserError> {
 }
 
 fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
-    let (source, results) = many1(start_or_full_section)
+    let inside = vec!["root"];
+    let (source, results) = many1(|src| start_or_full_section(src, inside.clone()))
         .context("")
         .parse(source)?;
     Ok((source, results))
+}
+
+fn raw_secction_end() {
+    // TODO
 }
 
 fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
@@ -686,6 +714,7 @@ fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 
 fn raw_section_start<'a>(
     source: &'a str,
+    mut inside: Vec<&'a str>
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "raw";
     let (source, _) = tag("-- ").context("").parse(source)?;
@@ -718,19 +747,20 @@ fn raw_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&
 
 fn start_or_full_section<'a>(
     source: &'a str,
+    inside: Vec<&'a str>
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, results) = alt((
         |src| basic_section_full(src),
-        |src| basic_section_start(src),
-        |src| checklist_section_full(src),
+        |src| basic_section_start(src, inside.clone()),
+        |src| checklist_section_full(src, inside.clone()),
         |src| json_section_full(src),
-        |src| json_section_start(src),
-        |src| list_section_full(src),
+        |src| json_section_start(src, inside.clone()),
+        |src| list_section_full(src, inside.clone()),
         |src| raw_section_full(src),
-        |src| raw_section_start(src),
+        |src| raw_section_start(src, inside.clone()),
         // make sure generic is last
         |src| generic_section_full(src),
-        |src| generic_section_start(src),
+        |src| generic_section_start(src, inside.clone()),
     ))
     .context("")
     .parse(source)?;
