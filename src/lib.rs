@@ -393,30 +393,30 @@ fn json_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-// fn json_section_start<'a>(
-//     source: &'a str,
-// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-//     let category = "json";
-//     let (source, _) = tag("-- ").context("").parse(source)?;
-//     let (source, r#type) = json_section_tag.context("").parse(source)?;
-//     let end_key = format!("-- /{}", r#type);
-//     let (source, _) = tag("/").context("").parse(source)?;
-//     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-//     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-//     let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
-//     let (source, data) =  take_until(end_key.as_str()).context("").parse(source)?;
-//     let (source, _) = tag(end_key.as_str()).context("").parse(source)?;
-//     let (source, _) = multispace0.context("").parse(source)?;
-//     Ok((
-//         source,
-//         Node::Json {
-//             category: category.to_string(),
-//             r#type: r#type.to_string(),
-//             data: data.trim_end().to_string(),
-//             bounds: "full".to_string(),
-//         },
-//     ))
-// }
+fn json_section_start<'a>(
+    source: &'a str,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    let category = "json";
+    let (source, _) = tag("-- ").context("").parse(source)?;
+    let (source, r#type) = json_section_tag.context("").parse(source)?;
+    let end_key = format!("-- /{}", r#type);
+    let (source, _) = tag("/").context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
+    let (source, data) =  take_until(end_key.as_str()).context("").parse(source)?;
+    let (source, _) = tag(end_key.as_str()).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    Ok((
+        source,
+        Node::Json {
+            category: category.to_string(),
+            r#type: r#type.to_string(),
+            data: data.trim_end().to_string(),
+            bounds: "full".to_string(),
+        },
+    ))
+}
 
 fn json_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
     let (source, r#type) = alt((tag("metadata"), tag("metadata")))
@@ -634,7 +634,7 @@ fn start_or_full_section<'a>(
         |src| basic_section_start(src),
         |src| checklist_section_full(src),
         |src| json_section_full(src),
-        // |src| json_section_start(src),
+        |src| json_section_start(src),
         |src| list_section_full(src),
         |src| raw_section_full(src),
         |src| raw_section_start(src),

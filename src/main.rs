@@ -3,9 +3,11 @@ use neopoligen_parser_prototype_v36::*;
 use std::fs;
 
 fn main() {
-    let content = r#"-- pre
+    let content = r#"-- metadata/
 
-a
+{}
+
+-- /metadata
 
 "#;
     match parse(content) {

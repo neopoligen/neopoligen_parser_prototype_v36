@@ -237,6 +237,17 @@ a
 "#,
     "<unknown-tag><p>a</p></unknown-tag>"
 )]
+#[case(
+    "JSON Start/End",
+    r#"-- metadata/
+
+{}
+
+-- /metadata
+
+"#,
+    "<h2>metadata</h2><pre>{}</pre>"
+)]
 fn run_tests(#[case] _x: &str, #[case] input: &str, #[case] left: &str) {
     let right = output(&parse(input).unwrap());
     assert_eq!(left, right);
