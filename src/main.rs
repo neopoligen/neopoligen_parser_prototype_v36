@@ -3,11 +3,21 @@ use neopoligen_parser_prototype_v36::*;
 use std::fs;
 
 fn main() {
-    let content = r#"-- pre/
+    let content = r#"-- list
 
-d
+-/ a
 
--- /pre"#;
+-- pre/
+
+asdf
+
+-- /pre
+
+//
+
+- b
+
+"#;
     match parse(content) {
         Ok(ast) => {
             let out = output(&ast);

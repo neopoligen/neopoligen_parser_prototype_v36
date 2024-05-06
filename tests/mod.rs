@@ -3,8 +3,24 @@ use pretty_assertions::assert_eq;
 use rstest::rstest;
 
 #[rstest]
-#[case("-- div\n\nalfa\n\n", "<div><p>alfa</p></div>")]
-#[case("-- div/\n\nbravo\n\n-- /div\n\n", "<div><p>bravo</p></div>")]
+#[case(
+    "-- div
+
+alfa
+
+",
+    "<div><p>alfa</p></div>"
+)]
+#[case(
+    "-- div/
+
+bravo
+
+-- /div
+
+",
+    "<div><p>bravo</p></div>"
+)]
 #[case(
     "-- div/\n\ncharlie\n\n-- div\n\ndelta\n\n-- /div\n\n",
     "<div><p>charlie</p><div><p>delta</p></div></div>"
@@ -22,7 +38,19 @@ use rstest::rstest;
     "<ul><li><p>charlie</p></li><li><p>delta</p></li></ul>"
 )]
 #[case(
-    "-- list\n\n-/ echo\n\n-- div\n\nfoxtrot\n\n//\n\n- golf\n\n",
+    "-- list
+
+-/ echo
+
+-- div
+
+foxtrot
+
+//
+
+- golf
+
+",
     "<ul><li><p>echo</p><div><p>foxtrot</p></div></li><li><p>golf</p></li></ul>"
 )]
 #[case(
@@ -89,6 +117,22 @@ f
 #[case("-- pre\n\nb", "<pre>b</pre>")]
 #[case("-- pre\n\n\n\n    c", "<pre>    c</pre>")]
 #[case("-- pre/\n\nd\n\n-- /pre", "<pre>d</pre>")]
+#[case(r#"-- list
+
+-/ a
+
+-- pre/
+
+b
+
+-- /pre
+
+//
+
+- c
+
+"#, 
+"<ul><li><p>a</p><pre>b</pre></li><li><p>c</p></li></ul>")]
 fn run_tests(#[case] input: &str, #[case] left: &str) {
     let right = output(&parse(input).unwrap());
     assert_eq!(left, right);
