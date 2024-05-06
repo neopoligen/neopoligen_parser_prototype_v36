@@ -7,8 +7,6 @@ fn main() {
 
 -/ a
 
-asdf
-
 // 
 
 - b

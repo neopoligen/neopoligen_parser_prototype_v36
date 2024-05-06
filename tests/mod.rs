@@ -17,10 +17,10 @@ use rstest::rstest;
     "-- list\n\n- alfa\n\n- bravo\n\n",
     "<ul><li><p>alfa</p></li><li><p>bravo</p></li></ul>"
 )]
-//#[case(
-//   "-- list/\n\n- charlie\n\n-- list\n\n- delta\n\n-- /list\n\n",
-//  "<ul><li><p>charlie</p></li><li><p>bravo</p></li></ul>"
-//)]
+#[case(
+    "-- list\n\n-/ charlie\n\n//\n\n- delta\n\n",
+    "<ul><li><p>charlie</p></li><li><p>delta</p></li></ul>"
+)]
 fn run_tests(#[case] input: &str, #[case] left: &str) {
     let right = output(&parse(input).unwrap());
     assert_eq!(left, right);
