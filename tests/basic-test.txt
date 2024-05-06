@@ -225,3 +225,54 @@ List Full Inside List Item Start/End
     </li>
 </ul>
 
+
+
+################################################
+
+Three levels of Basic Start/End
+
+------------------------------------------------
+
+-- div/
+
+a
+
+    -- div/
+
+    b
+
+        -- div/
+
+        c
+
+        -- /div
+
+    d
+
+    -- /div
+
+e
+
+-- /div
+
+
+------------------------------------------------
+
+<div class="basic-start-div">
+    <p>a</p>
+    <div class="basic-start-div">
+        <p>b</p>
+        <div class="basic-start-div">
+            <p>c</p>
+        </div>
+        <div class="basic-end-div">
+        <p>d</p>
+        </div>
+    </div>
+    <div class="basic-end-div">
+    <p>e</p>
+    </div>
+</div>
+<div class="basic-end-div">
+</div>
+
