@@ -56,7 +56,8 @@ pub enum Node {
         bounds: String,
         kind: String,
         r#type: String,
-        text: String,
+        text: Option<String>,
+        children: Vec<Node>,
     },
 }
 
@@ -460,7 +461,6 @@ fn list_item_end<'a>(
     inside.pop();
     let (source, _) = tag("//").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    dbg!(inside);
     Ok((
         source,
         Node::Basic {
@@ -663,8 +663,13 @@ pub fn output(ast: &Vec<Node>) -> String {
         Node::Json { data, r#type, .. } => {
             response.push_str(format!("<h2>{}</h2><pre>{}</pre>", r#type, data).as_str())
         }
-        Node::Raw { text, r#type, kind, bounds } => {
-
+        Node::Raw {
+            text,
+            r#type,
+            kind,
+            bounds,
+            children,
+        } => {
             if bounds == "full" {
                 response.push_str("<pre class=\"");
                 response.push_str(kind);
@@ -673,10 +678,9 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str("-");
                 response.push_str(r#type);
                 response.push_str("\">");
-                response.push_str(text);
+                response.push_str(text.clone().unwrap().as_str());
                 response.push_str("</pre>");
-            }
-            if bounds == "start" {
+            } else if bounds == "start" {
                 response.push_str("<pre class=\"");
                 response.push_str(kind);
                 response.push_str("-");
@@ -684,21 +688,20 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str("-");
                 response.push_str(r#type);
                 response.push_str("\">");
-                response.push_str(text);
+                response.push_str(text.clone().unwrap().as_str());
+                response.push_str(&output(&children));
+            } else if bounds == "end" {
+                response.push_str("</pre>");
+                response.push_str("<div class=\"");
+                response.push_str(kind);
+                response.push_str("-");
+                response.push_str(bounds);
+                response.push_str("-");
+                response.push_str(r#type);
+                response.push_str("\">");
+                response.push_str(&output(&children));
+                response.push_str("</div>");
             }
-            // if bounds == "end" {
-            //     response.push_str("</pre>");
-            //     response.push_str("<div class=\"");
-            //     response.push_str(kind);
-            //     response.push_str("-");
-            //     response.push_str(bounds);
-            //     response.push_str("-");
-            //     response.push_str(r#type);
-            //     response.push_str("\">");
-            //     response.push_str(&output(&children));
-            //     response.push_str("</div>");
-            // }
-
         }
     });
     response
@@ -719,9 +722,30 @@ fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
     Ok((source, results))
 }
 
-#[allow(dead_code)]
-fn raw_section_end() {
-    // TODO
+fn raw_section_end<'a>(
+    source: &'a str,
+    mut inside: Vec<&'a str>,
+    key: &'a str,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    inside.pop();
+    let kind = "raw";
+    let (source, _) = tag("-- ").context("").parse(source)?;
+    let (source, _) = tag("/").context("").parse(source)?;
+    let (source, r#type) = tag(key).context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    let (source, children) = many0(basic_block).context("").parse(source)?;
+    Ok((
+        source,
+        Node::Raw {
+            bounds: "end".to_string(),
+            children,
+            kind: kind.to_string(),
+            r#type: r#type.to_string(),
+            text: None,
+        },
+    ))
 }
 
 fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
@@ -739,9 +763,10 @@ fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         source,
         Node::Raw {
             bounds: "full".to_string(),
+            children: vec![],
             kind: kind.to_string(),
             r#type: r#type.to_string(),
-            text: text.trim_end().to_string(),
+            text: Some(text.trim_end().to_string()),
         },
     ))
 }
@@ -754,7 +779,7 @@ fn raw_section_start<'a>(
     inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = raw_section_tag.context("").parse(source)?;
-    let end_key = format!("-- /{}", r#type);
+    let end_key = format!("\n-- /{}", r#type);
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -762,15 +787,16 @@ fn raw_section_start<'a>(
         .context("")
         .parse(source)?;
     let (source, text) = take_until(end_key.as_str()).context("").parse(source)?;
-    let (source, _) = tag(end_key.as_str()).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
+    let (source, end_section) = raw_section_end(source, inside.clone(), r#type)?;
     Ok((
         source,
         Node::Raw {
             bounds: "start".to_string(),
+            children: vec![end_section],
             kind: kind.to_string(),
             r#type: r#type.to_string(),
-            text: text.trim_end().to_string(),
+            text: Some(text.trim_end().to_string()),
         },
     ))
 }
