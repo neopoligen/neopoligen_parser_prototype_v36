@@ -332,3 +332,67 @@ Items After Closing List
 
 
 
+
+
+################################################
+
+Three Levels Of List Item Start/End
+
+
+------------------------------------------------
+
+-- list
+
+-/ a
+
+    -- list
+
+    - c
+
+    -/ d
+
+        -- list
+
+        - e
+
+    //
+
+    -- div
+
+    here
+
+//
+
+- b
+
+f
+
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>a</p>
+        <ul class="list-full-list">
+            <li class="list_item-full-list_item">
+                <p>c</p>
+            </li>
+            <li class="list_item-start-list_item">
+                <p>d</p>
+                <ul class="list-full-list">
+                    <li class="list_item-full-list_item">
+                        <p>e</p>
+                    </li>
+                </ul>
+            </li><!-- list_item-end-list_item -->
+        </ul>
+        <div class="basic-full-div">
+            <p>here</p>
+        </div>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>b</p>
+        <p>f</p>
+    </li>
+</ul>
+

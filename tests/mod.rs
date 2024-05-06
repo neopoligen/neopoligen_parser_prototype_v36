@@ -12,36 +12,7 @@ use std::fs;
 
 
 
-// #[case("Three Levels Of List Item Start/End",
-//     r#"-- list
 
-// -/ a
-
-//     -- list
-
-//     - c
-
-//     -/ d
-
-//         -- list
-
-//         - e
-
-//     //
-
-//     -- div
-
-//     here
-
-// //
-
-// - b
-
-// f
-
-// "#,
-//     "<ul><li><p>a</p><ul><li><p>c</p></li><li><p>d</p><ul><li><p>e</p></li></ul></li></ul><div><p>here</p></div></li><li><p>b</p><p>f</p></li></ul>"
-// )]
 // #[case(
 //     "Raw Full",
 //     "-- pre
