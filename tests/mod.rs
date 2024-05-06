@@ -18,24 +18,48 @@ alfa
 
 bravo
 
--- /div
-
-",
+-- /div",
     "<div><p>bravo</p></div>"
 )]
 #[case(
     "Basic Full Inside Basic Start/End",
-    "-- div/\n\ncharlie\n\n-- div\n\ndelta\n\n-- /div\n\n",
+    "-- div/
+
+charlie
+
+-- div
+
+delta
+
+-- /div",
     "<div><p>charlie</p><div><p>delta</p></div></div>"
 )]
 #[case(
     "Basic Start/End Inside Basic Start/End",
-    "-- div/\n\necho\n\n-- div/\n\nfoxtrot\n\n-- /div\n\ngolf\n\n-- /div\n\n",
+    "-- div/
+
+echo
+
+-- div/
+
+foxtrot
+
+-- /div
+
+golf
+
+-- /div",
     "<div><p>echo</p><div><p>foxtrot</p></div><p>golf</p></div>"
 )]
 #[case(
     "List Full",
-    "-- list\n\n- alfa\n\n- bravo\n\n",
+    "-- list
+
+- alfa
+
+- bravo
+
+",
     "<ul><li><p>alfa</p></li><li><p>bravo</p></li></ul>"
 )]
 #[case(
@@ -143,7 +167,13 @@ f
 "#,
     "<ul><li><p>a</p><ul><li><p>c</p></li><li><p>d</p><ul><li><p>e</p></li></ul></li></ul><div><p>here</p></div></li><li><p>b</p><p>f</p></li></ul>"
 )]
-#[case("Raw Full", "-- pre\n\nb", "<pre>b</pre>")]
+#[case(
+    "Raw Full",
+    "-- pre
+
+b",
+    "<pre>b</pre>"
+)]
 #[case(
     "Raw Keep Leading Whitespace",
     r#"-- pre
@@ -151,12 +181,15 @@ f
     c"#,
     "<pre>    c</pre>"
 )]
-#[case("Raw Start/End", r#"-- pre/
+#[case(
+    "Raw Start/End",
+    r#"-- pre/
 
 d
 
--- /pre"#, 
-    "<pre>d</pre>")]
+-- /pre"#,
+    "<pre>d</pre>"
+)]
 #[case(
     "Raw Start/End Inside List Item Start/End",
     r#"-- list
