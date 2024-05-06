@@ -629,7 +629,7 @@ pub fn output(ast: &Vec<Node>) -> String {
                 }
                 if bounds == "end" {
                     response.push_str("</li>");
-                    response.push_str("<div class=\"");
+                    response.push_str("<li class=\"");
                     response.push_str(kind);
                     response.push_str("-");
                     response.push_str(bounds);
@@ -640,28 +640,6 @@ pub fn output(ast: &Vec<Node>) -> String {
                     response.push_str("</div>");
                 }
             }
-
-
-
-
-
-            // if bounds == "end" {
-            //     if let Some(s) = start_tag {
-            //         response.push_str(s)
-            //     }
-            //     if let Some(e) = end_tag {
-            //         response.push_str(e)
-            //     }
-            //     response.push_str(&output(&children));
-            // } else {
-            //     if let Some(s) = start_tag {
-            //         response.push_str(s)
-            //     }
-            //     response.push_str(&output(&children));
-            //     if let Some(e) = end_tag {
-            //         response.push_str(e)
-            //     }
-            // }
 
 
         }
