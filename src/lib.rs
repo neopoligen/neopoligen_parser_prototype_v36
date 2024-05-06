@@ -290,6 +290,7 @@ fn list_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, r#type) = list_section_tag.context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(alt((list_item_full, list_item_start)))
         .context("")
         .parse(source)?;

@@ -55,6 +55,36 @@ e
 "#,
     "<div><p>a</p><div><p>b</p><div><p>c</p></div><p>d</p></div><p>e</p></div>"
 )]
+#[case(
+    r#"-- list
+
+-/ a
+
+    -- list
+
+    - c
+
+    -/ d
+
+        -- list
+
+        - e
+
+    //
+
+    -- div
+
+    here
+
+//
+
+- b
+
+f
+
+"#,
+    "<ul><li><p>a</p><ul><li><p>c</p></li><li><p>d</p><ul><li><p>e</p></li></ul></li></ul><div><p>here</p></div></li><li><p>b</p><p>f</p></li></ul>"
+)]
 fn run_tests(#[case] input: &str, #[case] left: &str) {
     let right = output(&parse(input).unwrap());
     assert_eq!(left, right);
