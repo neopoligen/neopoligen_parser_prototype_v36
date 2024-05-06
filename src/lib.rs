@@ -35,7 +35,7 @@ pub enum Node {
     Basic {
         start_tag: Option<String>,
         end_tag: Option<String>,
-        category: String,
+        kind: String,
         r#type: String,
         children: Vec<Node>,
         bounds: String,
@@ -45,13 +45,13 @@ pub enum Node {
     },
     Json {
         bounds: String,
-        category: String,
+        kind: String,
         r#type: String,
         data: String,
     },
     Raw {
         bounds: String,
-        category: String,
+        kind: String,
         r#type: String,
         text: String,
     },
@@ -75,7 +75,7 @@ fn basic_section_end<'a>(
     source: &'a str,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let category = "basic";
+    let kind = "basic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -88,7 +88,7 @@ fn basic_section_end<'a>(
         Node::Basic {
             start_tag: None,
             end_tag: Some(format!("</{}>", key)),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "end".to_string(),
@@ -97,7 +97,7 @@ fn basic_section_end<'a>(
 }
 
 fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "basic";
+    let kind = "basic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -109,7 +109,7 @@ fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Basic {
             start_tag: Some(format!("<{}>", r#type)),
             end_tag: Some(format!("</{}>", r#type)),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -120,7 +120,7 @@ fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 fn basic_section_start<'a>(
     source: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let category = "basic";
+    let kind = "basic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
@@ -139,7 +139,7 @@ fn basic_section_start<'a>(
         Node::Basic {
             start_tag: Some(format!("<{}>", r#type)),
             end_tag: None,
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "start".to_string(),
@@ -170,7 +170,7 @@ fn checklist_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "checklist_item";
+    let kind = "checklist_item";
     let (source, _) = tag("//").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -178,7 +178,7 @@ fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Basic {
             start_tag: Some("".to_string()),
             end_tag: Some("</li>".to_string()),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: "checklist_item".to_string(),
             children: vec![],
             bounds: "end".to_string(),
@@ -187,7 +187,7 @@ fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "checklist";
+    let kind = "checklist";
     // NOTE: this prototype only looks for unchecked items
     let (source, _) = tag("[] ").context("").parse(source)?;
     let (source, children) = many0(checklist_item_block).context("").parse(source)?;
@@ -197,7 +197,7 @@ fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Basic {
             start_tag: Some("<li>".to_string()),
             end_tag: Some("</li>".to_string()),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: "checklist_item".to_string(),
             children,
             bounds: "full".to_string(),
@@ -206,7 +206,7 @@ fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn checklist_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "checklist_item";
+    let kind = "checklist_item";
     let (source, _) = tag("[]/ ").context("").parse(source)?;
     let (source, mut children) = many0(alt((checklist_item_block, |src| {
         start_or_full_section(src)
@@ -220,7 +220,7 @@ fn checklist_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Basic {
             start_tag: Some("<li>".to_string()),
             end_tag: Some("".to_string()),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: "checklist_item".to_string(),
             children,
             bounds: "start".to_string(),
@@ -229,7 +229,7 @@ fn checklist_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn checklist_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "checklist";
+    let kind = "checklist";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = checklist_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -243,7 +243,7 @@ fn checklist_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> 
         Node::Basic {
             start_tag: Some("<ul>".to_string()),
             end_tag: Some("</ul>".to_string()),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -271,7 +271,7 @@ fn generic_section_end<'a>(
     source: &'a str,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let category = "generic";
+    let kind = "generic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -284,7 +284,7 @@ fn generic_section_end<'a>(
         Node::Basic {
             start_tag: None,
             end_tag: Some(format!("</{}>", key)),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "end".to_string(),
@@ -293,7 +293,7 @@ fn generic_section_end<'a>(
 }
 
 fn generic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "generic";
+    let kind = "generic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = is_not(" /\n").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -305,7 +305,7 @@ fn generic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Basic {
             start_tag: Some(format!("<{}>", r#type)),
             end_tag: Some(format!("</{}>", r#type)),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -316,7 +316,7 @@ fn generic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 fn generic_section_start<'a>(
     source: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let category = "generic";
+    let kind = "generic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = is_not(" /\n").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
@@ -335,7 +335,7 @@ fn generic_section_start<'a>(
         Node::Basic {
             start_tag: Some(format!("<{}>", r#type)),
             end_tag: None,
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "start".to_string(),
@@ -372,7 +372,7 @@ fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
 
 
 fn json_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "json";
+    let kind = "json";
     // Note: this is not actually converted to json for the prototype, but
     // it will be in the full code
     let (source, _) = tag("-- ").context("").parse(source)?;
@@ -385,7 +385,7 @@ fn json_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     Ok((
         source,
         Node::Json {
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             data: data.trim_end().to_string(),
             bounds: "full".to_string(),
@@ -396,7 +396,7 @@ fn json_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 fn json_section_start<'a>(
     source: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let category = "json";
+    let kind = "json";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = json_section_tag.context("").parse(source)?;
     let end_key = format!("-- /{}", r#type);
@@ -410,7 +410,7 @@ fn json_section_start<'a>(
     Ok((
         source,
         Node::Json {
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             data: data.trim_end().to_string(),
             bounds: "full".to_string(),
@@ -440,7 +440,7 @@ fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn list_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "list_item";
+    let kind = "list_item";
     let (source, _) = tag("//").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -448,7 +448,7 @@ fn list_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Basic {
             start_tag: Some("".to_string()),
             end_tag: Some("</li>".to_string()),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: "list_item".to_string(),
             children: vec![],
             bounds: "end".to_string(),
@@ -457,7 +457,7 @@ fn list_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "list_item";
+    let kind = "list_item";
     let (source, _) = tag("- ").context("").parse(source)?;
     let (source, children) = many0(list_item_block).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
@@ -466,7 +466,7 @@ fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Basic {
             start_tag: Some("<li>".to_string()),
             end_tag: Some("</li>".to_string()),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: "list_item".to_string(),
             children,
             bounds: "full".to_string(),
@@ -475,7 +475,7 @@ fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn list_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "list_item";
+    let kind = "list_item";
     let (source, _) = tag("-/ ").context("").parse(source)?;
     let (source, mut children) = many0(alt((list_item_block, |src| {
         start_or_full_section(src)
@@ -489,7 +489,7 @@ fn list_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Basic {
             start_tag: Some("<li>".to_string()),
             end_tag: Some("".to_string()),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: "list_item".to_string(),
             children,
             bounds: "start".to_string(),
@@ -498,7 +498,7 @@ fn list_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn list_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "list";
+    let kind = "list";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = list_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -512,7 +512,7 @@ fn list_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Basic {
             start_tag: Some("<ul>".to_string()),
             end_tag: Some("</ul>".to_string()),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -531,27 +531,44 @@ pub fn output(ast: &Vec<Node>) -> String {
         Node::Basic {
             bounds,
             children,
-            end_tag,
-            start_tag,
+            kind,
+            r#type,
             ..
         } => {
-            if bounds == "end" {
-                if let Some(s) = start_tag {
-                    response.push_str(s)
-                }
-                if let Some(e) = end_tag {
-                    response.push_str(e)
-                }
-                response.push_str(&output(&children));
-            } else {
-                if let Some(s) = start_tag {
-                    response.push_str(s)
-                }
-                response.push_str(&output(&children));
-                if let Some(e) = end_tag {
-                    response.push_str(e)
+
+            response.push_str("<h2>");
+            response.push_str(kind);
+            response.push_str(" ");
+            response.push_str(r#type);
+            response.push_str("</h2>");
+
+            if kind == "basic" {
+                if bounds == "full" {
+                    response.push_str("<div>");
+                    response.push_str(&output(&children));
+                    response.push_str("</div>");
                 }
             }
+
+            // if bounds == "end" {
+            //     if let Some(s) = start_tag {
+            //         response.push_str(s)
+            //     }
+            //     if let Some(e) = end_tag {
+            //         response.push_str(e)
+            //     }
+            //     response.push_str(&output(&children));
+            // } else {
+            //     if let Some(s) = start_tag {
+            //         response.push_str(s)
+            //     }
+            //     response.push_str(&output(&children));
+            //     if let Some(e) = end_tag {
+            //         response.push_str(e)
+            //     }
+            // }
+
+
         }
         Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
         Node::Json { data, r#type, .. } => response.push_str(format!("<h2>{}</h2><pre>{}</pre>", r#type, data).as_str()),
@@ -575,7 +592,7 @@ fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
 }
 
 fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let category = "raw";
+    let kind = "raw";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = raw_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -587,7 +604,7 @@ fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         source,
         Node::Raw {
             bounds: "full".to_string(),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             text: text.trim_end().to_string(), 
         },
@@ -597,7 +614,7 @@ fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 fn raw_section_start<'a>(
     source: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let category = "raw";
+    let kind = "raw";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = raw_section_tag.context("").parse(source)?;
     let end_key = format!("-- /{}", r#type);
@@ -612,7 +629,7 @@ fn raw_section_start<'a>(
         source,
         Node::Raw {
             bounds: "full".to_string(),
-            category: category.to_string(),
+            kind: kind.to_string(),
             r#type: r#type.to_string(),
             text: text.trim_end().to_string(), 
         },
