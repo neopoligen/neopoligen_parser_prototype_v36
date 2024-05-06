@@ -172,14 +172,14 @@ f
     "-- pre
 
 b",
-    "<pre>b</pre>"
+    "<h2>pre</h2><pre>b</pre>"
 )]
 #[case(
     "Raw Keep Leading Whitespace",
     r#"-- pre
 
     c"#,
-    "<pre>    c</pre>"
+    "<h2>pre</h2><pre>    c</pre>"
 )]
 #[case(
     "Raw Start/End",
@@ -188,7 +188,7 @@ b",
 d
 
 -- /pre"#,
-    "<pre>d</pre>"
+    "<h2>pre</h2><pre>d</pre>"
 )]
 #[case(
     "Raw Start/End Inside List Item Start/End",
@@ -207,7 +207,7 @@ b
 - c
 
 "#,
-    "<ul><li><p>a</p><pre>b</pre></li><li><p>c</p></li></ul>"
+    "<ul><li><p>a</p><h2>pre</h2><pre>b</pre></li><li><p>c</p></li></ul>"
 )]
 #[case(
     "Checklist with start/end",
@@ -226,7 +226,7 @@ b
 [] c
 
 "#,
-    "<ul><li><p>a</p><pre>b</pre></li><li><p>c</p></li></ul>"
+    "<ul><li><p>a</p><h2>pre</h2><pre>b</pre></li><li><p>c</p></li></ul>"
 )]
 #[case(
     "Generic Tag",
