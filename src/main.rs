@@ -5,15 +5,17 @@ use std::fs;
 fn main() {
     let content = r#"-- list
 
--/ a
+-/ alfa
 
--- div
+-- list
 
-here
+- bravo
+
+- charlie
 
 // 
 
-- b
+- delta
 
 "#;
     match parse(content) {
