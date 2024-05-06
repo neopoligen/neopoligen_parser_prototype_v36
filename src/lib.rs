@@ -17,6 +17,7 @@ use nom_supreme::final_parser::Location;
 use nom_supreme::final_parser::RecreateContext;
 use nom_supreme::parser_ext::ParserExt;
 use nom::combinator::eof;
+use nom::combinator::rest;
 
 #[derive(Debug)]
 pub struct ParserError {
@@ -378,7 +379,7 @@ fn pre_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     // TODO: Chomp preceeding empty lines here instead of multieplace
     // so things can start with a space on the first line that won't get eaten
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, text) = take_until("\n--").context("pre_section_full").parse(source)?;
+    let (source, text) = alt((take_until("\n--"), rest)).context("pre_section_full").parse(source)?;
     let (source, _) = multispace0.context("pre_section_full").parse(source)?;
     Ok((
         source,

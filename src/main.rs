@@ -5,13 +5,7 @@ use std::fs;
 fn main() {
     let content = r#"-- pre
 
-a
-
--- div
-
-b
-
-"#;
+a"#;
     match parse(content) {
         Ok(ast) => {
             let out = output(&ast);
