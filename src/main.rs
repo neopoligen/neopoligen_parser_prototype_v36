@@ -3,9 +3,9 @@ use neopoligen_parser_prototype_v36::*;
 use std::fs;
 
 fn main() {
-    let content = r#"-- div
+    let content = r#"-- pre
 
-some pre formatted stuff
+this is some preformatted code
 
 "#;
     match parse(content) {

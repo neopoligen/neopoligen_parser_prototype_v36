@@ -38,8 +38,11 @@ pub enum Node {
         bounds: String,
     },
     Block {
-        text: String,
+        spans: String,
     },
+    Raw {
+        text: String,
+    }
 }
 
 fn basic_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
@@ -51,7 +54,7 @@ fn basic_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     Ok((
         source,
         Node::Block {
-            text: text.to_string(),
+            spans: text.to_string(),
         },
     ))
 }
@@ -139,13 +142,6 @@ fn basic_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree
     Ok((source, r#type))
 }
 
-fn do_parse(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
-    let (source, results) = many1(start_or_full_section)
-        .context("")
-        .parse(source)?;
-    Ok((source, results))
-}
-
 fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
     match tree {
         GenericErrorTree::Base { location, kind } => {
@@ -183,7 +179,7 @@ fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     Ok((
         source,
         Node::Block {
-            text: text.to_string(),
+            spans: text.to_string(),
         },
     ))
 }
@@ -302,17 +298,127 @@ pub fn output(ast: &Vec<Node>) -> String {
                 }
             }
         }
-        Node::Block { text } => response.push_str(format!("<p>{}</p>", text).as_str()),
+        Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
+        Node::Raw { text } => response.push_str(format!("{}", text).as_str()),
     });
     response
 }
 
 pub fn parse(source: &str) -> Result<Vec<Node>, ParserError> {
-    match final_parser(do_parse)(source) {
+    match final_parser(parse_runner)(source) {
         Ok(ast) => Ok(ast),
         Err(e) => Err(get_error(source, &e)),
     }
 }
+
+fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
+    let (source, results) = many1(start_or_full_section)
+        .context("")
+        .parse(source)?;
+    Ok((source, results))
+}
+
+// fn pre_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+//     let (source, _) = not(tag("--")).context("").parse(source)?;
+//     let (source, _) = not(tag("//")).context("").parse(source)?;
+//     // using take_until isn't robust but works for this prototype
+//     let (source, text) = take_until("\n\n").context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     Ok((
+//         source,
+//         Node::Block {
+//             text: text.to_string(),
+//         },
+//     ))
+// }
+
+// fn pre_section_end<'a>(
+//     source: &'a str,
+//     key: &'a str,
+// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+//     let (source, _) = tag("-- ").context("").parse(source)?;
+//     let (source, _) = tag("/").context("").parse(source)?;
+//     let (source, r#type) = tag(key).context("").parse(source)?;
+//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     let (source, children) = many0(basic_block).context("").parse(source)?;
+//     Ok((
+//         source,
+//         Node::Wrapper {
+//             start_tag: None,
+//             end_tag: Some(format!("</{}>", key)),
+//             category: "basic".to_string(),
+//             r#type: r#type.to_string(),
+//             children,
+//             bounds: "end".to_string(),
+//         },
+//     ))
+// }
+
+fn pre_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    // dbg!("basic_section_full");
+    // dbg!(source);
+    let (source, _) = tag("-- ").context("").parse(source)?;
+    let (source, r#type) = pre_section_tag.context("").parse(source)?;
+    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    let (source, children) = many0(basic_block).context("").parse(source)?;
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: Some(format!("<{}>", r#type)),
+            end_tag: Some(format!("</{}>", r#type)),
+            category: "basic".to_string(),
+            r#type: r#type.to_string(),
+            children,
+            bounds: "full".to_string(),
+        },
+    ))
+}
+
+// fn pre_section_start<'a>(
+//     source: &'a str,
+// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+//     let category = "basic";
+//     let (source, _) = tag("-- ").context("").parse(source)?;
+//     let (source, r#type) = basic_section_tag.context("").parse(source)?;
+//     let (source, _) = tag("/").context("").parse(source)?;
+//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     let (source, mut children) = many0(alt((basic_block, |src| {
+//         start_or_full_section(src)
+//     })))
+//     .context("")
+//     .parse(source)?;
+//     let (source, end_section) = basic_section_end(source, r#type)?;
+//     children.push(end_section);
+//     Ok((
+//         source,
+//         Node::Wrapper {
+//             start_tag: Some(format!("<{}>", r#type)),
+//             end_tag: None,
+//             category: category.to_string(),
+//             r#type: r#type.to_string(),
+//             children,
+//             bounds: "start".to_string(),
+//         },
+//     ))
+// }
+
+
+
+fn pre_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    let (source, r#type) = alt((tag("pre"), tag("code")))
+        .context("")
+        .parse(source)?;
+    Ok((source, r#type))
+}
+
+
+
 
 fn start_or_full_section<'a>(
     source: &'a str,
@@ -322,6 +428,7 @@ fn start_or_full_section<'a>(
         |src| basic_section_full(src),
         |src| basic_section_start(src),
         |src| list_section_full(src),
+        |src| pre_section_full(src),
         // |src| list_section_start(src, inside.clone()),
     ))
     .context("")
