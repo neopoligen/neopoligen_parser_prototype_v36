@@ -33,8 +33,6 @@ pub struct ParserError {
 #[derive(Debug)]
 pub enum Node {
     Basic {
-        start_tag: Option<String>,
-        end_tag: Option<String>,
         kind: String,
         r#type: String,
         children: Vec<Node>,
@@ -88,8 +86,6 @@ fn basic_section_end<'a>(
     Ok((
         source,
         Node::Basic {
-            start_tag: None,
-            end_tag: Some(format!("</{}>", key)),
             kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
@@ -110,8 +106,6 @@ fn basic_section_full(source: &str,
     Ok((
         source,
         Node::Basic {
-            start_tag: Some(format!("<{}>", r#type)),
-            end_tag: Some(format!("</{}>", r#type)),
             kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
@@ -142,8 +136,6 @@ fn basic_section_start<'a>(
     Ok((
         source,
         Node::Basic {
-            start_tag: Some(format!("<{}>", r#type)),
-            end_tag: None,
             kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
@@ -181,8 +173,6 @@ fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     Ok((
         source,
         Node::Basic {
-            start_tag: Some("".to_string()),
-            end_tag: Some("</li>".to_string()),
             kind: kind.to_string(),
             r#type: "checklist_item".to_string(),
             children: vec![],
@@ -200,8 +190,6 @@ fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     Ok((
         source,
         Node::Basic {
-            start_tag: Some("<li>".to_string()),
-            end_tag: Some("</li>".to_string()),
             kind: kind.to_string(),
             r#type: "checklist_item".to_string(),
             children,
@@ -225,8 +213,6 @@ fn checklist_item_start<'a>(source: &'a str,
     Ok((
         source,
         Node::Basic {
-            start_tag: Some("<li>".to_string()),
-            end_tag: Some("".to_string()),
             kind: kind.to_string(),
             r#type: "checklist_item".to_string(),
             children,
@@ -253,8 +239,6 @@ fn checklist_section_full<'a>(source: &'a str,
     Ok((
         source,
         Node::Basic {
-            start_tag: Some("<ul>".to_string()),
-            end_tag: Some("</ul>".to_string()),
             kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
@@ -295,8 +279,6 @@ fn generic_section_end<'a>(
     Ok((
         source,
         Node::Basic {
-            start_tag: None,
-            end_tag: Some(format!("</{}>", key)),
             kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
@@ -316,8 +298,6 @@ fn generic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     Ok((
         source,
         Node::Basic {
-            start_tag: Some(format!("<{}>", r#type)),
-            end_tag: Some(format!("</{}>", r#type)),
             kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
@@ -348,8 +328,6 @@ fn generic_section_start<'a>(
     Ok((
         source,
         Node::Basic {
-            start_tag: Some(format!("<{}>", r#type)),
-            end_tag: None,
             kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
@@ -469,8 +447,6 @@ fn list_item_end<'a>(source: &'a str,
     Ok((
         source,
         Node::Basic {
-            start_tag: Some("".to_string()),
-            end_tag: Some("</li>".to_string()),
             kind: kind.to_string(),
             r#type: "list_item".to_string(),
             children: vec![],
@@ -487,8 +463,6 @@ fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     Ok((
         source,
         Node::Basic {
-            start_tag: Some("<li>".to_string()),
-            end_tag: Some("</li>".to_string()),
             kind: kind.to_string(),
             r#type: "list_item".to_string(),
             children,
@@ -512,8 +486,6 @@ fn list_item_start<'a>(source: &'a str,
     Ok((
         source,
         Node::Basic {
-            start_tag: Some("<li>".to_string()),
-            end_tag: Some("".to_string()),
             kind: kind.to_string(),
             r#type: "list_item".to_string(),
             children,
@@ -537,8 +509,6 @@ fn list_section_full<'a>(source: &'a str,
     Ok((
         source,
         Node::Basic {
-            start_tag: Some("<ul>".to_string()),
-            end_tag: Some("</ul>".to_string()),
             kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
@@ -688,7 +658,7 @@ fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
     Ok((source, results))
 }
 
-fn raw_secction_end() {
+fn raw_section_end() {
     // TODO
 }
 
