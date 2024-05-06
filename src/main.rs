@@ -3,7 +3,7 @@ use neopoligen_parser_prototype_v36::*;
 use std::fs;
 
 fn main() {
-    let content = r#"-- unknown-tag
+    let content = r#"-- pre
 
 a
 

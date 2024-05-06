@@ -32,6 +32,18 @@ pub struct ParserError {
 
 #[derive(Debug)]
 pub enum Node {
+    Block {
+        spans: String,
+    },
+    Json {
+        bounds: String,
+        category: String,
+        r#type: String,
+        data: String,
+    },
+    Raw {
+        text: String,
+    },
     Wrapper {
         start_tag: Option<String>,
         end_tag: Option<String>,
@@ -40,12 +52,6 @@ pub enum Node {
         children: Vec<Node>,
         bounds: String,
     },
-    Block {
-        spans: String,
-    },
-    Raw {
-        text: String,
-    }
 }
 
 fn basic_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
@@ -361,6 +367,63 @@ fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
     }
 }
 
+
+fn json_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let category = "json";
+    // Note: this is not actually converted to json for the prototype, but
+    // it will be in the full code
+    let (source, _) = tag("-- ").context("").parse(source)?;
+    let (source, r#type) = json_section_tag.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
+    let (source, data) = alt((take_until("\n--"), rest)).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    Ok((
+        source,
+        Node::Json {
+            category: category.to_string(),
+            r#type: r#type.to_string(),
+            data: data.trim_end().to_string(),
+            bounds: "full".to_string(),
+        },
+    ))
+}
+
+fn json_section_start<'a>(
+    source: &'a str,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    let category = "json";
+    let (source, _) = tag("-- ").context("").parse(source)?;
+    let (source, r#type) = json_section_tag.context("").parse(source)?;
+    let end_key = format!("-- /{}", r#type);
+    let (source, _) = tag("/").context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
+    let (source, text) =  take_until(end_key.as_str()).context("").parse(source)?;
+    let (source, _) = tag(end_key.as_str()).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: Some(format!("<{}>", r#type)),
+            end_tag: Some(format!("</{}>", r#type)),
+            category: category.to_string(),
+            r#type: r#type.to_string(),
+            children: vec![Node::Raw { text: text.trim_end().to_string() }],
+            bounds: "full".to_string(),
+        },
+    ))
+}
+
+fn json_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    let (source, r#type) = alt((tag("metadata"), tag("metadata")))
+        .context("")
+        .parse(source)?;
+    Ok((source, r#type))
+}
+
 fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = not(tag("-")).context("").parse(source)?;
     let (source, _) = not(tag("//")).context("").parse(source)?;
@@ -490,6 +553,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
         Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
+        Node::Json { data, r#type, .. } => response.push_str(format!("<h2>{}</h2><pre>{}</pre>", r#type, data).as_str()),
         Node::Raw { text } => response.push_str(format!("{}", text).as_str()),
     });
     response
@@ -512,12 +576,12 @@ fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
 fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let category = "raw";
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = pre_section_tag.context("").parse(source)?;
+    let (source, r#type) = raw_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
-    let (source, text) = alt((take_until("\n--"), rest)).context("pre_section_full").parse(source)?;
-    let (source, _) = multispace0.context("pre_section_full").parse(source)?;
+    let (source, text) = alt((take_until("\n--"), rest)).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
         Node::Wrapper {
@@ -536,15 +600,15 @@ fn raw_section_start<'a>(
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let category = "raw";
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = pre_section_tag.context("").parse(source)?;
+    let (source, r#type) = raw_section_tag.context("").parse(source)?;
     let end_key = format!("-- /{}", r#type);
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
     let (source, text) =  take_until(end_key.as_str()).context("").parse(source)?;
-    let (source, _) = tag(end_key.as_str()).context("pre_section_full").parse(source)?;
-    let (source, _) = multispace0.context("pre_section_full").parse(source)?;
+    let (source, _) = tag(end_key.as_str()).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
         Node::Wrapper {
@@ -558,7 +622,7 @@ fn raw_section_start<'a>(
     ))
 }
 
-fn pre_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+fn raw_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
     let (source, r#type) = alt((tag("pre"), tag("code")))
         .context("")
         .parse(source)?;
@@ -572,14 +636,17 @@ fn start_or_full_section<'a>(
         |src| basic_section_full(src),
         |src| basic_section_start(src),
         |src| checklist_section_full(src),
+        |src| json_section_full(src),
+        |src| json_section_start(src),
         |src| list_section_full(src),
         |src| raw_section_full(src),
         |src| raw_section_start(src),
         // make sure generic is last
-        |src| generic_section_full(src),
-        |src| generic_section_start(src),
+        // |src| generic_section_full(src),
+        // |src| generic_section_start(src),
     ))
     .context("")
     .parse(source)?;
     Ok((source, results))
 }
+
