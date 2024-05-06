@@ -1,10 +1,13 @@
 use nom::branch::alt;
+use nom::bytes::complete::is_not;
 use nom::bytes::complete::tag;
 use nom::bytes::complete::take_until;
 use nom::character::complete::multispace0;
 use nom::character::complete::newline;
 use nom::character::complete::space0;
+use nom::combinator::eof;
 use nom::combinator::not;
+use nom::combinator::rest;
 use nom::multi::many0;
 use nom::multi::many1;
 use nom::sequence::tuple;
@@ -16,15 +19,11 @@ use nom_supreme::final_parser::final_parser;
 use nom_supreme::final_parser::Location;
 use nom_supreme::final_parser::RecreateContext;
 use nom_supreme::parser_ext::ParserExt;
-use nom::combinator::eof;
-use nom::combinator::rest;
-use nom::bytes::complete::is_not;
 
 // NOTE: Not sure if the 'inside' stuff is needed. I started
 // adding it, then realized I didn't need it for lists
 // in the way I thought. I'm leaving it here for now. Can
 // remove after everything else is done if it's not needed
-
 
 #[derive(Debug)]
 pub struct ParserError {
@@ -100,8 +99,7 @@ fn basic_section_end<'a>(
     ))
 }
 
-fn basic_section_full(source: &str,
-    ) -> IResult<&str, Node, ErrorTree<&str>> {
+fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let kind = "basic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
@@ -122,7 +120,7 @@ fn basic_section_full(source: &str,
 
 fn basic_section_start<'a>(
     source: &'a str,
-    mut inside: Vec<&'a str>
+    mut inside: Vec<&'a str>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "basic";
     inside.push(kind);
@@ -204,8 +202,10 @@ fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-fn checklist_item_start<'a>(source: &'a str,
-    mut inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+fn checklist_item_start<'a>(
+    source: &'a str,
+    mut inside: Vec<&'a str>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "checklist_item";
     inside.push(kind);
     let (source, _) = tag("[]/ ").context("").parse(source)?;
@@ -227,8 +227,10 @@ fn checklist_item_start<'a>(source: &'a str,
     ))
 }
 
-fn checklist_section_full<'a>(source: &'a str,
-    mut inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+fn checklist_section_full<'a>(
+    source: &'a str,
+    mut inside: Vec<&'a str>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "checklist";
     inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
@@ -237,11 +239,11 @@ fn checklist_section_full<'a>(source: &'a str,
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(alt((
-        |src| checklist_item_full(src), 
-        |src| checklist_item_start(src, inside.clone())
+        |src| checklist_item_full(src),
+        |src| checklist_item_start(src, inside.clone()),
     )))
-        .context("")
-        .parse(source)?;
+    .context("")
+    .parse(source)?;
     Ok((
         source,
         Node::Basic {
@@ -258,10 +260,12 @@ fn checklist_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, Error
     Ok((source, r#type))
 }
 
-fn empty_until_newline_or_eof<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+fn empty_until_newline_or_eof<'a>(
+    source: &'a str,
+) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
     let (source, _) = alt((
         tuple((space0, newline.map(|_| ""))),
-        tuple((multispace0, eof.map(|_| "")))
+        tuple((multispace0, eof.map(|_| ""))),
     ))
     .context("")
     .parse(source)?;
@@ -314,7 +318,7 @@ fn generic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 
 fn generic_section_start<'a>(
     source: &'a str,
-    mut inside: Vec<&'a str>
+    mut inside: Vec<&'a str>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "generic";
     inside.push(kind);
@@ -369,7 +373,6 @@ fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
     }
 }
 
-
 #[allow(dead_code)]
 fn json_section_end() {
     // TODO
@@ -383,7 +386,9 @@ fn json_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, r#type) = json_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
+    let (source, _) = many0(empty_until_newline_or_eof)
+        .context("")
+        .parse(source)?;
     let (source, data) = alt((take_until("\n--"), rest)).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -399,7 +404,7 @@ fn json_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 
 fn json_section_start<'a>(
     source: &'a str,
-    mut inside: Vec<&'a str>
+    mut inside: Vec<&'a str>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "json";
     inside.push(kind);
@@ -409,8 +414,10 @@ fn json_section_start<'a>(
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
-    let (source, data) =  take_until(end_key.as_str()).context("").parse(source)?;
+    let (source, _) = many0(empty_until_newline_or_eof)
+        .context("")
+        .parse(source)?;
+    let (source, data) = take_until(end_key.as_str()).context("").parse(source)?;
     let (source, _) = tag(end_key.as_str()).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -445,8 +452,10 @@ fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-fn list_item_end<'a>(source: &'a str,
-    mut inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+fn list_item_end<'a>(
+    source: &'a str,
+    mut inside: Vec<&'a str>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "list_item";
     inside.pop();
     let (source, _) = tag("//").context("").parse(source)?;
@@ -479,8 +488,10 @@ fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-fn list_item_start<'a>(source: &'a str,
-    mut inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+fn list_item_start<'a>(
+    source: &'a str,
+    mut inside: Vec<&'a str>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "list_item";
     inside.push(kind);
     let (source, _) = tag("-/ ").context("").parse(source)?;
@@ -489,7 +500,9 @@ fn list_item_start<'a>(source: &'a str,
     })))
     .context("")
     .parse(source)?;
-    let (source, ending) = (|src| list_item_end(src, inside.clone())).context("").parse(source)?;
+    let (source, ending) = (|src| list_item_end(src, inside.clone()))
+        .context("")
+        .parse(source)?;
     children.push(ending);
     Ok((
         source,
@@ -502,8 +515,10 @@ fn list_item_start<'a>(source: &'a str,
     ))
 }
 
-fn list_section_full<'a>(source: &'a str,
-    mut inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+fn list_section_full<'a>(
+    source: &'a str,
+    mut inside: Vec<&'a str>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "list";
     inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
@@ -511,9 +526,11 @@ fn list_section_full<'a>(source: &'a str,
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(alt((list_item_full, |src| list_item_start(src, inside.clone()))))
-        .context("")
-        .parse(source)?;
+    let (source, children) = many0(alt((list_item_full, |src| {
+        list_item_start(src, inside.clone())
+    })))
+    .context("")
+    .parse(source)?;
     Ok((
         source,
         Node::Basic {
@@ -639,13 +656,50 @@ pub fn output(ast: &Vec<Node>) -> String {
                     response.push_str("-");
                     response.push_str(r#type);
                     response.push_str(" -->");
-                    
                 }
             }
         }
         Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
-        Node::Json { data, r#type, .. } => response.push_str(format!("<h2>{}</h2><pre>{}</pre>", r#type, data).as_str()),
-        Node::Raw { text, r#type, .. } => response.push_str(format!("<h2>{}</h2><pre>{}</pre>", r#type, text).as_str()),
+        Node::Json { data, r#type, .. } => {
+            response.push_str(format!("<h2>{}</h2><pre>{}</pre>", r#type, data).as_str())
+        }
+        Node::Raw { text, r#type, kind, bounds } => {
+
+            if bounds == "full" {
+                response.push_str("<pre class=\"");
+                response.push_str(kind);
+                response.push_str("-");
+                response.push_str(bounds);
+                response.push_str("-");
+                response.push_str(r#type);
+                response.push_str("\">");
+                response.push_str(text);
+                response.push_str("</pre>");
+            }
+            if bounds == "start" {
+                response.push_str("<pre class=\"");
+                response.push_str(kind);
+                response.push_str("-");
+                response.push_str(bounds);
+                response.push_str("-");
+                response.push_str(r#type);
+                response.push_str("\">");
+                response.push_str(text);
+            }
+            // if bounds == "end" {
+            //     response.push_str("</pre>");
+            //     response.push_str("<div class=\"");
+            //     response.push_str(kind);
+            //     response.push_str("-");
+            //     response.push_str(bounds);
+            //     response.push_str("-");
+            //     response.push_str(r#type);
+            //     response.push_str("\">");
+            //     response.push_str(&output(&children));
+            //     response.push_str("</div>");
+            // }
+
+        }
     });
     response
 }
@@ -676,7 +730,9 @@ fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, r#type) = raw_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
+    let (source, _) = many0(empty_until_newline_or_eof)
+        .context("")
+        .parse(source)?;
     let (source, text) = alt((take_until("\n--"), rest)).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -685,14 +741,14 @@ fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
             bounds: "full".to_string(),
             kind: kind.to_string(),
             r#type: r#type.to_string(),
-            text: text.trim_end().to_string(), 
+            text: text.trim_end().to_string(),
         },
     ))
 }
 
 fn raw_section_start<'a>(
     source: &'a str,
-    mut inside: Vec<&'a str>
+    mut inside: Vec<&'a str>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "raw";
     inside.push(kind);
@@ -702,8 +758,10 @@ fn raw_section_start<'a>(
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
-    let (source, text) =  take_until(end_key.as_str()).context("").parse(source)?;
+    let (source, _) = many0(empty_until_newline_or_eof)
+        .context("")
+        .parse(source)?;
+    let (source, text) = take_until(end_key.as_str()).context("").parse(source)?;
     let (source, _) = tag(end_key.as_str()).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -712,21 +770,19 @@ fn raw_section_start<'a>(
             bounds: "start".to_string(),
             kind: kind.to_string(),
             r#type: r#type.to_string(),
-            text: text.trim_end().to_string(), 
+            text: text.trim_end().to_string(),
         },
     ))
 }
 
 fn raw_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = alt((tag("pre"), tag("code")))
-        .context("")
-        .parse(source)?;
+    let (source, r#type) = alt((tag("pre"), tag("code"))).context("").parse(source)?;
     Ok((source, r#type))
 }
 
 fn start_or_full_section<'a>(
     source: &'a str,
-    inside: Vec<&'a str>
+    inside: Vec<&'a str>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, results) = alt((
         |src| basic_section_full(src),
@@ -745,4 +801,3 @@ fn start_or_full_section<'a>(
     .parse(source)?;
     Ok((source, results))
 }
-

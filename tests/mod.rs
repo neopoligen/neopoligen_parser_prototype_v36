@@ -13,13 +13,7 @@ use std::fs;
 
 
 
-// #[case(
-//     "Raw Full",
-//     "-- pre
 
-// b",
-//     "<h2>pre</h2><pre>b</pre>"
-// )]
 // #[case(
 //     "Raw Keep Leading Whitespace",
 //     r#"-- pre
