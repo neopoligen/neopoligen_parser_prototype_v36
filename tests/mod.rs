@@ -1,71 +1,13 @@
 use neopoligen_parser_prototype_v36::*;
 use pretty_assertions::assert_eq;
-use rstest::rstest;
+// use rstest::rstest;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 use std::fs;
 
 
-// #[rstest]
-// #[case(
-//     "Basic Full Section",
-//     "-- div
 
-// alfa
 
-// ",
-//     "<div><p>alfa</p></div>"
-// )]
-// #[case(
-//     "Basic Start/End Section",
-//     "-- div/
-
-// bravo
-
-// -- /div",
-//     "<div><p>bravo</p></div>"
-// )]
-// #[case(
-//     "Basic Full Inside Basic Start/End",
-//     "-- div/
-
-// charlie
-
-// -- div
-
-// delta
-
-// -- /div",
-//     "<div><p>charlie</p><div><p>delta</p></div></div>"
-// )]
-// #[case(
-//     "Basic Start/End Inside Basic Start/End",
-//     "-- div/
-
-// echo
-
-// -- div/
-
-// foxtrot
-
-// -- /div
-
-// golf
-
-// -- /div",
-//     "<div><p>echo</p><div><p>foxtrot</p></div><p>golf</p></div>"
-// )]
-// #[case(
-//     "List Full",
-//     "-- list
-
-// - alfa
-
-// - bravo
-
-// ",
-//     "<ul><li><p>alfa</p></li><li><p>bravo</p></li></ul>"
-// )]
 // #[case(
 //     "List With Start/End Item",
 //     "-- list
@@ -264,7 +206,7 @@ fn run_tests() {
         let content = fs::read_to_string(f).unwrap();
         let tests = content.split("################################################").collect::<Vec<&str>>();
         tests.iter().for_each(|t| {
-            let parts = t.split("------------------------------------------------").map(|p| p.trim_left()).collect::<Vec<&str>>();
+            let parts = t.split("------------------------------------------------").map(|p| p.trim_start()).collect::<Vec<&str>>();
             let left = parts[2].trim().replace("\n", "").replace(" ", "");
             let out = output(&parse(parts[1]).unwrap());
             let right = out.trim().replace("\n", "").replace(" ", "");

@@ -35,3 +35,100 @@ here
     <h2>basic-end-div</h2>
 </div>
 
+################################################
+
+Nested Basic Start/End
+
+
+------------------------------------------------
+
+-- div/
+
+-- div
+
+here
+
+-- /div
+
+
+------------------------------------------------
+
+<div>
+    <h2>basic-start-div</h2>
+    <div>
+        <h2>basic-full-div</h2>
+        <p>here</p>
+    </div>
+</div>
+<div>
+    <h2>basic-end-div</h2>
+</div>
+
+
+
+################################################
+
+
+    Basic Start/End Inside Basic Start/End"
+
+------------------------------------------------
+
+-- div/
+
+echo
+
+-- div/
+
+foxtrot
+
+-- /div
+
+golf
+
+-- /div
+
+------------------------------------------------
+
+<div>
+    <h2>basic-start-div</h2>
+    <p>echo</p>
+    <div>
+        <h2>basic-start-div</h2>
+        <p>foxtrot</p>
+    </div>
+    <div>
+        <h2>basic-end-div</h2>
+        <p>golf</p>
+    </div>
+</div>
+<div>
+    <h2>basic-end-div</h2>
+</div>
+
+
+
+
+################################################
+
+List Full
+
+------------------------------------------------
+
+-- list
+
+- alfa
+
+- bravo
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li class="list_item-full-list_item">
+        <p>alfa</p>
+    </li>
+    <li class="list_item-full-list_item">
+        <p>bravo</p>
+    </li>
+</ul>
+
+
