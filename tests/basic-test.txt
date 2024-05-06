@@ -8,8 +8,7 @@ here
 
 ------------------------------------------------
 
-<div>
-    <h2>basic-full-div</h2>
+<div class="basic-full-div">
     <p>here</p>
 </div>
 
@@ -27,12 +26,10 @@ here
 
 ------------------------------------------------
 
-<div>
-    <h2>basic-start-div</h2>
+<div class="basic-start-div">
     <p>here</p>
 </div>
-<div>
-    <h2>basic-end-div</h2>
+<div class="basic-end-div">
 </div>
 
 ################################################
@@ -53,15 +50,12 @@ here
 
 ------------------------------------------------
 
-<div>
-    <h2>basic-start-div</h2>
-    <div>
-        <h2>basic-full-div</h2>
+<div class="basic-start-div">
+    <div class="basic-full-div">
         <p>here</p>
     </div>
 </div>
-<div>
-    <h2>basic-end-div</h2>
+<div class="basic-end-div">
 </div>
 
 
@@ -89,20 +83,16 @@ golf
 
 ------------------------------------------------
 
-<div>
-    <h2>basic-start-div</h2>
+<div class="basic-start-div">
     <p>echo</p>
-    <div>
-        <h2>basic-start-div</h2>
+    <div class="basic-start-div">
         <p>foxtrot</p>
     </div>
-    <div>
-        <h2>basic-end-div</h2>
+    <div class="basic-end-div">
         <p>golf</p>
     </div>
 </div>
-<div>
-    <h2>basic-end-div</h2>
+<div class="basic-end-div">
 </div>
 
 
@@ -130,5 +120,6 @@ List Full
         <p>bravo</p>
     </li>
 </ul>
+
 
 
