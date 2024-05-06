@@ -86,8 +86,8 @@ fn basic_section_end<'a>(
 }
 
 fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    dbg!("basic_section_full");
-    dbg!(source);
+    // dbg!("basic_section_full");
+    // dbg!(source);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
@@ -180,8 +180,8 @@ fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
 }
 
 fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    dbg!("list_item_block");
-    dbg!(source);
+    // dbg!("list_item_block");
+    // dbg!(source);
     let (source, _) = not(tag("-")).context("").parse(source)?;
     let (source, _) = not(tag("//")).context("").parse(source)?;
     let (source, text) = take_until("\n\n").context("").parse(source)?;
@@ -195,8 +195,8 @@ fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn list_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    dbg!("list_item_end");
-    dbg!(source);
+    // dbg!("list_item_end");
+    // dbg!(source);
     let (source, _) = tag("//").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -230,8 +230,8 @@ fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn list_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    dbg!("list_item_start");
-    dbg!(source);
+    // dbg!("list_item_start");
+    // dbg!(source);
     let (source, _) = tag("-/ ").context("").parse(source)?;
     let (source, mut children) = many0(alt((list_item_block, |src| {
         start_or_full_section(src, vec!["see-if-this-can-be-removed"])
@@ -383,7 +383,7 @@ fn start_or_full_section<'a>(
     source: &'a str,
     inside: Vec<&'a str>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    dbg!(source);
+    // dbg!(source);
     let (source, results) = alt((
         |src| basic_section_full(src),
         |src| basic_section_start(src, inside.clone()),
