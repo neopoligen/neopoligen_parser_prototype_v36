@@ -67,6 +67,7 @@ fn basic_section_end<'a>(
     let (source, r#type) = tag(key).context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = if *inside.last().unwrap() == "list" {
         many0(list_item_block).context("").parse(source)?
     } else {
@@ -92,6 +93,7 @@ fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(basic_block).context("").parse(source)?;
     Ok((
         source,
@@ -117,6 +119,7 @@ fn basic_section_start<'a>(
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
     let (source, mut children) = many0(alt((basic_block, |src| {
         start_or_full_section(src, inside.clone())
     })))

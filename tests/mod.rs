@@ -53,7 +53,7 @@ e
 -- /div
 
 "#,
-    "<div><p>a</p><div><p>    b</p><div><p>        c</p></div><p>    d</p></div><p>e</p></div>"
+    "<div><p>a</p><div><p>b</p><div><p>c</p></div><p>d</p></div><p>e</p></div>"
 )]
 fn run_tests(#[case] input: &str, #[case] left: &str) {
     let right = output(&parse(input).unwrap());
