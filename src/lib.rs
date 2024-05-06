@@ -114,10 +114,9 @@ fn basic_section_start<'a>(
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, mut children) = many0(alt((
-        |src| start_or_full_section(src, inside.clone()),
-        basic_block,
-    )))
+    let (source, mut children) = many0(alt((basic_block, |src| {
+        start_or_full_section(src, inside.clone())
+    })))
     .context("")
     .parse(source)?;
     let (source, end_section) = basic_section_end(source, inside, r#type)?;
