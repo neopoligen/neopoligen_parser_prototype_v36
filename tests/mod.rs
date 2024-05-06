@@ -29,6 +29,32 @@ use rstest::rstest;
     "-- list\n\n-/ hotel\n\n-- list\n\n- india\n\n- juliet\n\n//\n\n- kilo\n\n",
     "<ul><li><p>hotel</p><ul><li><p>india</p></li><li><p>juliet</p></li></ul></li><li><p>kilo</p></li></ul>"
 )]
+#[case(
+    r#"-- div/
+
+a
+
+    -- div/
+
+    b
+
+        -- div/
+
+        c
+
+        -- /div
+
+    d
+
+    -- /div
+
+e
+
+-- /div
+
+"#,
+    "<div><p>a</p><div><p>    b</p><div><p>        c</p></div><p>    d</p></div><p>e</p></div>"
+)]
 fn run_tests(#[case] input: &str, #[case] left: &str) {
     let right = output(&parse(input).unwrap());
     assert_eq!(left, right);

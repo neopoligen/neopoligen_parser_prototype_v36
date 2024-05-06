@@ -3,19 +3,27 @@ use neopoligen_parser_prototype_v36::*;
 use std::fs;
 
 fn main() {
-    let content = r#"-- list
+    let content = r#"-- div/
 
--/ alfa
+a
 
--- list
+    -- div/
 
-- bravo
+    b
 
-- charlie
+        -- div/
 
-// 
+        c
 
-- delta
+        -- /div
+
+    d
+
+    -- /div
+
+e
+
+-- /div
 
 "#;
     match parse(content) {
@@ -24,7 +32,21 @@ fn main() {
             let _ = fs::write(
                 "output.html",
                 format!(
-                    "<!DOCTYPE html><html><head></head><body>{} <hr /><pre><code>{}<code></pre></body></html>",
+                    r#"<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {{ background-color: #444; color: #aaa; }}
+            div {{ border: 1px solid black; padding: 0.2rem; margin: 0.4rem;}}
+        </style>
+    </head>
+    <body>
+        {}
+        <div>
+        <pre><code>{}<code></pre>
+        </div>
+    </body>
+</html>"#,
                     out,
                     html_escape::encode_text(&out)
                 ),
