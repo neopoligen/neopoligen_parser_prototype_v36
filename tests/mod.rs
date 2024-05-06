@@ -209,8 +209,9 @@ b
 "#,
     "<ul><li><p>a</p><pre>b</pre></li><li><p>c</p></li></ul>"
 )]
-#[case("Checklist with start/end", 
-r#"-- checklist
+#[case(
+    "Checklist with start/end",
+    r#"-- checklist
 
 []/ a
 
@@ -225,7 +226,17 @@ b
 [] c
 
 "#,
-"<ul><li><p>a</p><pre>b</pre></li><li><p>c</p></li></ul>")]
+    "<ul><li><p>a</p><pre>b</pre></li><li><p>c</p></li></ul>"
+)]
+#[case(
+    "Generic Tag",
+    r#"-- unknown-tag
+
+a
+
+"#,
+    "<unknown-tag><p>a</p></unknown-tag>"
+)]
 fn run_tests(#[case] _x: &str, #[case] input: &str, #[case] left: &str) {
     let right = output(&parse(input).unwrap());
     assert_eq!(left, right);

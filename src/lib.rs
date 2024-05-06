@@ -18,6 +18,7 @@ use nom_supreme::final_parser::RecreateContext;
 use nom_supreme::parser_ext::ParserExt;
 use nom::combinator::eof;
 use nom::combinator::rest;
+use nom::bytes::complete::is_not;
 
 #[derive(Debug)]
 pub struct ParserError {
@@ -65,6 +66,7 @@ fn basic_section_end<'a>(
     source: &'a str,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    let category = "basic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -77,7 +79,7 @@ fn basic_section_end<'a>(
         Node::Wrapper {
             start_tag: None,
             end_tag: Some(format!("</{}>", key)),
-            category: "basic".to_string(),
+            category: category.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "end".to_string(),
@@ -86,8 +88,7 @@ fn basic_section_end<'a>(
 }
 
 fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    // dbg!("basic_section_full");
-    // dbg!(source);
+    let category = "basic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -99,7 +100,7 @@ fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Wrapper {
             start_tag: Some(format!("<{}>", r#type)),
             end_tag: Some(format!("</{}>", r#type)),
-            category: "basic".to_string(),
+            category: category.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -145,8 +146,6 @@ fn basic_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree
 }
 
 fn checklist_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    // dbg!("checklist_item_block");
-    // dbg!(source);
     let (source, _) = not(tag("--")).context("").parse(source)?;
     let (source, _) = not(tag("[")).context("").parse(source)?;
     let (source, _) = not(tag("//")).context("").parse(source)?;
@@ -162,8 +161,7 @@ fn checklist_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    // dbg!("list_item_end");
-    // dbg!(source);
+    let category = "checklist_item";
     let (source, _) = tag("//").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -171,8 +169,8 @@ fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Wrapper {
             start_tag: Some("".to_string()),
             end_tag: Some("</li>".to_string()),
-            category: "checklist_item".to_string(),
-            r#type: "checklist_item_end".to_string(),
+            category: category.to_string(),
+            r#type: "checklist_item".to_string(),
             children: vec![],
             bounds: "end".to_string(),
         },
@@ -180,6 +178,7 @@ fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let category = "checklist";
     // NOTE: this prototype only looks for unchecked items
     let (source, _) = tag("[] ").context("").parse(source)?;
     let (source, children) = many0(checklist_item_block).context("").parse(source)?;
@@ -189,8 +188,8 @@ fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Wrapper {
             start_tag: Some("<li>".to_string()),
             end_tag: Some("</li>".to_string()),
-            category: "list_item".to_string(),
-            r#type: "list_item".to_string(),
+            category: category.to_string(),
+            r#type: "checklist_item".to_string(),
             children,
             bounds: "full".to_string(),
         },
@@ -198,9 +197,7 @@ fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn checklist_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    // dbg!("list_item_start");
-    // dbg!(source);
-    // NOTE: this prototype only looks for unchecked items
+    let category = "checklist_item";
     let (source, _) = tag("[]/ ").context("").parse(source)?;
     let (source, mut children) = many0(alt((checklist_item_block, |src| {
         start_or_full_section(src)
@@ -214,15 +211,16 @@ fn checklist_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Wrapper {
             start_tag: Some("<li>".to_string()),
             end_tag: Some("".to_string()),
-            category: "list_item".to_string(),
-            r#type: "list_item".to_string(),
+            category: category.to_string(),
+            r#type: "checklist_item".to_string(),
             children,
-            bounds: "full".to_string(),
+            bounds: "start".to_string(),
         },
     ))
 }
 
 fn checklist_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let category = "checklist";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = checklist_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -236,7 +234,7 @@ fn checklist_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> 
         Node::Wrapper {
             start_tag: Some("<ul>".to_string()),
             end_tag: Some("</ul>".to_string()),
-            category: "list".to_string(),
+            category: category.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -259,6 +257,82 @@ fn empty_until_newline_or_eof<'a>(source: &'a str) -> IResult<&'a str, &'a str, 
     Ok((source, ""))
 }
 
+
+fn generic_section_end<'a>(
+    source: &'a str,
+    key: &'a str,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    let category = "generic";
+    let (source, _) = tag("-- ").context("").parse(source)?;
+    let (source, _) = tag("/").context("").parse(source)?;
+    let (source, r#type) = tag(key).context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    let (source, children) = many0(basic_block).context("").parse(source)?;
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: None,
+            end_tag: Some(format!("</{}>", key)),
+            category: category.to_string(),
+            r#type: r#type.to_string(),
+            children,
+            bounds: "end".to_string(),
+        },
+    ))
+}
+
+fn generic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let category = "generic";
+    let (source, _) = tag("-- ").context("").parse(source)?;
+    let (source, r#type) = is_not(" /\n").context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    let (source, children) = many0(basic_block).context("").parse(source)?;
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: Some(format!("<{}>", r#type)),
+            end_tag: Some(format!("</{}>", r#type)),
+            category: category.to_string(),
+            r#type: r#type.to_string(),
+            children,
+            bounds: "full".to_string(),
+        },
+    ))
+}
+
+fn generic_section_start<'a>(
+    source: &'a str,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    let category = "generic";
+    let (source, _) = tag("-- ").context("").parse(source)?;
+    let (source, r#type) = is_not(" /\n").context("").parse(source)?;
+    let (source, _) = tag("/").context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    let (source, mut children) = many0(alt((basic_block, |src| {
+        start_or_full_section(src)
+    })))
+    .context("")
+    .parse(source)?;
+    let (source, end_section) = generic_section_end(source, r#type)?;
+    children.push(end_section);
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: Some(format!("<{}>", r#type)),
+            end_tag: None,
+            category: category.to_string(),
+            r#type: r#type.to_string(),
+            children,
+            bounds: "start".to_string(),
+        },
+    ))
+}
 
 fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
     match tree {
@@ -288,8 +362,6 @@ fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
 }
 
 fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    // dbg!("list_item_block");
-    // dbg!(source);
     let (source, _) = not(tag("-")).context("").parse(source)?;
     let (source, _) = not(tag("//")).context("").parse(source)?;
     // using take_until isn't robust but works for this prototype
@@ -304,8 +376,7 @@ fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn list_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    // dbg!("list_item_end");
-    // dbg!(source);
+    let category = "list_item";
     let (source, _) = tag("//").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -313,8 +384,8 @@ fn list_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Wrapper {
             start_tag: Some("".to_string()),
             end_tag: Some("</li>".to_string()),
-            category: "list_item".to_string(),
-            r#type: "list_item_end".to_string(),
+            category: category.to_string(),
+            r#type: "list_item".to_string(),
             children: vec![],
             bounds: "end".to_string(),
         },
@@ -322,6 +393,7 @@ fn list_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let category = "list_item";
     let (source, _) = tag("- ").context("").parse(source)?;
     let (source, children) = many0(list_item_block).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
@@ -330,7 +402,7 @@ fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Wrapper {
             start_tag: Some("<li>".to_string()),
             end_tag: Some("</li>".to_string()),
-            category: "list_item".to_string(),
+            category: category.to_string(),
             r#type: "list_item".to_string(),
             children,
             bounds: "full".to_string(),
@@ -339,8 +411,7 @@ fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 }
 
 fn list_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    // dbg!("list_item_start");
-    // dbg!(source);
+    let category = "list_item";
     let (source, _) = tag("-/ ").context("").parse(source)?;
     let (source, mut children) = many0(alt((list_item_block, |src| {
         start_or_full_section(src)
@@ -354,15 +425,16 @@ fn list_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Wrapper {
             start_tag: Some("<li>".to_string()),
             end_tag: Some("".to_string()),
-            category: "list_item".to_string(),
+            category: category.to_string(),
             r#type: "list_item".to_string(),
             children,
-            bounds: "full".to_string(),
+            bounds: "start".to_string(),
         },
     ))
 }
 
 fn list_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let category = "list";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = list_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -376,7 +448,7 @@ fn list_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Wrapper {
             start_tag: Some("<ul>".to_string()),
             end_tag: Some("</ul>".to_string()),
-            category: "list".to_string(),
+            category: category.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -437,48 +509,8 @@ fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
     Ok((source, results))
 }
 
-// fn pre_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-//     let (source, _) = not(tag("--")).context("").parse(source)?;
-//     let (source, _) = not(tag("//")).context("").parse(source)?;
-//     // using take_until isn't robust but works for this prototype
-//     let (source, text) = take_until("\n\n").context("").parse(source)?;
-//     let (source, _) = multispace0.context("").parse(source)?;
-//     Ok((
-//         source,
-//         Node::Block {
-//             text: text.to_string(),
-//         },
-//     ))
-// }
-
-// fn pre_section_end<'a>(
-//     source: &'a str,
-//     key: &'a str,
-// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-//     let (source, _) = tag("-- ").context("").parse(source)?;
-//     let (source, _) = tag("/").context("").parse(source)?;
-//     let (source, r#type) = tag(key).context("").parse(source)?;
-//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-//     let (source, _) = multispace0.context("").parse(source)?;
-//     let (source, children) = many0(basic_block).context("").parse(source)?;
-//     Ok((
-//         source,
-//         Node::Wrapper {
-//             start_tag: None,
-//             end_tag: Some(format!("</{}>", key)),
-//             category: "basic".to_string(),
-//             r#type: r#type.to_string(),
-//             children,
-//             bounds: "end".to_string(),
-//         },
-//     ))
-// }
-
 fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let category = "raw";
-    // dbg!("basic_section_full");
-    // dbg!(source);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = pre_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -526,7 +558,6 @@ fn raw_section_start<'a>(
     ))
 }
 
-
 fn pre_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
     let (source, r#type) = alt((tag("pre"), tag("code")))
         .context("")
@@ -534,11 +565,9 @@ fn pre_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&
     Ok((source, r#type))
 }
 
-
 fn start_or_full_section<'a>(
     source: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    // dbg!(source);
     let (source, results) = alt((
         |src| basic_section_full(src),
         |src| basic_section_start(src),
@@ -546,6 +575,9 @@ fn start_or_full_section<'a>(
         |src| list_section_full(src),
         |src| raw_section_full(src),
         |src| raw_section_start(src),
+        // make sure generic is last
+        |src| generic_section_full(src),
+        |src| generic_section_start(src),
     ))
     .context("")
     .parse(source)?;

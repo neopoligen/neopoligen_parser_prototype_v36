@@ -3,19 +3,9 @@ use neopoligen_parser_prototype_v36::*;
 use std::fs;
 
 fn main() {
-    let content = r#"-- checklist
+    let content = r#"-- unknown-tag
 
-[]/ a
-
--- pre/
-
-asdf
-
--- /pre
-
-//
-
-[] b
+a
 
 "#;
     match parse(content) {
