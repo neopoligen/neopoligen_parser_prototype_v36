@@ -276,3 +276,59 @@ e
 <div class="basic-end-div">
 </div>
 
+
+################################################
+
+Items After Closing List
+
+------------------------------------------------
+
+-- list
+
+-/ a
+
+    -- div/
+
+    b
+
+        -- div/
+
+        c
+
+        -- /div
+
+    d
+
+    -- /div
+
+//
+
+- e
+
+
+
+
+------------------------------------------------
+
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>a</p>
+        <div class="basic-start-div">
+            <p>b</p>
+            <div class="basic-start-div">
+                <p>c</p>
+            </div>
+            <div class="basic-end-div">
+            <p>d</p>
+            </div>
+        </div>
+        <div class="basic-end-div"></div>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>e</p>
+    </li>
+</ul>
+
+
+
