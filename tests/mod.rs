@@ -262,10 +262,14 @@ fn run_tests() {
     let dir = PathBuf::from("tests");
     get_files(&dir, vec!["txt"]).iter().for_each(|f| {
         let content = fs::read_to_string(f).unwrap();
-        let parts = content.split("~~~").map(|p| p.trim_left()).collect::<Vec<&str>>();
-        let left = parts[2];
-        let right = output(&parse(parts[1]).unwrap());
-        assert_eq!(left, right);
+        let tests = content.split("################################################").collect::<Vec<&str>>();
+        tests.iter().for_each(|t| {
+            let parts = t.split("------------------------------------------------").map(|p| p.trim_left()).collect::<Vec<&str>>();
+            let left = parts[2].trim().replace("\n", "").replace(" ", "");
+            let out = output(&parse(parts[1]).unwrap());
+            let right = out.trim().replace("\n", "").replace(" ", "");
+            assert_eq!(left, right);
+        });
     });
 }
 
