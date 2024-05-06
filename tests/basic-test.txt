@@ -122,7 +122,31 @@ List Full
 </ul>
 
 
+################################################
 
+List With Start/End Item
+
+------------------------------------------------
+
+-- list
+
+-/ charlie
+
+//
+
+- delta
+
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>charlie</p>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>delta</p>
+    </li>
+</ul>
 
 
 

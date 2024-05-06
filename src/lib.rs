@@ -20,6 +20,12 @@ use nom::combinator::eof;
 use nom::combinator::rest;
 use nom::bytes::complete::is_not;
 
+// NOTE: Not sure if the 'inside' stuff is needed. I started
+// adding it, then realized I didn't need it for lists
+// in the way I thought. I'm leaving it here for now. Can
+// remove after everything else is done if it's not needed
+
+
 #[derive(Debug)]
 pub struct ParserError {
     pub line: usize,
@@ -364,6 +370,7 @@ fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
 }
 
 
+#[allow(dead_code)]
 fn json_section_end() {
     // TODO
 }
@@ -412,7 +419,7 @@ fn json_section_start<'a>(
             kind: kind.to_string(),
             r#type: r#type.to_string(),
             data: data.trim_end().to_string(),
-            bounds: "full".to_string(),
+            bounds: "start".to_string(),
         },
     ))
 }
@@ -444,6 +451,7 @@ fn list_item_end<'a>(source: &'a str,
     inside.pop();
     let (source, _) = tag("//").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
+    dbg!(inside);
     Ok((
         source,
         Node::Basic {
@@ -624,15 +632,14 @@ pub fn output(ast: &Vec<Node>) -> String {
                 }
                 if bounds == "end" {
                     response.push_str("</li>");
-                    response.push_str("<li class=\"");
+                    response.push_str("<!-- ");
                     response.push_str(kind);
                     response.push_str("-");
                     response.push_str(bounds);
                     response.push_str("-");
                     response.push_str(r#type);
-                    response.push_str("\">");
-                    response.push_str(&output(&children));
-                    response.push_str("</div>");
+                    response.push_str(" -->");
+                    
                 }
             }
         }
@@ -658,6 +665,7 @@ fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
     Ok((source, results))
 }
 
+#[allow(dead_code)]
 fn raw_section_end() {
     // TODO
 }
@@ -687,6 +695,7 @@ fn raw_section_start<'a>(
     mut inside: Vec<&'a str>
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let kind = "raw";
+    inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = raw_section_tag.context("").parse(source)?;
     let end_key = format!("-- /{}", r#type);
@@ -700,7 +709,7 @@ fn raw_section_start<'a>(
     Ok((
         source,
         Node::Raw {
-            bounds: "full".to_string(),
+            bounds: "start".to_string(),
             kind: kind.to_string(),
             r#type: r#type.to_string(),
             text: text.trim_end().to_string(), 
