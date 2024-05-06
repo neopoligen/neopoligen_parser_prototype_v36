@@ -13,6 +13,14 @@ use rstest::rstest;
     "-- div/\n\necho\n\n-- div/\n\nfoxtrot\n\n-- /div\n\ngolf\n\n-- /div\n\n",
     "<div><p>echo</p><div><p>foxtrot</p></div><p>golf</p></div>"
 )]
+#[case(
+    "-- list\n\n- alfa\n\n- bravo\n\n",
+    "<ul><li><p>alfa</p></li><li><p>bravo</p></li></ul>"
+)]
+//#[case(
+//   "-- list/\n\n- charlie\n\n-- list\n\n- delta\n\n-- /list\n\n",
+//  "<ul><li><p>charlie</p></li><li><p>bravo</p></li></ul>"
+//)]
 fn run_tests(#[case] input: &str, #[case] left: &str) {
     let right = output(&parse(input).unwrap());
     assert_eq!(left, right);

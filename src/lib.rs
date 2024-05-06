@@ -178,6 +178,8 @@ fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
 
 fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = not(tag("-")).context("").parse(source)?;
+    let (source, _) = not(tag("--")).context("").parse(source)?;
+    let (source, _) = not(tag("//")).context("").parse(source)?;
     let (source, text) = take_until("\n\n").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
@@ -188,9 +190,26 @@ fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
+fn list_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let (source, _) = tag("//").context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    Ok((
+        source,
+        Node::Wrapper {
+            start_tag: Some("".to_string()),
+            end_tag: Some("</li>".to_string()),
+            category: "list_item".to_string(),
+            r#type: "list_item_end".to_string(),
+            children: vec![],
+            bounds: "full".to_string(),
+        },
+    ))
+}
+
 fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = tag("- ").context("").parse(source)?;
     let (source, children) = many0(list_item_block).context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
         Node::Wrapper {
@@ -204,41 +223,65 @@ fn list_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-fn list_section_end<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-    key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.pop();
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, _) = tag("/").context("").parse(source)?;
-    let (source, r#type) = tag(key).context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, children) = if *inside.last().unwrap() == "list" {
-        many0(list_item_block).context("").parse(source)?
-    } else {
-        many0(basic_block).context("").parse(source)?
-    };
+fn list_item_start(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let (source, _) = tag("-/ ").context("").parse(source)?;
+    let (source, mut children) = many0(alt((list_item_block, |src| {
+        start_or_full_section(src, vec!["see-if-this-can-be-removed"])
+    })))
+    .context("")
+    .parse(source)?;
+    let (source, ending) = list_item_end.context("").parse(source)?;
+    children.push(ending);
     Ok((
         source,
         Node::Wrapper {
-            start_tag: None,
-            end_tag: Some("</ul>".to_string()),
-            category: "list".to_string(),
-            r#type: r#type.to_string(),
+            start_tag: Some("<li>".to_string()),
+            end_tag: Some("".to_string()),
+            category: "list_item".to_string(),
+            r#type: "list_item".to_string(),
             children,
-            bounds: "end".to_string(),
+            bounds: "full".to_string(),
         },
     ))
 }
+
+// fn list_section_end<'a>(
+//     source: &'a str,
+//     mut inside: Vec<&'a str>,
+//     key: &'a str,
+// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+//     inside.pop();
+//     let (source, _) = tag("-- ").context("").parse(source)?;
+//     let (source, _) = tag("/").context("").parse(source)?;
+//     let (source, r#type) = tag(key).context("").parse(source)?;
+//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+//     let (source, children) = if *inside.last().unwrap() == "list" {
+//         many0(list_item_block).context("").parse(source)?
+//     } else {
+//         many0(basic_block).context("").parse(source)?
+//     };
+//     Ok((
+//         source,
+//         Node::Wrapper {
+//             start_tag: None,
+//             end_tag: Some("</ul>".to_string()),
+//             category: "list".to_string(),
+//             r#type: r#type.to_string(),
+//             children,
+//             bounds: "end".to_string(),
+//         },
+//     ))
+// }
 
 fn list_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = list_section_tag.context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, children) = many0(list_item_full).context("").parse(source)?;
+    let (source, children) = many0(alt((list_item_full, list_item_start)))
+        .context("")
+        .parse(source)?;
     Ok((
         source,
         Node::Wrapper {
@@ -252,36 +295,36 @@ fn list_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-fn list_section_start<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let category = "list";
-    inside.push(category);
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = list_section_tag.context("").parse(source)?;
-    let (source, _) = tag("/").context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, _) = tuple((space0, newline)).context("").parse(source)?;
-    let (source, mut children) = many0(alt((list_item_full, |src| {
-        start_or_full_section(src, inside.clone())
-    })))
-    .context("")
-    .parse(source)?;
-    let (source, end_section) = list_section_end(source, inside.clone(), r#type)?;
-    children.push(end_section);
-    Ok((
-        source,
-        Node::Wrapper {
-            start_tag: Some("<ul>".to_string()),
-            end_tag: None,
-            category: category.to_string(),
-            r#type: r#type.to_string(),
-            children,
-            bounds: "start".to_string(),
-        },
-    ))
-}
+// fn list_section_start<'a>(
+//     source: &'a str,
+//     mut inside: Vec<&'a str>,
+// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+//     let category = "list";
+//     inside.push(category);
+//     let (source, _) = tag("-- ").context("").parse(source)?;
+//     let (source, r#type) = list_section_tag.context("").parse(source)?;
+//     let (source, _) = tag("/").context("").parse(source)?;
+//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+//     let (source, _) = tuple((space0, newline)).context("").parse(source)?;
+//     let (source, mut children) = many0(alt((list_item_full, |src| {
+//         start_or_full_section(src, inside.clone())
+//     })))
+//     .context("")
+//     .parse(source)?;
+//     let (source, end_section) = list_section_end(source, inside.clone(), r#type)?;
+//     children.push(end_section);
+//     Ok((
+//         source,
+//         Node::Wrapper {
+//             start_tag: Some("<ul>".to_string()),
+//             end_tag: None,
+//             category: category.to_string(),
+//             r#type: r#type.to_string(),
+//             children,
+//             bounds: "start".to_string(),
+//         },
+//     ))
+// }
 
 fn list_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
     let (source, r#type) = alt((tag("list"),)).context("").parse(source)?;
@@ -336,7 +379,7 @@ fn start_or_full_section<'a>(
         |src| basic_section_full(src),
         |src| basic_section_start(src, inside.clone()),
         |src| list_section_full(src),
-        |src| list_section_start(src, inside.clone()),
+        // |src| list_section_start(src, inside.clone()),
     ))
     .context("")
     .parse(source)?;

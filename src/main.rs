@@ -1,20 +1,17 @@
+use html_escape;
 use neopoligen_parser_prototype_v36::*;
 use std::fs;
 
 fn main() {
-    let content = r#"-- list/
+    let content = r#"-- list
 
-- 1
+-/ a
 
--- div/
+asdf
 
-alfa
+// 
 
--- /div
-
-- 2
-
--- /list
+- b
 
 "#;
     match parse(content) {
@@ -23,8 +20,9 @@ alfa
             let _ = fs::write(
                 "output.html",
                 format!(
-                    "<!DOCTYPE html><html><head></head><body>{}</body></html>",
-                    out
+                    "<!DOCTYPE html><html><head></head><body>{} <hr /><pre><code>{}<code></pre></body></html>",
+                    out,
+                    html_escape::encode_text(&out)
                 ),
             );
         }
