@@ -377,9 +377,7 @@ fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, r#type) = pre_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    // TODO: Chomp preceeding empty lines here instead of multieplace
-    // so things can start with a space on the first line that won't get eaten
-    let (source, _) = multispace0.context("").parse(source)?;
+    let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
     let (source, text) = alt((take_until("\n--"), rest)).context("pre_section_full").parse(source)?;
     let (source, _) = multispace0.context("pre_section_full").parse(source)?;
     Ok((
@@ -400,29 +398,24 @@ fn raw_section_start<'a>(
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let category = "raw";
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = basic_section_tag.context("").parse(source)?;
+    let (source, r#type) = pre_section_tag.context("").parse(source)?;
+    let end_key = format!("-- /{}", r#type);
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    // TODO: Chomp preceeding empty lines here instead of multieplace
-    // so things can start with a space on the first line that won't get eaten
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(alt((basic_block, |src| {
-        start_or_full_section(src)
-    })))
-    .context("")
-    .parse(source)?;
-    let (source, end_section) = basic_section_end(source, r#type)?;
-    children.push(end_section);
+    let (source, _) = many0(empty_until_newline_or_eof).context("").parse(source)?;
+    let (source, text) =  take_until(end_key.as_str()).context("").parse(source)?;
+    let (source, _) = tag(end_key.as_str()).context("pre_section_full").parse(source)?;
+    let (source, _) = multispace0.context("pre_section_full").parse(source)?;
     Ok((
         source,
         Node::Wrapper {
             start_tag: Some(format!("<{}>", r#type)),
-            end_tag: None,
+            end_tag: Some(format!("</{}>", r#type)),
             category: category.to_string(),
             r#type: r#type.to_string(),
-            children,
-            bounds: "start".to_string(),
+            children: vec![Node::Raw { text: text.trim_end().to_string() }],
+            bounds: "full".to_string(),
         },
     ))
 }
@@ -436,7 +429,6 @@ fn pre_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&
 }
 
 
-
 fn start_or_full_section<'a>(
     source: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
@@ -447,7 +439,6 @@ fn start_or_full_section<'a>(
         |src| list_section_full(src),
         |src| raw_section_full(src),
         |src| raw_section_start(src),
-        // |src| list_section_start(src, inside.clone()),
     ))
     .context("")
     .parse(source)?;

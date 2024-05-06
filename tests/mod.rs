@@ -87,6 +87,8 @@ f
 )]
 #[case("-- pre\n\na\n\n-- div\n\nb\n\n", "<pre>a</pre><div><p>b</p></div>")]
 #[case("-- pre\n\nb", "<pre>b</pre>")]
+#[case("-- pre\n\n\n\n    c", "<pre>    c</pre>")]
+#[case("-- pre/\n\nd\n\n-- /pre", "<pre>d</pre>")]
 fn run_tests(#[case] input: &str, #[case] left: &str) {
     let right = output(&parse(input).unwrap());
     assert_eq!(left, right);
