@@ -26,8 +26,6 @@ use nom_supreme::parser_ext::ParserExt;
 pub fn block_of_anything(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = not(eof).context("").parse(source)?;
     let (source, _) = not(tag("--")).context("").parse(source)?;
-    // using take_until isn't robust but works for this prototype
-    //let (source, text) = take_until("\n\n").context("").parse(source)?;
     let (source, spans) = many0(span).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((source, Node::Block { spans }))
@@ -37,9 +35,7 @@ pub fn block_of_end_content(source: &str) -> IResult<&str, Node, ErrorTree<&str>
     let (source, _) = not(eof).context("").parse(source)?;
     let (source, _) = not(tag("-")).context("").parse(source)?;
     let (source, _) = not(tag("[")).context("").parse(source)?;
-    // let (source, _) = not(tag("//")).context("").parse(source)?;
-    // using take_until isn't robust but works for this prototype
-    // let (source, text) = take_until("\n\n").context("").parse(source)?;
+    let (source, spans) = many0(span).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((source, Node::Block { spans: vec![] }))
+    Ok((source, Node::Block { spans }))
 }
