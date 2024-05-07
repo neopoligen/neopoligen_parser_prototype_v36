@@ -36,7 +36,11 @@ pub fn checklist_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-pub fn checklist_item_with_sections<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn checklist_item_with_sections<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("[] ").context("").parse(source)?;
     let (source, children) = many0(alt((checklist_item_block, |src| {
         start_or_full_section(src, &sections, &spans)
@@ -75,9 +79,15 @@ pub fn checklist_section_end<'a>(
     ))
 }
 
-pub fn checklist_section_full<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn checklist_section_full<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = checklist_section_tag.context("").parse(source)?;
+    let (source, r#type) = (|src| tag_finder(src, &sections.checklist))
+        .context("")
+        .parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
@@ -92,9 +102,15 @@ pub fn checklist_section_full<'a>(source: &'a str, sections: &'a Sections, spans
     ))
 }
 
-pub fn checklist_section_start<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn checklist_section_start<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = checklist_section_tag.context("").parse(source)?;
+    let (source, r#type) = (|src| tag_finder(src, &sections.checklist))
+        .context("")
+        .parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -112,9 +128,4 @@ pub fn checklist_section_start<'a>(source: &'a str, sections: &'a Sections, span
             bounds: "start".to_string(),
         },
     ))
-}
-
-pub fn checklist_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = alt((tag("todo"),)).context("").parse(source)?;
-    Ok((source, r#type))
 }

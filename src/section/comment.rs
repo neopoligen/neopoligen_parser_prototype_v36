@@ -34,9 +34,15 @@ pub fn comment_section_end<'a>(
     ))
 }
 
-pub fn comment_section_full<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn comment_section_full<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = comment_section_tag.context("").parse(source)?;
+    let (source, r#type) = (|src| tag_finder(src, &sections.comment))
+        .context("")
+        .parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = many0(empty_until_newline_or_eof)
@@ -55,9 +61,15 @@ pub fn comment_section_full<'a>(source: &'a str, sections: &'a Sections, spans: 
     ))
 }
 
-pub fn comment_section_start<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn comment_section_start<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = comment_section_tag.context("").parse(source)?;
+    let (source, r#type) = (|src| tag_finder(src, &sections.comment))
+        .context("")
+        .parse(source)?;
     let end_key = format!("-- /{}", r#type);
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -77,9 +89,4 @@ pub fn comment_section_start<'a>(source: &'a str, sections: &'a Sections, spans:
             text: Some(text.trim_end().to_string()),
         },
     ))
-}
-
-pub fn comment_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = alt((tag("comment"),)).context("").parse(source)?;
-    Ok((source, r#type))
 }
