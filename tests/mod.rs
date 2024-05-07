@@ -18,7 +18,8 @@ fn run_tests() {
                 .map(|p| p.trim_start())
                 .collect::<Vec<&str>>();
             if parts[0].starts_with("solo") && parts.len() == 3 {
-                //if !parts[0].starts_with("skip") && parts.len() == 3 {
+                // if !parts[0].starts_with("skip") && parts.len() == 3 {
+                println!("{}", parts[0].trim());
                 let left = parts[2].trim().replace("\n", "").replace(" ", "");
                 let out = output(&parse(parts[1]).unwrap());
                 let right = out.trim().replace("\n", "").replace(" ", "");

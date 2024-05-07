@@ -105,11 +105,14 @@ pub fn output(ast: &Vec<Node>) -> String {
         Node::Block { spans } => {
             response.push_str("<p>");
             spans.iter().for_each(|s| match s {
+                Span::Newline { .. } => {
+                    response.push_str(" ");
+                }
+                Span::Space { .. } => {
+                    response.push_str(" ");
+                }
                 Span::WordPart { text } => {
                     response.push_str(text);
-                }
-                Span::Space { text } => {
-                    response.push_str(" ");
                 }
             });
             response.push_str("</p>");

@@ -1,6 +1,6 @@
 ################################################
 
-solo Basic Test
+Basic Test
 
 ------------------------------------------------
 
@@ -16,7 +16,7 @@ here
 
 ################################################
 
-solo Basic Start/End
+Basic Start/End
 
 ------------------------------------------------
 
@@ -36,7 +36,7 @@ here
 
 ################################################
 
-solo Basic Start/End With Extra Content
+Basic Start/End With Extra Content
 
 ------------------------------------------------
 
@@ -60,7 +60,7 @@ b
 
 ################################################
 
-solo Nested Basic Start/End
+Nested Basic Start/End
 
 ------------------------------------------------
 
@@ -87,7 +87,7 @@ here
 ################################################
 
 
-solo Basic Start/End Inside Basic Start/End
+Basic Start/End Inside Basic Start/End
 
 ------------------------------------------------
 
@@ -120,7 +120,7 @@ golf
 
 ################################################
 
-solo Three levels of Basic Start/End
+Three levels of Basic Start/End
 
 ------------------------------------------------
 

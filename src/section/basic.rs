@@ -42,7 +42,6 @@ pub fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> 
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    dbg!(&source);
     let (source, children) = many0(block_of_anything).context("").parse(source)?;
     Ok((
         source,

@@ -3,31 +3,9 @@ use neopoligen_parser_prototype_v36::*;
 use std::fs;
 
 fn main() {
-    let content = r#"-- list/
+    let content = r#"-- div
 
-- hotel
-
-    -- list/
-
-    - india
-
-        -- list/
-
-        - asdf
-
-        - awerwe
-
-        -- /list
-
-    - juliet
-
-    -- /list
-
-- kilo
-
--- /list
-
-
+one ping only
     "#;
     match parse(content) {
         Ok(ast) => {
