@@ -5,6 +5,10 @@ use nom::branch::alt;
 // use nom::character::complete::multispace0;
 // use nom::multi::many0;
 use nom::bytes::complete::is_not;
+use nom::character::complete::line_ending;
+use nom::character::complete::not_line_ending;
+use nom::character::complete::space0;
+use nom::character::complete::space1;
 use nom::combinator::eof;
 use nom::combinator::not;
 use nom::IResult;
@@ -14,25 +18,31 @@ use nom_supreme::parser_ext::ParserExt;
 
 #[derive(Debug)]
 pub enum Span {
+    Space { text: String },
     WordPart { text: String },
 }
 
 pub fn span(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
-    let (source, span) = alt((word_part,)).context("").parse(source)?;
+    let (source, span) = alt((word_part, space)).context("").parse(source)?;
     Ok((source, span))
 }
 
-pub fn word_part(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
-    dbg!(&source);
-    //let (source, _) = not(eof).context("").parse(source)?;
-    let (source, word_part) = is_not(" \n").context("").parse(source)?;
-    //
-    dbg!(&source);
+pub fn space(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
+    let (source, text) = space1.context("").parse(source)?;
+    Ok((
+        source,
+        Span::Space {
+            text: text.to_string(),
+        },
+    ))
+}
 
+pub fn word_part(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
+    let (source, text) = is_not(" \n").context("").parse(source)?;
     Ok((
         source,
         Span::WordPart {
-            text: word_part.to_string(),
+            text: text.to_string(),
         },
     ))
 }

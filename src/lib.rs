@@ -1,3 +1,4 @@
+pub mod block;
 pub mod section;
 pub mod span;
 
@@ -106,6 +107,9 @@ pub fn output(ast: &Vec<Node>) -> String {
             spans.iter().for_each(|s| match s {
                 Span::WordPart { text } => {
                     response.push_str(text);
+                }
+                Span::Space { text } => {
+                    response.push_str(" ");
                 }
             });
             response.push_str("</p>");
