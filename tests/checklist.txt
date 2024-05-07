@@ -4,7 +4,7 @@ skip Checklist Full
 
 ------------------------------------------------
 
--- checklist
+-- todo
 
 [] a
 
@@ -12,7 +12,7 @@ skip Checklist Full
 
 ------------------------------------------------
 
-<ul class="list-full-list">
+<ul class="checklist-full-todo">
     <li>
         <p>alfa</p>
     </li>

@@ -1,3 +1,13 @@
+pub mod basic;
+pub mod checklist;
+pub mod generic;
+pub mod list;
+pub mod node;
+pub mod raw;
+pub mod section;
+
+use crate::node::Node;
+use crate::section::*;
 use nom::branch::alt;
 use nom::bytes::complete::is_not;
 use nom::bytes::complete::tag;
@@ -34,349 +44,107 @@ pub struct ParserError {
     pub source: String,
     pub message: String,
 }
+// fn checklist_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+//     let (source, _) = not(tag("--")).context("").parse(source)?;
+//     let (source, _) = not(tag("[")).context("").parse(source)?;
+//     let (source, _) = not(tag("//")).context("").parse(source)?;
+//     // using take_until isn't robust but works for this prototype
+//     let (source, text) = take_until("\n\n").context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     Ok((
+//         source,
+//         Node::Block {
+//             spans: text.to_string(),
+//         },
+//     ))
+// }
 
-#[derive(Debug)]
-pub enum Node {
-    Basic {
-        kind: String,
-        r#type: String,
-        children: Vec<Node>,
-        bounds: String,
-    },
-    Block {
-        spans: String,
-    },
-    Checklist {
-        r#type: String,
-        children: Vec<Node>,
-        bounds: String,
-    },
-    ChecklistItem {
-        r#type: String,
-        children: Vec<Node>,
-        bounds: String,
-    },
-    Json {
-        bounds: String,
-        kind: String,
-        r#type: String,
-        data: String,
-    },
-    List {
-        r#type: String,
-        children: Vec<Node>,
-        bounds: String,
-    },
-    ListItem {
-        children: Vec<Node>,
-    },
-    Raw {
-        bounds: String,
-        kind: String,
-        r#type: String,
-        text: Option<String>,
-        children: Vec<Node>,
-    },
-}
+// fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+//     let kind = "checklist_item";
+//     let (source, _) = tag("//").context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     Ok((
+//         source,
+//         Node::ChecklistItem {
+//             r#type: "checklist_item".to_string(),
+//             children: vec![],
+//             bounds: "end".to_string(),
+//         },
+//     ))
+// }
 
+// fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+//     let kind = "checklist";
+//     // NOTE: this prototype only looks for unchecked items
+//     let (source, _) = tag("[] ").context("").parse(source)?;
+//     let (source, children) = many0(checklist_item_block).context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     Ok((
+//         source,
+//         Node::Checklist {
+//             r#type: "checklist_item".to_string(),
+//             children,
+//             bounds: "full".to_string(),
+//         },
+//     ))
+// }
 
+// fn checklist_item_start<'a>(
+//     source: &'a str,
+//     mut inside: Vec<&'a str>,
+// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+//     let kind = "checklist_item";
+//     inside.push(kind);
+//     let (source, _) = tag("[]/ ").context("").parse(source)?;
+//     let (source, mut children) = many0(alt((checklist_item_block, |src| {
+//         start_or_full_section(src, inside.clone())
+//     })))
+//     .context("")
+//     .parse(source)?;
+//     let (source, ending) = checklist_item_end.context("").parse(source)?;
+//     children.push(ending);
+//     Ok((
+//         source,
+//         Node::Checklist {
+//             r#type: "checklist_item".to_string(),
+//             children,
+//             bounds: "start".to_string(),
+//         },
+//     ))
+// }
 
-fn basic_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let (source, _) = not(tag("--")).context("").parse(source)?;
-    // let (source, _) = not(tag("//")).context("").parse(source)?;
-    // using take_until isn't robust but works for this prototype
-    let (source, text) = take_until("\n\n").context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::Block {
-            spans: text.to_string(),
-        },
-    ))
-}
+// fn checklist_section_full<'a>(
+//     source: &'a str,
+//     mut inside: Vec<&'a str>,
+// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+//     let kind = "checklist";
+//     inside.push(kind);
+//     let (source, _) = tag("-- ").context("").parse(source)?;
+//     let (source, r#type) = checklist_section_tag.context("").parse(source)?;
+//     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+//     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     let (source, children) = many0(alt((
+//         |src| checklist_item_full(src),
+//         |src| checklist_item_start(src, inside.clone()),
+//     )))
+//     .context("")
+//     .parse(source)?;
+//     Ok((
+//         source,
+//         Node::Checklist {
+//             r#type: r#type.to_string(),
+//             children,
+//             bounds: "full".to_string(),
+//         },
+//     ))
+// }
 
-fn basic_block_not_list_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let (source, _) = not(tag("-")).context("").parse(source)?;
-    // let (source, _) = not(tag("//")).context("").parse(source)?;
-    // using take_until isn't robust but works for this prototype
-    let (source, text) = take_until("\n\n").context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::Block {
-            spans: text.to_string(),
-        },
-    ))
-}
-
-fn basic_section_end<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-    key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.pop();
-    let kind = "basic";
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, _) = tag("/").context("").parse(source)?;
-    let (source, r#type) = tag(key).context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block_not_list_item).context("").parse(source)?;
-    Ok((
-        source,
-        Node::Basic {
-            kind: kind.to_string(),
-            r#type: r#type.to_string(),
-            children,
-            bounds: "end".to_string(),
-        },
-    ))
-}
-
-fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let kind = "basic";
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = basic_section_tag.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block).context("").parse(source)?;
-    Ok((
-        source,
-        Node::Basic {
-            kind: kind.to_string(),
-            r#type: r#type.to_string(),
-            children,
-            bounds: "full".to_string(),
-        },
-    ))
-}
-
-fn basic_section_start<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let kind = "basic";
-    inside.push(kind);
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = basic_section_tag.context("").parse(source)?;
-    let (source, _) = tag("/").context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(alt((basic_block, |src| {
-        start_or_full_section(src, inside.clone())
-    })))
-    .context("")
-    .parse(source)?;
-    let (source, end_section) = basic_section_end(source, inside.clone(), r#type)?;
-    children.push(end_section);
-    Ok((
-        source,
-        Node::Basic {
-            kind: kind.to_string(),
-            r#type: r#type.to_string(),
-            children,
-            bounds: "start".to_string(),
-        },
-    ))
-}
-
-fn basic_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = alt((tag("div"), tag("h2"), tag("p"), tag("title")))
-        .context("")
-        .parse(source)?;
-    Ok((source, r#type))
-}
-
-fn checklist_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let (source, _) = not(tag("--")).context("").parse(source)?;
-    let (source, _) = not(tag("[")).context("").parse(source)?;
-    let (source, _) = not(tag("//")).context("").parse(source)?;
-    // using take_until isn't robust but works for this prototype
-    let (source, text) = take_until("\n\n").context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::Block {
-            spans: text.to_string(),
-        },
-    ))
-}
-
-fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let kind = "checklist_item";
-    let (source, _) = tag("//").context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::ChecklistItem {
-            r#type: "checklist_item".to_string(),
-            children: vec![],
-            bounds: "end".to_string(),
-        },
-    ))
-}
-
-fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let kind = "checklist";
-    // NOTE: this prototype only looks for unchecked items
-    let (source, _) = tag("[] ").context("").parse(source)?;
-    let (source, children) = many0(checklist_item_block).context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::Checklist {
-            r#type: "checklist_item".to_string(),
-            children,
-            bounds: "full".to_string(),
-        },
-    ))
-}
-
-fn checklist_item_start<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let kind = "checklist_item";
-    inside.push(kind);
-    let (source, _) = tag("[]/ ").context("").parse(source)?;
-    let (source, mut children) = many0(alt((checklist_item_block, |src| {
-        start_or_full_section(src, inside.clone())
-    })))
-    .context("")
-    .parse(source)?;
-    let (source, ending) = checklist_item_end.context("").parse(source)?;
-    children.push(ending);
-    Ok((
-        source,
-        Node::Checklist {
-            r#type: "checklist_item".to_string(),
-            children,
-            bounds: "start".to_string(),
-        },
-    ))
-}
-
-fn checklist_section_full<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let kind = "checklist";
-    inside.push(kind);
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = checklist_section_tag.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(alt((
-        |src| checklist_item_full(src),
-        |src| checklist_item_start(src, inside.clone()),
-    )))
-    .context("")
-    .parse(source)?;
-    Ok((
-        source,
-        Node::Checklist {
-            r#type: r#type.to_string(),
-            children,
-            bounds: "full".to_string(),
-        },
-    ))
-}
-
-fn checklist_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = alt((tag("checklist"),)).context("").parse(source)?;
-    Ok((source, r#type))
-}
-
-fn empty_until_newline_or_eof<'a>(
-    source: &'a str,
-) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, _) = alt((
-        tuple((space0, newline.map(|_| ""))),
-        tuple((multispace0, eof.map(|_| ""))),
-    ))
-    .context("")
-    .parse(source)?;
-    Ok((source, ""))
-}
-
-fn generic_section_end<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-    key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let kind = "generic";
-    inside.pop();
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, _) = tag("/").context("").parse(source)?;
-    let (source, r#type) = tag(key).context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block).context("").parse(source)?;
-    Ok((
-        source,
-        Node::Basic {
-            kind: kind.to_string(),
-            r#type: r#type.to_string(),
-            children,
-            bounds: "end".to_string(),
-        },
-    ))
-}
-
-fn generic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let kind = "generic";
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = is_not(" /\n").context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block).context("").parse(source)?;
-    Ok((
-        source,
-        Node::Basic {
-            kind: kind.to_string(),
-            r#type: r#type.to_string(),
-            children,
-            bounds: "full".to_string(),
-        },
-    ))
-}
-
-fn generic_section_start<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let kind = "generic";
-    inside.push(kind);
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = is_not(" /\n").context("").parse(source)?;
-    let (source, _) = tag("/").context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(alt((basic_block, |src| {
-        start_or_full_section(src, inside.clone())
-    })))
-    .context("")
-    .parse(source)?;
-    let (source, end_section) = generic_section_end(source, inside.clone(), r#type)?;
-    children.push(end_section);
-    Ok((
-        source,
-        Node::Basic {
-            kind: kind.to_string(),
-            r#type: r#type.to_string(),
-            children,
-            bounds: "start".to_string(),
-        },
-    ))
-}
-
+// fn checklist_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+//     let (source, r#type) = alt((tag("checklist"),)).context("").parse(source)?;
+//     Ok((source, r#type))
+// }
+//
 fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
     match tree {
         GenericErrorTree::Base { location, kind } => {
@@ -531,137 +299,138 @@ fn json_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<
 //     ))
 // }
 
-fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let (source, _) = not(tag("-")).context("").parse(source)?;
-    // let (source, _) = not(tag("//")).context("").parse(source)?;
-    // using take_until isn't robust but works for this prototype
-    let (source, text) = take_until("\n\n").context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::Block {
-            spans: text.to_string(),
-        },
-    ))
-}
+// fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+//     let (source, _) = not(tag("-")).context("").parse(source)?;
+//     // let (source, _) = not(tag("//")).context("").parse(source)?;
+//     // using take_until isn't robust but works for this prototype
+//     let (source, text) = take_until("\n\n").context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     Ok((
+//         source,
+//         Node::Block {
+//             spans: text.to_string(),
+//         },
+//     ))
+// }
 
-fn list_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let (source, _) = tag("- ").context("").parse(source)?;
-    let (source, children) = many0(list_item_block).context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((source, Node::ListItem { children }))
-}
+// fn list_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+//     let (source, _) = tag("- ").context("").parse(source)?;
+//     let (source, children) = many0(list_item_block).context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     Ok((source, Node::ListItem { children }))
+// }
 
-fn list_item_with_sections<'a>(source: &'a str, inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let (source, _) = tag("- ").context("").parse(source)?;
-    let (source, children) = many0(alt((list_item_block, |src| {
-        start_or_full_section(src, inside.clone())
-    })))
-    .context("")
-    .parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((source, Node::ListItem { children }))
-}
+// fn list_item_with_sections<'a>(
+//     source: &'a str,
+//     inside: Vec<&'a str>,
+// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+//     let (source, _) = tag("- ").context("").parse(source)?;
+//     let (source, children) = many0(alt((list_item_block, |src| {
+//         start_or_full_section(src, inside.clone())
+//     })))
+//     .context("")
+//     .parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     Ok((source, Node::ListItem { children }))
+// }
 
-fn list_section_end<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-    key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.pop();
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, _) = tag("/").context("").parse(source)?;
-    let (source, r#type) = tag(key).context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
+// fn list_section_end<'a>(
+//     source: &'a str,
+//     mut inside: Vec<&'a str>,
+//     key: &'a str,
+// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+//     inside.pop();
+//     let (source, _) = tag("-- ").context("").parse(source)?;
+//     let (source, _) = tag("/").context("").parse(source)?;
+//     let (source, r#type) = tag(key).context("").parse(source)?;
+//     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+//     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     let (source, children) = many0(basic_block_not_list_item).context("").parse(source)?;
+//     Ok((
+//         source,
+//         Node::List {
+//             r#type: r#type.to_string(),
+//             children,
+//             bounds: "end".to_string(),
+//         },
+//     ))
+//     // if *inside.last().unwrap() == "list" {
+//     //     let (source, children) = many0(list_item).context("").parse(source)?;
+//     //     Ok((
+//     //         source,
+//     //         Node::List {
+//     //             r#type: r#type.to_string(),
+//     //             children,
+//     //             bounds: "end".to_string(),
+//     //         },
+//     //     ))
+//     // } else {
+//     //     let (source, children) = many0(basic_block).context("").parse(source)?;
+//     //     Ok((
+//     //         source,
+//     //         Node::List {
+//     //             r#type: r#type.to_string(),
+//     //             children,
+//     //             bounds: "end".to_string(),
+//     //         },
+//     //     ))
+//     // }
+// }
 
-    let (source, children) = many0(basic_block_not_list_item).context("").parse(source)?;
-    Ok((
-        source,
-        Node::List {
-            r#type: r#type.to_string(),
-            children,
-            bounds: "end".to_string(),
-        },
-    ))
+// fn list_section_full<'a>(
+//     source: &'a str,
+//     mut _inside: Vec<&'a str>,
+// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+//     let (source, _) = tag("-- ").context("").parse(source)?;
+//     let (source, r#type) = list_section_tag.context("").parse(source)?;
+//     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+//     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     let (source, children) = many0(list_item).context("").parse(source)?;
+//     Ok((
+//         source,
+//         Node::List {
+//             r#type: r#type.to_string(),
+//             children,
+//             bounds: "full".to_string(),
+//         },
+//     ))
+// }
 
+// fn list_section_start<'a>(
+//     source: &'a str,
+//     mut inside: Vec<&'a str>,
+// ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+//     inside.push("list");
+//     let (source, _) = tag("-- ").context("").parse(source)?;
+//     let (source, r#type) = list_section_tag.context("").parse(source)?;
+//     let (source, _) = tag("/").context("").parse(source)?;
+//     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+//     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+//     let (source, _) = multispace0.context("").parse(source)?;
+//     // let (source, mut children) = many0(alt((|src| {
+//     //     start_or_full_section(src, inside.clone())
+//     // }, list_item)))
+//     let (source, mut children) = many0(|src| list_item_with_sections(src, inside.clone()))
+//         .context("")
+//         .parse(source)?;
+//     let (source, end_section) = list_section_end(source, inside.clone(), r#type)?;
+//     children.push(end_section);
+//     Ok((
+//         source,
+//         Node::List {
+//             r#type: r#type.to_string(),
+//             children,
+//             bounds: "start".to_string(),
+//         },
+//     ))
+// }
 
-    // if *inside.last().unwrap() == "list" {
-    //     let (source, children) = many0(list_item).context("").parse(source)?;
-    //     Ok((
-    //         source,
-    //         Node::List {
-    //             r#type: r#type.to_string(),
-    //             children,
-    //             bounds: "end".to_string(),
-    //         },
-    //     ))
-    // } else {
-    //     let (source, children) = many0(basic_block).context("").parse(source)?;
-    //     Ok((
-    //         source,
-    //         Node::List {
-    //             r#type: r#type.to_string(),
-    //             children,
-    //             bounds: "end".to_string(),
-    //         },
-    //     ))
-    // }
-
-}
-
-fn list_section_full<'a>(
-    source: &'a str,
-    mut _inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = list_section_tag.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(list_item).context("").parse(source)?;
-    Ok((
-        source,
-        Node::List {
-            r#type: r#type.to_string(),
-            children,
-            bounds: "full".to_string(),
-        },
-    ))
-}
-
-fn list_section_start<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.push("list");
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = list_section_tag.context("").parse(source)?;
-    let (source, _) = tag("/").context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    // let (source, mut children) = many0(alt((|src| {
-    //     start_or_full_section(src, inside.clone())
-    // }, list_item)))
-    let (source, mut children) = many0(|src| list_item_with_sections(src, inside.clone())).context("").parse(source)?;
-    let (source, end_section) = list_section_end(source, inside.clone(), r#type)?;
-    children.push(end_section);
-    Ok((
-        source,
-        Node::List {
-            r#type: r#type.to_string(),
-            children,
-            bounds: "start".to_string(),
-        },
-    ))
-}
-
-fn list_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = alt((tag("list"),)).context("").parse(source)?;
-    Ok((source, r#type))
-}
+// fn list_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+//     let (source, r#type) = alt((tag("list"),)).context("").parse(source)?;
+//     Ok((source, r#type))
+// }
 
 pub fn output(ast: &Vec<Node>) -> String {
     let mut response = String::from("");
@@ -917,112 +686,5 @@ fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
     let (source, results) = many1(|src| start_or_full_section(src, inside.clone()))
         .context("")
         .parse(source)?;
-    Ok((source, results))
-}
-
-fn raw_section_end<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-    key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.pop();
-    let kind = "raw";
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, _) = tag("/").context("").parse(source)?;
-    let (source, r#type) = tag(key).context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block_not_list_item).context("").parse(source)?;
-    Ok((
-        source,
-        Node::Raw {
-            bounds: "end".to_string(),
-            children,
-            kind: kind.to_string(),
-            r#type: r#type.to_string(),
-            text: None,
-        },
-    ))
-}
-
-fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let kind = "raw";
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = raw_section_tag.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = many0(empty_until_newline_or_eof)
-        .context("")
-        .parse(source)?;
-    let (source, text) = alt((take_until("\n--"), rest)).context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::Raw {
-            bounds: "full".to_string(),
-            children: vec![],
-            kind: kind.to_string(),
-            r#type: r#type.to_string(),
-            text: Some(text.trim_end().to_string()),
-        },
-    ))
-}
-
-fn raw_section_start<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let kind = "raw";
-    inside.push(kind);
-    let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = raw_section_tag.context("").parse(source)?;
-    let end_key = format!("-- /{}", r#type);
-    let (source, _) = tag("/").context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
-    let (source, _) = many0(empty_until_newline_or_eof)
-        .context("")
-        .parse(source)?;
-    let (source, text) = take_until(end_key.as_str()).context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    let (source, end_section) = raw_section_end(source, inside.clone(), r#type)?;
-    Ok((
-        source,
-        Node::Raw {
-            bounds: "start".to_string(),
-            children: vec![end_section],
-            kind: kind.to_string(),
-            r#type: r#type.to_string(),
-            text: Some(text.trim_end().to_string()),
-        },
-    ))
-}
-
-fn raw_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = alt((tag("pre"), tag("code"))).context("").parse(source)?;
-    Ok((source, r#type))
-}
-
-fn start_or_full_section<'a>(
-    source: &'a str,
-    inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let (source, results) = alt((
-        |src| basic_section_full(src),
-        |src| basic_section_start(src, inside.clone()),
-        |src| checklist_section_full(src, inside.clone()),
-        |src| json_section_full(src),
-        |src| json_section_start(src, inside.clone()),
-        |src| list_section_full(src, inside.clone()),
-        |src| list_section_start(src, inside.clone()),
-        |src| raw_section_full(src),
-        |src| raw_section_start(src, inside.clone()),
-        // make sure generic is last
-        |src| generic_section_full(src),
-        |src| generic_section_start(src, inside.clone()),
-    ))
-    .context("")
-    .parse(source)?;
     Ok((source, results))
 }
