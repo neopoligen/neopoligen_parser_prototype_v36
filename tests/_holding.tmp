@@ -1,41 +1,5 @@
 
 
-Raw Start/End Inside List Item Start/End
-
-
-------------------------------------------------
-
-
--- list
-
--/ a
-
--- pre/
-
-b
-
--- /pre
-
-//
-
-- c
-
-
-------------------------------------------------
-
-
-<ul class="list-full-list">
-    <li class="list_item-start-list_item">
-        <p>a</p>
-        <pre class="raw-start-pre">b</pre>
-        <div class="raw-end-pre"></div>
-    </li><!-- list_item-end-list_item -->
-    <li class="list_item-full-list_item">
-        <p>c</p>
-    </li>
-</ul>
-
-
 
 
 

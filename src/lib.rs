@@ -889,15 +889,14 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(&output(&children));
             } else if bounds == "end" {
                 response.push_str("</pre>");
-                response.push_str("<div class=\"");
+                response.push_str("<!-- ");
                 response.push_str(kind);
                 response.push_str("-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(" -->");
                 response.push_str(&output(&children));
-                response.push_str("</div>");
             }
         }
     });
@@ -932,7 +931,7 @@ fn raw_section_end<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block).context("").parse(source)?;
+    let (source, children) = many0(basic_block_not_list_item).context("").parse(source)?;
     Ok((
         source,
         Node::Raw {

@@ -192,9 +192,9 @@ some content
 ------------------------------------------------
 
 <pre class="raw-start-pre">d</pre>
-<div class="raw-end-pre">
-    <p>some content</p>
-</div>
+<!-- raw-end-pre -->
+<p>some content</p>
+
 
 
 
@@ -365,6 +365,47 @@ Content After List Item
     </li>
     <li>
         <p>d</p>
+    </li>
+</ul>
+<!-- list-end-list -->
+
+
+
+
+################################################
+
+
+Raw Start/End Inside List Item Start/End
+
+
+------------------------------------------------
+
+
+-- list/
+
+- a
+
+-- pre/
+
+b
+
+-- /pre
+
+- c
+
+-- /list
+
+
+------------------------------------------------
+
+<ul class="list-start-list">
+    <li>
+        <p>a</p>
+        <pre class="raw-start-pre">b</pre>
+        <!-- raw-end-pre -->
+    </li>
+    <li>
+        <p>c</p>
     </li>
 </ul>
 <!-- list-end-list -->
