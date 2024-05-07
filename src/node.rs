@@ -53,4 +53,11 @@ pub enum Node {
         text: Option<String>,
         children: Vec<Node>,
     },
+    Yaml {
+        bounds: String,
+        kind: String,
+        r#type: String,
+        data: Option<String>,
+        children: Vec<Node>,
+    },
 }

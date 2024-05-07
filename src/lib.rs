@@ -7,6 +7,7 @@ pub mod list;
 pub mod node;
 pub mod raw;
 pub mod section;
+pub mod yaml;
 
 use crate::node::Node;
 use crate::section::*;
@@ -292,6 +293,28 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str("-");
                 response.push_str(r#type);
                 response.push_str(" -->");
+                response.push_str(&output(&children));
+            }
+        }
+
+        Node::Yaml {
+            bounds,
+            children,
+            data,
+            r#type,
+            ..
+        } => {
+            if bounds == "end" {
+                response.push_str(format!("<!-- yaml-end-{} -->", r#type).as_str());
+                response.push_str(&output(&children));
+            } else if bounds == "full" {
+                response.push_str(
+                    format!("<!-- yaml-full-{} -->{}", r#type, data.clone().unwrap()).as_str(),
+                );
+            } else if bounds == "start" {
+                response.push_str(
+                    format!("<!-- yaml-start-{} -->{}", r#type, data.clone().unwrap()).as_str(),
+                );
                 response.push_str(&output(&children));
             }
         }

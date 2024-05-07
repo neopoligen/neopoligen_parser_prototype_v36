@@ -6,6 +6,7 @@ use crate::json::*;
 use crate::list::*;
 use crate::node::Node;
 use crate::raw::*;
+use crate::yaml::*;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::bytes::complete::take_until;
@@ -77,6 +78,8 @@ pub fn start_or_full_section<'a>(
         |src| list_section_start(src, inside.clone()),
         |src| raw_section_full(src),
         |src| raw_section_start(src, inside.clone()),
+        |src| yaml_section_full(src),
+        |src| yaml_section_start(src, inside.clone()),
         // make sure generic is last
         |src| generic_section_full(src),
         |src| generic_section_start(src, inside.clone()),
