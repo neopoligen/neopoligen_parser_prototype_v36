@@ -21,6 +21,20 @@ use nom_supreme::parser_ext::ParserExt;
 // remove after everything else is done if it's not needed
 
 #[derive(Debug)]
+pub struct Sections {
+    pub basic: Vec<String>,
+    pub checklist: Vec<String>,
+    pub comment: Vec<String>,
+    pub detail: Vec<String>,
+    pub generic: Vec<String>,
+    pub json: Vec<String>,
+    pub list: Vec<String>,
+    pub raw: Vec<String>,
+    pub table: Vec<String>,
+    pub yaml: Vec<String>,
+}
+
+#[derive(Debug)]
 pub struct ParserError {
     pub line: usize,
     pub column: usize,
@@ -351,14 +365,22 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
     response
 }
 
-pub fn parse(source: &str) -> Result<Vec<Node>, ParserError> {
-    match final_parser(parse_runner)(source) {
+pub fn parse(
+    source: &str,
+    sections: &Sections,
+    spans: &Vec<String>,
+) -> Result<Vec<Node>, ParserError> {
+    match final_parser(|src| parse_runner(src, sections, spans))(source) {
         Ok(ast) => Ok(ast),
         Err(e) => Err(get_error(source, &e)),
     }
 }
 
-fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
+fn parse_runner<'a>(
+    source: &'a str,
+    _sections: &'a Sections,
+    _spans: &'a Vec<String>,
+) -> IResult<&'a str, Vec<Node>, ErrorTree<&'a str>> {
     let inside = vec!["root"];
     let (source, results) = many1(|src| start_or_full_section(src, inside.clone()))
         .context("")

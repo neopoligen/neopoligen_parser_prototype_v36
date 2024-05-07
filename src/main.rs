@@ -3,11 +3,25 @@ use neopoligen_parser_prototype_v36::*;
 use std::fs;
 
 fn main() {
+    let sections = Sections {
+        basic: vec!["div".to_string()],
+        checklist: vec!["todo".to_string()],
+        comment: vec!["comment".to_string()],
+        detail: vec![],
+        generic: vec![],
+        json: vec!["json-example".to_string()],
+        list: vec!["list".to_string()],
+        raw: vec!["pre".to_string()],
+        table: vec![],
+        yaml: vec![],
+    };
+
+    let spans = vec!["em".to_string()];
     let content = r#"-- div
 
 one ping only
     "#;
-    match parse(content) {
+    match parse(content, &sections, &spans) {
         Ok(ast) => {
             let out = output(&ast);
             let _ = fs::write(
