@@ -254,14 +254,14 @@ Item After List Item
 ################################################
 
 
-skip Content After List Item
+Content After List Item In Nested List
 
 
 ------------------------------------------------
 
--- checklist/
+-- todo/
 
-- a
+[] a
 
     -- list/
 
@@ -271,15 +271,15 @@ skip Content After List Item
     
     c
 
-- d
+[] d
 
--- /list
+-- /todo
 
 ------------------------------------------------
 
 
-<ul class="list-start-list">
-    <li>
+<ul class="checklist-start-todo">
+    <li class="status-false">
         <p>a</p>
         <ul class="list-start-list">
             <li>
@@ -289,11 +289,11 @@ skip Content After List Item
         <!-- list-end-list -->
         <p>c</p>
     </li>
-    <li>
+    <li class="status-false">
         <p>d</p>
     </li>
+<!-- checklist-end-todo -->
 </ul>
-<!-- list-end-list -->
 
 
 
@@ -301,40 +301,40 @@ skip Content After List Item
 ################################################
 
 
-skip Raw Start/End Inside List Item Start/End
+Raw Start/End Inside List Item Start/End
 
 
 ------------------------------------------------
 
 
--- checklist/
+-- todo/
 
-- a
+[] a
 
--- pre/
+    -- pre/
 
-b
+    b
 
--- /pre
+    -- /pre
 
-- c
+[] c
 
--- /list
+-- /todo
 
 
 ------------------------------------------------
 
-<ul class="list-start-list">
-    <li>
+<ul class="checklist-start-todo">
+    <li class="status-false">
         <p>a</p>
         <pre class="raw-start-pre">b</pre>
         <!-- raw-end-pre -->
     </li>
-    <li>
+    <li class="status-false">
         <p>c</p>
     </li>
+<!-- checklist-end-todo -->
 </ul>
-<!-- list-end-list -->
 
 
 
@@ -375,10 +375,10 @@ f
 
 ------------------------------------------------
 
-<ul class="list-start-list">
+<ul class="checklist-start-list">
     <li>
         <p>a</p>
-        <ul class="list-start-list">
+        <ul class="checklist-start-list">
             <li>
                 <p>c</p>
             </li>
@@ -438,7 +438,7 @@ skip Items After Closing List
 ------------------------------------------------
 
 
-<ul class="list-start-list">
+<ul class="checklist-start-list">
     <li>
         <p>a</p>
         <div class="basic-start-div">
