@@ -194,19 +194,23 @@ pub fn output(ast: &Vec<Node>) -> String {
 
         Node::Json {
             bounds,
+            children,
             data,
             r#type,
             ..
         } => {
             if bounds == "end" {
+                response.push_str(format!("<!-- json-end-{} -->", r#type).as_str());
+                response.push_str(&output(&children));
             } else if bounds == "full" {
                 response.push_str(
                     format!("<!-- json-full-{} -->{}", r#type, data.clone().unwrap()).as_str(),
-                )
+                );
             } else if bounds == "start" {
                 response.push_str(
                     format!("<!-- json-start-{} -->{}", r#type, data.clone().unwrap()).as_str(),
-                )
+                );
+                response.push_str(&output(&children));
             }
         }
 

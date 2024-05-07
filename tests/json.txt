@@ -14,40 +14,25 @@ JSON Full
 
 ################################################
 
-Raw Keep Leading Whitespace
 
-------------------------------------------------
-
--- pre
-
-    c
+JSON Start/End
 
 
 ------------------------------------------------
 
-<pre class="raw-full-pre">    c</pre>
+-- json-example/
 
+{}
 
-################################################
-
-
-Raw Start/End
-
-
-------------------------------------------------
-
--- pre/
-
-d
-
--- /pre
+-- /json-example
 
 e
 
 ------------------------------------------------
 
-<pre class="raw-start-pre">d</pre>
-<!-- raw-end-pre -->
+<!-- json-start-json-example -->
+{}
+<!-- json-end-json-example -->
 <p>e</p>
 
 
@@ -63,11 +48,11 @@ Raw Inside List With End Content
 
 - a
 
-    -- pre/
+    -- json-example/
 
-    b
+    {}
 
-    -- /pre
+    -- /json-example
 
     c
 
@@ -80,8 +65,9 @@ Raw Inside List With End Content
 <ul class="list-start-list">
     <li>
         <p>a</p>
-        <pre class="raw-start-pre">b</pre>
-        <!-- raw-end-pre -->
+        <!-- json-start-json-example -->
+        {}
+        <!-- json-end-json-example -->
         <p>c</p>
     </li>
     <li>
@@ -89,37 +75,5 @@ Raw Inside List With End Content
     </li>
 </ul>
 <!-- list-end-list -->
-
-
-
-################################################
-
-
-Nest One Type Of Raw Inside Another Type
-
-
-------------------------------------------------
-
--- code/
-
--- pre/
-
-b
-
--- /pre
-
--- /code
-
-------------------------------------------------
-
-
-<pre class="raw-start-code">-- pre/
-
-b
-
--- /pre
-</pre>
-<!-- raw-end-code -->
-
 
 
