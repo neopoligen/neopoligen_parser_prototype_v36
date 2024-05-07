@@ -104,17 +104,7 @@ pub fn output(ast: &Vec<Node>) -> String {
         //Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
         Node::Block { spans } => {
             response.push_str("<p>");
-            spans.iter().for_each(|s| match s {
-                Span::Newline { .. } => {
-                    response.push_str(" ");
-                }
-                Span::Space { .. } => {
-                    response.push_str(" ");
-                }
-                Span::WordPart { text } => {
-                    response.push_str(text);
-                }
-            });
+            response.push_str(output_spans(spans).as_str());
             response.push_str("</p>");
         }
         Node::Checklist {
@@ -325,6 +315,25 @@ pub fn output(ast: &Vec<Node>) -> String {
                 );
                 response.push_str(&output(&children));
             }
+        }
+    });
+    response
+}
+
+pub fn output_spans(spans: &Vec<Span>) -> String {
+    let mut response = String::from("");
+    spans.iter().for_each(|span| match span {
+        Span::KnownSpan { r#type, .. } => {
+            response.push_str(format!("<{}></{}>", r#type, r#type).as_str());
+        }
+        Span::Newline { .. } => {
+            response.push_str(" ");
+        }
+        Span::Space { .. } => {
+            response.push_str(" ");
+        }
+        Span::WordPart { text } => {
+            response.push_str(text);
         }
     });
     response
