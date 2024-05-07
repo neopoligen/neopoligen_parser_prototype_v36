@@ -1,0 +1,454 @@
+################################################
+
+Checklist Full
+
+------------------------------------------------
+
+-- todo
+
+[] a
+
+[] b
+
+------------------------------------------------
+
+<ul class="checklist-full-todo">
+    <li class="status-false">
+        <p>a</p>
+    </li>
+    <li class="status-false">
+        <p>b</p>
+    </li>
+</ul>
+
+
+################################################
+
+Basic Start/End
+
+------------------------------------------------
+
+
+-- todo/
+
+[] a
+
+[] b
+
+-- /todo
+
+
+------------------------------------------------
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>a</p>
+    </li>
+    <li class="status-false">
+        <p>b</p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>
+
+
+################################################
+
+Basic Start/End With Following Content
+
+------------------------------------------------
+
+
+-- todo/
+
+[] a
+
+[] b
+
+-- /todo
+
+here
+
+------------------------------------------------
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>a</p>
+    </li>
+    <li class="status-false">
+        <p>b</p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>
+<p>here</p>
+
+
+
+################################################
+
+Basic Full Inside List Item Start/End
+
+------------------------------------------------
+
+-- todo/
+
+[] echo
+
+    -- div/
+
+    foxtrot
+
+    -- /div
+
+[] golf
+
+-- /todo
+
+
+------------------------------------------------
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>echo</p>
+        <div class="basic-start-div">
+            <p>foxtrot</p>
+        <!-- basic-end-div -->
+        </div>
+    </li>
+    <li class="status-false">
+        <p>golf</p>
+    </li>
+<!-- checklist-end-todo-->
+</ul>
+
+
+################################################
+
+Empty checklist
+
+------------------------------------------------
+
+-- todo 
+
+-- p
+
+a
+
+------------------------------------------------
+
+<ul class="checklist-full-todo">
+</ul>
+<div class="basic-full-p">
+    <p>a</p>
+</div>
+
+
+
+################################################
+
+List Inside Checklist
+
+------------------------------------------------
+
+-- todo/
+
+[] hotel
+
+    -- list/
+
+    - india
+
+    - juliet
+
+    -- /list
+
+[] kilo
+
+-- /todo
+
+
+------------------------------------------------
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>hotel</p>
+        <ul class="list-start-list">
+            <li>
+                <p>india</p>
+            </li>
+            <li>
+                <p>juliet</p>
+            </li>
+        </ul>
+        <!-- list-end-list -->
+    </li>
+    <li class="status-false">
+        <p>kilo</p>
+    </li>
+<!-- checklist-end-todo-->
+</ul>
+
+
+
+
+################################################
+
+
+Empty Start End
+
+------------------------------------------------
+
+-- todo/
+
+-- /todo
+
+
+------------------------------------------------
+
+<ul class="checklist-start-todo">
+<!-- checklist-end-todo-->
+</ul>
+
+
+################################################
+
+
+Item After List Item
+
+
+------------------------------------------------
+
+-- todo/
+
+[] a
+
+    -- list/
+
+    - b
+
+    -- /list
+
+[] c
+
+-- /todo
+
+------------------------------------------------
+
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>a</p>
+        <ul class="list-start-list">
+            <li>
+                <p>b</p>
+            </li>
+        </ul>
+        <!-- list-end-list -->
+    </li>
+    <li class="status-false">
+        <p>c</p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>
+
+
+################################################
+
+
+Content After List Item In Nested List
+
+
+------------------------------------------------
+
+-- todo/
+
+[] a
+
+    -- list/
+
+    - b
+
+    -- /list
+    
+    c
+
+[] d
+
+-- /todo
+
+------------------------------------------------
+
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>a</p>
+        <ul class="list-start-list">
+            <li>
+                <p>b</p>
+            </li>
+        </ul>
+        <!-- list-end-list -->
+        <p>c</p>
+    </li>
+    <li class="status-false">
+        <p>d</p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>
+
+
+
+
+################################################
+
+
+Raw Start/End Inside List Item Start/End
+
+
+------------------------------------------------
+
+
+-- todo/
+
+[] a
+
+    -- pre/
+
+    b
+
+    -- /pre
+
+[] c
+
+-- /todo
+
+
+------------------------------------------------
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>a</p>
+        <pre class="raw-start-pre">b</pre>
+        <!-- raw-end-pre -->
+    </li>
+    <li class="status-false">
+        <p>c</p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>
+
+
+
+################################################
+
+Three Levels Of List Item Start/End
+
+
+------------------------------------------------
+
+-- todo/
+
+[] a
+
+    -- todo/
+
+    [] c
+
+    [] d
+
+        -- todo/ 
+
+        [] e
+
+        -- /todo
+
+    -- /todo
+
+[] b
+
+-- /todo
+
+
+------------------------------------------------
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>a</p>
+        <ul class="checklist-start-todo">
+            <li class="status-false">
+                <p>c</p>
+            </li>
+            <li class="status-false">
+                <p>d</p>
+                <ul class="checklist-start-todo">
+                    <li class="status-false">
+                        <p>e</p>
+                    </li>
+                    <!-- checklist-end-todo -->
+                </ul>
+            </li>
+        <!-- checklist-end-todo -->
+        </ul>
+    </li>
+    <li class="status-false">
+        <p>b</p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>
+
+
+
+
+################################################
+
+Items After Closing List
+
+------------------------------------------------
+
+-- todo/
+
+[] a
+
+    -- div/
+
+    b
+
+        -- div/
+
+        c
+
+        -- /div
+
+    d
+
+    -- /div
+
+[] e
+
+-- /todo
+
+
+
+------------------------------------------------
+
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>a</p>
+        <div class="basic-start-div">
+            <p>b</p>
+            <div class="basic-start-div">
+                <p>c</p>
+            <!-- basic-end-div -->
+            </div>
+            <p>d</p>
+        <!-- basic-end-div -->
+        </div>
+    </li>
+    <li class="status-false">
+        <p>e</p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>
+
+
+

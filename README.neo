@@ -15,3 +15,19 @@ and nesting
 - Attributes aren't included
 
 - Content is slurped up instead of parsed
+
+- The output.html file has basic HTML tags
+which let it work with browsersync's^1^^
+auto refresh
+
+-- footnote
+-- id: 1
+-- title: Browsersync
+-- url: https://browsersync.io/
+
+A great little tool for doing live-reloading
+of statically generated html files.
+
+-- metadata
+-- date: 2024-05-06 10:02:58
+-- id: 2g63ptu7

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+watchexec -e rs,txt "bash -c 'cargo test -- --nocapture && cargo run'"
+

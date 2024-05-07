@@ -1,0 +1,81 @@
+################################################
+
+Basic Comment
+
+------------------------------------------------
+
+-- comment
+
+nothing here
+
+------------------------------------------------
+
+<!-- comment-full-comment -->
+
+
+################################################
+
+Content Before And After Comment
+
+------------------------------------------------
+
+-- div
+
+a
+
+-- comment/
+
+nothing here
+
+-- /comment
+
+b
+
+-- div
+
+c
+
+------------------------------------------------
+
+<div class="basic-full-div">
+    <p>a</p>
+</div>
+<!-- comment-start-comment -->
+<!-- comment-end-comment -->
+<p>b</p>
+<div class="basic-full-div">
+    <p>c</p>
+</div>
+
+
+
+
+################################################
+
+Content Before And After Comment
+
+------------------------------------------------
+
+-- div
+
+a
+
+-- comment
+
+nothing here
+
+-- div
+
+b
+
+------------------------------------------------
+
+<div class="basic-full-div">
+    <p>a</p>
+</div>
+<!-- comment-full-comment -->
+<div class="basic-full-div">
+    <p>b</p>
+</div>
+
+

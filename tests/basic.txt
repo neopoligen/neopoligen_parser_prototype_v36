@@ -1,0 +1,167 @@
+Basic Test
+
+------------------------------------------------
+
+-- div
+
+here
+
+------------------------------------------------
+
+<div class="basic-full-div">
+    <p>here</p>
+</div>
+
+################################################
+
+Basic Start/End
+
+------------------------------------------------
+
+-- div/
+
+here
+
+-- /div
+
+------------------------------------------------
+
+<div class="basic-start-div">
+    <p>here</p>
+<!-- basic-end-div -->
+</div>
+
+
+################################################
+
+Basic Start/End With Extra Content
+
+------------------------------------------------
+
+-- div/
+
+a
+
+-- /div
+
+b
+
+------------------------------------------------
+
+<div class="basic-start-div">
+    <p>a</p>
+<!-- basic-end-div -->
+</div>
+<p>b</p>
+
+
+
+################################################
+
+Nested Basic Start/End
+
+------------------------------------------------
+
+-- div/
+
+-- div
+
+here
+
+-- /div
+
+
+------------------------------------------------
+
+<div class="basic-start-div">
+    <div class="basic-full-div">
+        <p>here</p>
+    </div>
+<!-- basic-end-div -->
+</div>
+
+
+
+################################################
+
+
+    Basic Start/End Inside Basic Start/End"
+
+------------------------------------------------
+
+-- div/
+
+echo
+
+-- div/
+
+foxtrot
+
+-- /div
+
+golf
+
+-- /div
+
+------------------------------------------------
+
+<div class="basic-start-div">
+    <p>echo</p>
+    <div class="basic-start-div">
+        <p>foxtrot</p>
+    <!-- basic-end-div -->
+    </div>
+    <p>golf</p>
+<!-- basic-end-div -->
+</div>
+
+
+
+
+################################################
+
+Three levels of Basic Start/End
+
+------------------------------------------------
+
+-- div/
+
+a
+
+    -- div/
+
+    b
+
+        -- div/
+
+        c
+
+        -- /div
+
+    d
+
+    -- /div
+
+e
+
+-- /div
+
+
+------------------------------------------------
+
+<div class="basic-start-div">
+    <p>a</p>
+    <div class="basic-start-div">
+        <p>b</p>
+        <div class="basic-start-div">
+            <p>c</p>
+        <!-- basic-end-div -->
+        </div>
+        <p>d</p>
+    <!-- basic-end-div -->
+    </div>
+    <p>e</p>
+<!-- basic-end-div -->
+</div>
+
+
