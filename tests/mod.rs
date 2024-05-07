@@ -8,7 +8,7 @@ use walkdir::WalkDir;
 fn run_tests() {
     let dir = PathBuf::from("tests");
     let sections = Sections {
-        basic: vec!["div".to_string()],
+        basic: vec!["div".to_string(), "p".to_string()],
         checklist: vec!["todo".to_string()],
         comment: vec!["comment".to_string()],
         detail: vec![],

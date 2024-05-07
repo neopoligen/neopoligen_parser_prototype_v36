@@ -299,7 +299,7 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(&output(&children));
             }
         }
-
+        Node::TagFinderInit => {}
         Node::Yaml {
             bounds,
             children,

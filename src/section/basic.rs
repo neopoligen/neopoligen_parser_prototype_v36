@@ -31,9 +31,15 @@ pub fn basic_section_end<'a>(
     ))
 }
 
-pub fn basic_section_full<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn basic_section_full<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    _spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = basic_section_tag.context("").parse(source)?;
+    let (source, r#type) = (|src| basic_section_tag(src, &sections))
+        .context("")
+        .parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
@@ -48,16 +54,24 @@ pub fn basic_section_full<'a>(source: &'a str, sections: &'a Sections, spans: &'
     ))
 }
 
-pub fn basic_section_start<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn basic_section_start<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = basic_section_tag.context("").parse(source)?;
+    let (source, r#type) = (|src| basic_section_tag(src, &sections))
+        .context("")
+        .parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(alt((block_of_anything, |src| start_or_full_section(src, &sections, &spans))))
-        .context("")
-        .parse(source)?;
+    let (source, mut children) = many0(alt((block_of_anything, |src| {
+        start_or_full_section(src, &sections, &spans)
+    })))
+    .context("")
+    .parse(source)?;
     let (source, end_section) = basic_section_end(source, r#type)?;
     children.push(end_section);
     Ok((
@@ -70,9 +84,16 @@ pub fn basic_section_start<'a>(source: &'a str, sections: &'a Sections, spans: &
     ))
 }
 
-pub fn basic_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = alt((tag("div"), tag("h2"), tag("p"), tag("title")))
+pub fn basic_section_tag<'a>(
+    source: &'a str,
+    sections: &Sections,
+) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    let (source, r#type) = (|src| tag_finder(src, &sections.basic))
         .context("")
         .parse(source)?;
+    // let (source, r#type) = alt((tag("div"), tag("h2"), tag("p"), tag("title")))
+    //     .context("")
+    //     .parse(source)?;
+
     Ok((source, r#type))
 }

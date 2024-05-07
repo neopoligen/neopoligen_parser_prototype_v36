@@ -20,7 +20,7 @@ use crate::span::*;
 use crate::yaml::*;
 use crate::Sections;
 use nom::branch::alt;
-// use nom::bytes::complete::tag;
+use nom::bytes::complete::tag;
 // use nom::bytes::complete::take_until;
 use nom::character::complete::multispace0;
 use nom::character::complete::newline;
@@ -73,4 +73,26 @@ pub fn start_or_full_section<'a>(
     .context("")
     .parse(source)?;
     Ok((source, results))
+}
+
+pub fn initial_error<'a>() -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    // the purpose of this function is just to put an
+    // error in the accumulator. There's a way to do that
+    // with just making an error, but I haven't solved all
+    // the parts to that yet.
+    let (_, _) = tag("asdf").parse("fdsa")?;
+    Ok(("", ""))
+}
+
+pub fn tag_finder<'a>(
+    source: &'a str,
+    section: &Vec<String>,
+) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    let (source, result) = section
+        .iter()
+        .fold(initial_error(), |acc, item| match acc {
+            Ok(v) => Ok(v),
+            _ => tag(item.as_str()).parse(source),
+        })?;
+    Ok((source, result))
 }

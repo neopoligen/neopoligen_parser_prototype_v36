@@ -51,6 +51,7 @@ pub enum Node {
         text: Option<String>,
         children: Vec<Node>,
     },
+    TagFinderInit,
     Yaml {
         bounds: String,
         r#type: String,
