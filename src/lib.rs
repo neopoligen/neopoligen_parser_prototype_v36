@@ -1,5 +1,6 @@
 pub mod basic;
 pub mod checklist;
+pub mod comment;
 pub mod generic;
 pub mod list;
 pub mod node;
@@ -145,6 +146,10 @@ pub fn output(ast: &Vec<Node>) -> String {
             );
             response.push_str(&output(&children));
             response.push_str("</li>");
+        }
+
+        Node::Comment { bounds, r#type, .. } => {
+            response.push_str(format!("<!-- comment-{}-{} -->", bounds, r#type).as_str());
         }
 
         Node::Json { data, r#type, .. } => {

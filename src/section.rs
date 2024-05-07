@@ -1,5 +1,6 @@
 use crate::basic::*;
 use crate::checklist::*;
+use crate::comment::*;
 use crate::list::*;
 use crate::node::Node;
 use crate::raw::*;
@@ -66,6 +67,8 @@ pub fn start_or_full_section<'a>(
         |src| basic_section_start(src, inside.clone()),
         |src| checklist_section_full(src, inside.clone()),
         |src| checklist_section_start(src, inside.clone()),
+        |src| comment_section_full(src),
+        |src| comment_section_start(src, inside.clone()),
         //        |src| json_section_full(src),
         //       |src| json_section_start(src, inside.clone()),
         |src| list_section_full(src, inside.clone()),

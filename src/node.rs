@@ -19,6 +19,12 @@ pub enum Node {
         status: bool,
         status_value: Option<String>,
     },
+    Comment {
+        bounds: String,
+        r#type: String,
+        text: Option<String>,
+        children: Vec<Node>,
+    },
     Json {
         bounds: String,
         kind: String,
