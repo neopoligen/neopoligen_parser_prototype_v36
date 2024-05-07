@@ -608,3 +608,73 @@ List Full
 
 
 
+
+
+################################################
+
+List With Start/End Item
+
+------------------------------------------------
+
+-- list/
+
+- charlie
+
+- delta
+
+-- /list
+
+
+------------------------------------------------
+
+<ul class="list-start-list">
+    <li>
+        <p>charlie</p>
+    </li>
+    <li>
+        <p>delta</p>
+    </li>
+</ul>
+<!-- list-end-list -->
+
+
+
+################################################
+
+Basic Full Inside List Item Start/End
+
+------------------------------------------------
+
+-- list/
+
+- echo
+
+    -- div/
+
+    foxtrot
+
+    -- /div
+
+- golf
+
+-- /list
+
+
+------------------------------------------------
+
+<ul class="list-start-list">
+    <li>
+        <p>echo</p>
+        <div class="basic-start-div">
+            <p>foxtrot</p>
+        </div>
+        <!-- basic-end-div -->
+    </li>
+    <li>
+        <p>golf</p>
+    </li>
+</ul>
+<!-- list-end-list -->
+
+
+
