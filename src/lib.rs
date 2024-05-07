@@ -79,6 +79,8 @@ pub enum Node {
     },
 }
 
+
+
 fn basic_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = not(tag("--")).context("").parse(source)?;
     // let (source, _) = not(tag("//")).context("").parse(source)?;
@@ -120,7 +122,7 @@ fn basic_section_end<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block).context("").parse(source)?;
+    let (source, children) = many0(basic_block_not_list_item).context("").parse(source)?;
     Ok((
         source,
         Node::Basic {

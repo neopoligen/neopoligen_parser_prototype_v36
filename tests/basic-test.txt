@@ -476,3 +476,135 @@ f
     </li>
 </ul>
 <!-- list-end-list -->
+
+
+
+
+################################################
+
+Items After Closing List
+
+------------------------------------------------
+
+-- list/
+
+- a
+
+    -- div/
+
+    b
+
+        -- div/
+
+        c
+
+        -- /div
+
+    d
+
+    -- /div
+
+- e
+
+-- /list
+
+
+
+------------------------------------------------
+
+
+<ul class="list-start-list">
+    <li>
+        <p>a</p>
+        <div class="basic-start-div">
+            <p>b</p>
+            <div class="basic-start-div">
+                <p>c</p>
+            </div>
+            <!-- basic-end-div -->
+            <p>d</p>
+        </div>
+        <!-- basic-end-div -->
+    </li>
+    <li>
+        <p>e</p>
+    </li>
+</ul>
+<!-- list-end-list -->
+
+
+
+
+
+################################################
+
+List Full Inside List Item Start/End
+
+------------------------------------------------
+
+-- list/
+
+- hotel
+
+    -- list/
+
+    - india
+
+    - juliet
+
+    -- /list
+
+- kilo
+
+-- /list
+
+
+------------------------------------------------
+
+<ul class="list-start-list">
+    <li>
+        <p>hotel</p>
+        <ul class="list-start-list">
+            <li>
+                <p>india</p>
+            </li>
+            <li>
+                <p>juliet</p>
+            </li>
+        </ul>
+        <!-- list-end-list -->
+    </li>
+    <li>
+        <p>kilo</p>
+    </li>
+</ul>
+<!-- list-end-list -->
+
+
+
+
+################################################
+
+List Full
+
+------------------------------------------------
+
+-- list
+
+- alfa
+
+- bravo
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li>
+        <p>alfa</p>
+    </li>
+    <li>
+        <p>bravo</p>
+    </li>
+</ul>
+
+
+

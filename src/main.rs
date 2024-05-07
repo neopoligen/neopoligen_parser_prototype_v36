@@ -5,30 +5,29 @@ use std::fs;
 fn main() {
     let content = r#"-- list/
 
-- a
+- hotel
 
     -- list/
 
-    - c
+    - india
 
-    - d
+        -- list/
 
-        -- list
+        - asdf
 
-        - e
+        - awerwe
 
-    -- div
+        -- /list
 
-    here
+    - juliet
 
     -- /list
 
-- b
-
-f
+- kilo
 
 -- /list
-    
+
+
     "#;
     match parse(content) {
         Ok(ast) => {
