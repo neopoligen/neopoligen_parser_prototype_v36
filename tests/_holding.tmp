@@ -1,0 +1,294 @@
+
+
+Raw Start/End Inside List Item Start/End
+
+
+------------------------------------------------
+
+
+-- list
+
+-/ a
+
+-- pre/
+
+b
+
+-- /pre
+
+//
+
+- c
+
+
+------------------------------------------------
+
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>a</p>
+        <pre class="raw-start-pre">b</pre>
+        <div class="raw-end-pre"></div>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>c</p>
+    </li>
+</ul>
+
+
+
+
+
+################################################
+
+Three Levels Of List Item Start/End
+
+
+------------------------------------------------
+
+-- list
+
+-/ a
+
+    -- list
+
+    - c
+
+    -/ d
+
+        -- list
+
+        - e
+
+    //
+
+    -- div
+
+    here
+
+//
+
+- b
+
+f
+
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>a</p>
+        <ul class="list-full-list">
+            <li class="list_item-full-list_item">
+                <p>c</p>
+            </li>
+            <li class="list_item-start-list_item">
+                <p>d</p>
+                <ul class="list-full-list">
+                    <li class="list_item-full-list_item">
+                        <p>e</p>
+                    </li>
+                </ul>
+            </li><!-- list_item-end-list_item -->
+        </ul>
+        <div class="basic-full-div">
+            <p>here</p>
+        </div>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>b</p>
+        <p>f</p>
+    </li>
+</ul>
+
+
+
+################################################
+
+Items After Closing List
+
+------------------------------------------------
+
+-- list
+
+-/ a
+
+    -- div/
+
+    b
+
+        -- div/
+
+        c
+
+        -- /div
+
+    d
+
+    -- /div
+
+//
+
+- e
+
+
+
+
+------------------------------------------------
+
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>a</p>
+        <div class="basic-start-div">
+            <p>b</p>
+            <div class="basic-start-div">
+                <p>c</p>
+            </div>
+            <div class="basic-end-div">
+            <p>d</p>
+            </div>
+        </div>
+        <div class="basic-end-div"></div>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>e</p>
+    </li>
+</ul>
+
+
+
+
+
+
+################################################
+
+List Full Inside List Item Start/End
+
+------------------------------------------------
+
+-- list
+
+-/ hotel
+
+-- list
+
+- india
+
+- juliet
+
+//
+
+- kilo
+
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>hotel</p>
+        <ul class="list-full-list">
+            <li class="list_item-full-list_item">
+                <p>india</p>
+            </li>
+            <li class="list_item-full-list_item">
+                <p>juliet</p>
+            </li>
+        </ul>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>kilo</p>
+    </li>
+</ul>
+
+
+
+
+
+
+################################################
+
+List Full
+
+------------------------------------------------
+
+-- list
+
+- alfa
+
+- bravo
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li class="list_item-full-list_item">
+        <p>alfa</p>
+    </li>
+    <li class="list_item-full-list_item">
+        <p>bravo</p>
+    </li>
+</ul>
+
+
+################################################
+
+List With Start/End Item
+
+------------------------------------------------
+
+-- list
+
+-/ charlie
+
+//
+
+- delta
+
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>charlie</p>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>delta</p>
+    </li>
+</ul>
+
+
+
+
+################################################
+
+Basic Full Inside List Item Start/End
+
+------------------------------------------------
+
+-- list
+
+-/ echo
+
+-- div
+
+foxtrot
+
+//
+
+- golf
+
+
+------------------------------------------------
+
+<ul class="list-full-list">
+    <li class="list_item-start-list_item">
+        <p>echo</p>
+        <div class="basic-full-div">
+            <p>foxtrot</p>
+        </div>
+    </li><!-- list_item-end-list_item -->
+    <li class="list_item-full-list_item">
+        <p>golf</p>
+    </li>
+</ul>
+
