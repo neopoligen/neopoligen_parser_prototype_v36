@@ -121,8 +121,6 @@ Basic Full Inside List Item Start/End
 </ul>
 
 
-
-
 ################################################
 
 Empty checklist
@@ -145,17 +143,15 @@ a
 
 
 
-
-
 ################################################
 
-skip List Full Inside List Item Start/End
+List Inside Checklist
 
 ------------------------------------------------
 
--- checklist/
+-- todo/
 
-- hotel
+[] hotel
 
     -- list/
 
@@ -165,15 +161,15 @@ skip List Full Inside List Item Start/End
 
     -- /list
 
-- kilo
+[] kilo
 
--- /list
+-- /todo
 
 
 ------------------------------------------------
 
-<ul class="list-start-list">
-    <li>
+<ul class="checklist-start-todo">
+    <li class="status-false">
         <p>hotel</p>
         <ul class="list-start-list">
             <li>
@@ -185,11 +181,11 @@ skip List Full Inside List Item Start/End
         </ul>
         <!-- list-end-list -->
     </li>
-    <li>
+    <li class="status-false">
         <p>kilo</p>
     </li>
+<!-- checklist-end-todo-->
 </ul>
-<!-- list-end-list -->
 
 
 
