@@ -34,23 +34,23 @@ here
 
 ################################################
 
-Generic Start/End With Extra Content
+solo Generic Start/End With Extra Content
 
 ------------------------------------------------
 
--- div/
+-- misc/
 
 a
 
--- /div
+-- /misc
 
 b
 
 ------------------------------------------------
 
-<div class="generic-start-div">
+<div class="generic-start-misc">
     <p>a</p>
-<!-- generic-end-div -->
+<!-- generic-end-misc -->
 </div>
 <p>b</p>
 
@@ -58,61 +58,60 @@ b
 
 ################################################
 
-Nested Generic Start/End
+solo Nested Generic Start/End
 
 ------------------------------------------------
 
--- div/
+-- misc/
 
 -- div
 
 here
 
--- /div
+-- /misc
 
 
 ------------------------------------------------
 
-<div class="generic-start-div">
-    <div class="generic-full-div">
+<div class="generic-start-misc">
+    <div class="basic-full-div">
         <p>here</p>
     </div>
-<!-- generic-end-div -->
+<!-- generic-end-misc -->
 </div>
 
 
 
 ################################################
 
-
-    Generic Start/End Inside Generic Start/End"
+solo Generic Start/End Inside Generic Start/End
 
 ------------------------------------------------
 
--- div/
+-- misc/
 
 echo
 
--- div/
+    -- misc/
 
-foxtrot
+    foxtrot
 
--- /div
+    -- /misc
 
 golf
 
--- /div
+-- /misc
 
 ------------------------------------------------
 
-<div class="generic-start-div">
+<div class="generic-start-misc">
     <p>echo</p>
-    <div class="generic-start-div">
+    <div class="generic-start-misc">
         <p>foxtrot</p>
-    <!-- generic-end-div -->
+    <!-- generic-end-misc -->
     </div>
     <p>golf</p>
-<!-- generic-end-div -->
+<!-- generic-end-misc -->
 </div>
 
 
