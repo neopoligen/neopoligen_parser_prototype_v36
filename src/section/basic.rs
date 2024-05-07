@@ -37,7 +37,7 @@ pub fn basic_section_full<'a>(
     _spans: &'a Vec<String>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = (|src| basic_section_tag(src, &sections))
+    let (source, r#type) = (|src| tag_finder(src, &sections.basic))
         .context("")
         .parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -60,7 +60,7 @@ pub fn basic_section_start<'a>(
     spans: &'a Vec<String>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = (|src| basic_section_tag(src, &sections))
+    let (source, r#type) = (|src| tag_finder(src, &sections.basic))
         .context("")
         .parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
@@ -82,18 +82,4 @@ pub fn basic_section_start<'a>(
             bounds: "start".to_string(),
         },
     ))
-}
-
-pub fn basic_section_tag<'a>(
-    source: &'a str,
-    sections: &Sections,
-) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = (|src| tag_finder(src, &sections.basic))
-        .context("")
-        .parse(source)?;
-    // let (source, r#type) = alt((tag("div"), tag("h2"), tag("p"), tag("title")))
-    //     .context("")
-    //     .parse(source)?;
-
-    Ok((source, r#type))
 }
