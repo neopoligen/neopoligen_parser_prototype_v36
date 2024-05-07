@@ -15,14 +15,9 @@ pub fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = not(tag("-")).context("").parse(source)?;
     // let (source, _) = not(tag("//")).context("").parse(source)?;
     // using take_until isn't robust but works for this prototype
-    let (source, text) = take_until("\n\n").context("").parse(source)?;
+    let (source, _text) = take_until("\n\n").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::Block {
-            spans: text.to_string(),
-        },
-    ))
+    Ok((source, Node::Block { spans: vec![] }))
 }
 
 pub fn list_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {

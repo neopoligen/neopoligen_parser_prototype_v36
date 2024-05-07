@@ -1,3 +1,5 @@
+use crate::span::Span;
+
 #[derive(Debug)]
 pub enum Node {
     Basic {
@@ -7,7 +9,7 @@ pub enum Node {
         bounds: String,
     },
     Block {
-        spans: String,
+        spans: Vec<Span>,
     },
     Checklist {
         r#type: String,

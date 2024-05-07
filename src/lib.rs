@@ -1,7 +1,9 @@
 pub mod section;
+pub mod span;
 
 use crate::node::Node;
 use crate::section::*;
+use crate::span::Span;
 use nom::multi::many1;
 use nom::IResult;
 use nom::Parser;
@@ -98,8 +100,16 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
-
+        //Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
+        Node::Block { spans } => {
+            response.push_str("<p>");
+            spans.iter().for_each(|s| match s {
+                Span::WordPart { text } => {
+                    response.push_str(text);
+                }
+            });
+            response.push_str("</p>");
+        }
         Node::Checklist {
             bounds,
             children,
