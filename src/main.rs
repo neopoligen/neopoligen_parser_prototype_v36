@@ -9,14 +9,27 @@ fn main() {
 
     -- list/
 
-    - b
+    - c
+
+    - d
+
+        -- list
+
+        - e
+
+    -- div
+
+    here
 
     -- /list
 
-- c
+- b
+
+f
 
 -- /list
-"#;
+    
+    "#;
     match parse(content) {
         Ok(ast) => {
             let out = output(&ast);

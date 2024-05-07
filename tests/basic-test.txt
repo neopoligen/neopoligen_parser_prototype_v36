@@ -410,3 +410,69 @@ b
 </ul>
 <!-- list-end-list -->
 
+
+
+
+################################################
+
+Three Levels Of List Item Start/End
+
+
+------------------------------------------------
+
+-- list/
+
+- a
+
+    -- list/
+
+    - c
+
+    - d
+
+        -- list
+
+        - e
+
+    -- div
+
+    here
+
+    -- /list
+
+- b
+
+f
+
+-- /list
+
+
+------------------------------------------------
+
+<ul class="list-start-list">
+    <li>
+        <p>a</p>
+        <ul class="list-start-list">
+            <li>
+                <p>c</p>
+            </li>
+            <li>
+                <p>d</p>
+                <ul class="list-full-list">
+                    <li>
+                        <p>e</p>
+                    </li>
+                </ul>
+                <div class="basic-full-div">
+                    <p>here</p>
+                </div>
+            </li>
+        </ul>
+        <!-- list-end-list -->
+    </li>
+    <li>
+        <p>b</p>
+        <p>f</p>
+    </li>
+</ul>
+<!-- list-end-list -->
