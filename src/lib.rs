@@ -2,6 +2,7 @@ pub mod basic;
 pub mod checklist;
 pub mod comment;
 pub mod generic;
+pub mod json;
 pub mod list;
 pub mod node;
 pub mod raw;
@@ -191,8 +192,22 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::Json { data, r#type, .. } => {
-            response.push_str(format!("<h2>{}</h2><pre>{}</pre>", r#type, data).as_str())
+        Node::Json {
+            bounds,
+            data,
+            r#type,
+            ..
+        } => {
+            if bounds == "end" {
+            } else if bounds == "full" {
+                response.push_str(
+                    format!("<!-- json-full-{} -->{}", r#type, data.clone().unwrap()).as_str(),
+                )
+            } else if bounds == "start" {
+                response.push_str(
+                    format!("<!-- json-start-{} -->{}", r#type, data.clone().unwrap()).as_str(),
+                )
+            }
         }
 
         Node::List {

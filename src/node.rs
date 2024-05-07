@@ -35,7 +35,8 @@ pub enum Node {
         bounds: String,
         kind: String,
         r#type: String,
-        data: String,
+        data: Option<String>,
+        children: Vec<Node>,
     },
     List {
         r#type: String,
