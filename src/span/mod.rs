@@ -80,13 +80,22 @@ pub fn known_span(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     let (source, spans) = many0(span_finder).context("").parse(source)?;
     let (source, raw_attrs) = many0(span_attr).context("").parse(source)?;
     let (source, _) = tag(">>").context("").parse(source)?;
+
+    let mut flags: Vec<String> = vec![];
+    let mut attrs = BTreeMap::new();
+    raw_attrs.iter().for_each(|attr| match attr {
+        SpanAttr::KeyValue { key, value } => {
+            attrs.insert(key.to_string(), value.to_string());
+        }
+        SpanAttr::Flat { key } => flags.push(key.to_string()),
+    });
     Ok((
         source,
         Span::KnownSpan {
             r#type: r#type.to_string(),
             spans,
-            flags: vec![],
-            attrs: BTreeMap::new(),
+            flags,
+            attrs,
         },
     ))
 }
