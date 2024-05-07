@@ -1,4 +1,4 @@
-solo Generic Test
+Generic Test
 
 ------------------------------------------------
 
@@ -14,7 +14,7 @@ here
 
 ################################################
 
-solo Generic Start/End
+Generic Start/End
 
 ------------------------------------------------
 
@@ -34,7 +34,7 @@ here
 
 ################################################
 
-solo Generic Start/End With Extra Content
+Generic Start/End With Extra Content
 
 ------------------------------------------------
 
@@ -58,7 +58,7 @@ b
 
 ################################################
 
-solo Nested Generic Start/End
+Nested Generic Start/End
 
 ------------------------------------------------
 
@@ -84,7 +84,7 @@ here
 
 ################################################
 
-solo Generic Start/End Inside Generic Start/End
+Generic Start/End Inside Generic Start/End
 
 ------------------------------------------------
 

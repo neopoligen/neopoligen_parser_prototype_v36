@@ -1,8 +1,8 @@
+use crate::block::*;
 use crate::node::Node;
 use crate::section::*;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-use nom::bytes::complete::take_until;
 use nom::character::complete::multispace0;
 use nom::combinator::not;
 use nom::multi::many0;
@@ -13,16 +13,10 @@ use nom_supreme::parser_ext::ParserExt;
 
 pub fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = not(tag("-")).context("").parse(source)?;
-    // let (source, _) = not(tag("//")).context("").parse(source)?;
-    // using take_until isn't robust but works for this prototype
-    let (source, text) = take_until("\n\n").context("").parse(source)?;
+    let (source, _) = not(eof).context("").parse(source)?;
+    let (source, spans) = many0(span_finder).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::Block {
-            spans: text.to_string(),
-        },
-    ))
+    Ok((source, Node::Block { spans }))
 }
 
 pub fn list_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {

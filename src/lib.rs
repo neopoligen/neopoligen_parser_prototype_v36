@@ -1,7 +1,10 @@
+pub mod block;
 pub mod section;
+pub mod span;
 
 use crate::node::Node;
 use crate::section::*;
+use crate::span::Span;
 use nom::multi::many1;
 use nom::IResult;
 use nom::Parser;
@@ -98,8 +101,12 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
-
+        //Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
+        Node::Block { spans } => {
+            response.push_str("<p>");
+            response.push_str(output_spans(spans).as_str());
+            response.push_str("</p>");
+        }
         Node::Checklist {
             bounds,
             children,
@@ -308,6 +315,37 @@ pub fn output(ast: &Vec<Node>) -> String {
                 );
                 response.push_str(&output(&children));
             }
+        }
+    });
+    response
+}
+
+pub fn output_spans(spans: &Vec<Span>) -> String {
+    let mut response = String::from("");
+    spans.iter().for_each(|span| match span {
+        Span::KnownSpan {
+            r#type,
+            spans,
+            attrs,
+            flags,
+        } => {
+            response.push_str(format!("<{}", r#type).as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</{}>", output_spans(spans), r#type).as_str());
+        }
+        Span::Newline { .. } => {
+            response.push_str(" ");
+        }
+        Span::Space { .. } => {
+            response.push_str(" ");
+        }
+        Span::WordPart { text } => {
+            response.push_str(text);
         }
     });
     response
