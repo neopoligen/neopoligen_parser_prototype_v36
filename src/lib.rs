@@ -977,7 +977,7 @@ fn raw_section_start<'a>(
     inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = raw_section_tag.context("").parse(source)?;
-    let end_key = format!("\n-- /{}", r#type);
+    let end_key = format!("-- /{}", r#type);
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
