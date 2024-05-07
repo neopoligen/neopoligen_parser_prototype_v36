@@ -24,7 +24,7 @@ pub fn generic_section_end<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block).context("").parse(source)?;
+    let (source, children) = many0(block_of_anything).context("").parse(source)?;
     Ok((
         source,
         Node::Basic {
@@ -43,7 +43,7 @@ pub fn generic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block).context("").parse(source)?;
+    let (source, children) = many0(block_of_anything).context("").parse(source)?;
     Ok((
         source,
         Node::Basic {
@@ -67,7 +67,7 @@ pub fn generic_section_start<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(alt((basic_block, |src| {
+    let (source, mut children) = many0(alt((block_of_anything, |src| {
         start_or_full_section(src, inside.clone())
     })))
     .context("")

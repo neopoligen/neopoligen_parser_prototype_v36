@@ -11,33 +11,6 @@ use nom::Parser;
 use nom_supreme::error::ErrorTree;
 use nom_supreme::parser_ext::ParserExt;
 
-pub fn basic_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let (source, _) = not(tag("--")).context("").parse(source)?;
-    // using take_until isn't robust but works for this prototype
-    let (source, text) = take_until("\n\n").context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::Block {
-            spans: text.to_string(),
-        },
-    ))
-}
-
-pub fn basic_block_not_list_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let (source, _) = not(tag("-")).context("").parse(source)?;
-    // let (source, _) = not(tag("//")).context("").parse(source)?;
-    // using take_until isn't robust but works for this prototype
-    let (source, text) = take_until("\n\n").context("").parse(source)?;
-    let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::Block {
-            spans: text.to_string(),
-        },
-    ))
-}
-
 pub fn basic_section_end<'a>(
     source: &'a str,
     mut inside: Vec<&'a str>,
@@ -51,7 +24,7 @@ pub fn basic_section_end<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block_not_list_item).context("").parse(source)?;
+    let (source, children) = many0(block_of_end_content).context("").parse(source)?;
     Ok((
         source,
         Node::Basic {
@@ -70,7 +43,7 @@ pub fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> 
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block).context("").parse(source)?;
+    let (source, children) = many0(block_of_anything).context("").parse(source)?;
     Ok((
         source,
         Node::Basic {
@@ -94,7 +67,7 @@ pub fn basic_section_start<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(alt((basic_block, |src| {
+    let (source, mut children) = many0(alt((block_of_anything, |src| {
         start_or_full_section(src, inside.clone())
     })))
     .context("")

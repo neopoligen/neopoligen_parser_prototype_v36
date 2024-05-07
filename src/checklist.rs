@@ -1,4 +1,3 @@
-use crate::basic::*;
 use crate::node::Node;
 use crate::section::*;
 use nom::branch::alt;
@@ -74,7 +73,7 @@ pub fn checklist_section_end<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block_not_list_item).context("").parse(source)?;
+    let (source, children) = many0(block_of_end_content).context("").parse(source)?;
     Ok((
         source,
         Node::Checklist {
