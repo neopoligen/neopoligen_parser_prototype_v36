@@ -10,7 +10,7 @@ use nom::character::complete::line_ending;
 use nom::character::complete::space0;
 use nom::character::complete::space1;
 // use nom::combinator::eof;
-// use nom::combinator::not;
+use nom::combinator::not;
 use nom::sequence::tuple;
 use nom::IResult;
 use nom::Parser;
@@ -31,6 +31,9 @@ pub fn span(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
 
 pub fn newline(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     let (source, text) = tuple((space0, line_ending)).context("").parse(source)?;
+    let (source, _) = not(tuple((space0, line_ending)))
+        .context("")
+        .parse(source)?;
     Ok((
         source,
         Span::Space {
