@@ -51,8 +51,6 @@ Basic Start/End
 </ul>
 
 
-
-
 ################################################
 
 Basic Start/End With Following Content
@@ -85,14 +83,9 @@ here
 
 
 
-
-
-
-
-
 ################################################
 
-skip Basic Full Inside List Item Start/End
+Basic Full Inside List Item Start/End
 
 ------------------------------------------------
 
@@ -113,19 +106,19 @@ skip Basic Full Inside List Item Start/End
 
 ------------------------------------------------
 
-<ul class="list-start-list">
-    <li>
+<ul class="checklist-start-todo">
+    <li class="status-false">
         <p>echo</p>
         <div class="basic-start-div">
             <p>foxtrot</p>
-        </div>
         <!-- basic-end-div -->
+        </div>
     </li>
-    <li>
+    <li class="status-false">
         <p>golf</p>
     </li>
+<!-- checklist-end-todo-->
 </ul>
-<!-- list-end-list -->
 
 
 
