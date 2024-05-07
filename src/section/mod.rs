@@ -18,6 +18,7 @@ use crate::section::json::*;
 use crate::section::list::*;
 use crate::span::*;
 use crate::yaml::*;
+use crate::Sections;
 use nom::branch::alt;
 // use nom::bytes::complete::tag;
 // use nom::bytes::complete::take_until;
@@ -45,25 +46,29 @@ pub fn empty_until_newline_or_eof<'a>(
     Ok((source, ""))
 }
 
-pub fn start_or_full_section<'a>(source: &'a str) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn start_or_full_section<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, results) = alt((
-        |src| basic_section_full(src),
-        |src| basic_section_start(src),
-        |src| checklist_section_full(src),
-        |src| checklist_section_start(src),
-        |src| comment_section_full(src),
-        |src| comment_section_start(src),
-        |src| json_section_full(src),
-        |src| json_section_start(src),
-        |src| list_section_full(src),
-        |src| list_section_start(src),
-        |src| raw_section_full(src),
-        |src| raw_section_start(src),
-        |src| yaml_section_full(src),
-        |src| yaml_section_start(src),
+        |src| basic_section_full(src, &sections, &spans),
+        |src| basic_section_start(src, &sections, &spans),
+        |src| checklist_section_full(src, &sections, &spans),
+        |src| checklist_section_start(src, &sections, &spans),
+        |src| comment_section_full(src, &sections, &spans),
+        |src| comment_section_start(src, &sections, &spans),
+        |src| json_section_full(src, &sections, &spans),
+        |src| json_section_start(src, &sections, &spans),
+        |src| list_section_full(src, &sections, &spans),
+        |src| list_section_start(src, &sections, &spans),
+        |src| raw_section_full(src, &sections, &spans),
+        |src| raw_section_start(src, &sections, &spans),
+        |src| yaml_section_full(src, &sections, &spans),
+        |src| yaml_section_start(src, &sections, &spans),
         // make sure generic is last
-        |src| generic_section_full(src),
-        |src| generic_section_start(src),
+        |src| generic_section_full(src, &sections, &spans),
+        |src| generic_section_start(src, &sections, &spans),
     ))
     .context("")
     .parse(source)?;

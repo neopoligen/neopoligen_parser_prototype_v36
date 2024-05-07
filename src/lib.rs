@@ -369,10 +369,10 @@ pub fn parse(
 
 fn parse_runner<'a>(
     source: &'a str,
-    _sections: &'a Sections,
-    _spans: &'a Vec<String>,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
 ) -> IResult<&'a str, Vec<Node>, ErrorTree<&'a str>> {
-    let (source, results) = many1(|src| start_or_full_section(src))
+    let (source, results) = many1(|src| start_or_full_section(src, &sections, &spans))
         .context("")
         .parse(source)?;
     Ok((source, results))

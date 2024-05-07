@@ -34,7 +34,7 @@ pub fn raw_section_end<'a>(
     ))
 }
 
-pub fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+pub fn raw_section_full<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = raw_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -55,7 +55,7 @@ pub fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     ))
 }
 
-pub fn raw_section_start<'a>(source: &'a str) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn raw_section_start<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = raw_section_tag.context("").parse(source)?;
     let end_key = format!("-- /{}", r#type);
