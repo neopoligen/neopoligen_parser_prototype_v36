@@ -103,40 +103,6 @@ pub fn output(ast: &Vec<Node>) -> String {
                     response.push_str(" -->");
                     response.push_str(&output(&children));
                 }
-            // } else if kind == "list" {
-            //     if bounds == "full" {
-            //         response.push_str("<ul class=\"");
-            //         response.push_str(kind);
-            //         response.push_str("-");
-            //         response.push_str(bounds);
-            //         response.push_str("-");
-            //         response.push_str(r#type);
-            //         response.push_str("\">");
-            //         response.push_str(&output(&children));
-            //         response.push_str("</ul>");
-            //     }
-            //     if bounds == "start" {
-            //         response.push_str("<ul class=\"");
-            //         response.push_str(kind);
-            //         response.push_str("-");
-            //         response.push_str(bounds);
-            //         response.push_str("-");
-            //         response.push_str(r#type);
-            //         response.push_str("\">");
-            //         response.push_str(&output(&children));
-            //     }
-            //     if bounds == "end" {
-            //         response.push_str("</ul>");
-            //         response.push_str("<div class=\"");
-            //         response.push_str(kind);
-            //         response.push_str("-");
-            //         response.push_str(bounds);
-            //         response.push_str("-");
-            //         response.push_str(r#type);
-            //         response.push_str("\">");
-            //         response.push_str(&output(&children));
-            //         response.push_str("</div>");
-            //     }
             } else if kind == "list_item" {
                 if bounds == "full" {
                     response.push_str("<li class=\"");
