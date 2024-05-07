@@ -53,8 +53,8 @@ Basic Full Inside List Item Start/End
         <p>echo</p>
         <div class="basic-start-div">
             <p>foxtrot</p>
-        </div>
         <!-- basic-end-div -->
+        </div>
     </li>
     <li>
         <p>golf</p>
@@ -464,11 +464,11 @@ Items After Closing List
             <p>b</p>
             <div class="basic-start-div">
                 <p>c</p>
-            </div>
             <!-- basic-end-div -->
+            </div>
             <p>d</p>
-        </div>
         <!-- basic-end-div -->
+        </div>
     </li>
     <li>
         <p>e</p>

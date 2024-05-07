@@ -28,8 +28,8 @@ here
 
 <div class="basic-start-div">
     <p>here</p>
-</div>
 <!-- basic-end-div -->
+</div>
 
 ################################################
 
@@ -53,8 +53,8 @@ here
     <div class="basic-full-div">
         <p>here</p>
     </div>
-</div>
 <!-- basic-end-div -->
+</div>
 
 
 
@@ -85,11 +85,11 @@ golf
     <p>echo</p>
     <div class="basic-start-div">
         <p>foxtrot</p>
-    </div>
     <!-- basic-end-div -->
+    </div>
     <p>golf</p>
-</div>
 <!-- basic-end-div -->
+</div>
 
 
 
@@ -131,13 +131,13 @@ e
         <p>b</p>
         <div class="basic-start-div">
             <p>c</p>
-        </div>
         <!-- basic-end-div -->
+        </div>
         <p>d</p>
-    </div>
     <!-- basic-end-div -->
+    </div>
     <p>e</p>
-</div>
 <!-- basic-end-div -->
+</div>
 
 

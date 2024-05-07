@@ -92,7 +92,6 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(&output(&children));
             }
             if bounds == "end" {
-                response.push_str("</div>");
                 response.push_str("<!-- ");
                 response.push_str(kind);
                 response.push_str("-");
@@ -100,6 +99,7 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str("-");
                 response.push_str(r#type);
                 response.push_str(" -->");
+                response.push_str("</div>");
                 response.push_str(&output(&children));
             }
         }
