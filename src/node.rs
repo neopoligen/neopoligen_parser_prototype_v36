@@ -25,6 +25,12 @@ pub enum Node {
         text: Option<String>,
         children: Vec<Node>,
     },
+    Generic {
+        kind: String,
+        r#type: String,
+        children: Vec<Node>,
+        bounds: String,
+    },
     Json {
         bounds: String,
         kind: String,

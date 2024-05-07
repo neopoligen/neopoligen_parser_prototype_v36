@@ -1,6 +1,7 @@
 use crate::basic::*;
 use crate::checklist::*;
 use crate::comment::*;
+use crate::generic::*;
 use crate::list::*;
 use crate::node::Node;
 use crate::raw::*;
@@ -76,8 +77,8 @@ pub fn start_or_full_section<'a>(
         |src| raw_section_full(src),
         |src| raw_section_start(src, inside.clone()),
         // make sure generic is last
-        //      |src| generic_section_full(src),
-        //     |src| generic_section_start(src, inside.clone()),
+        |src| generic_section_full(src),
+        |src| generic_section_start(src, inside.clone()),
     ))
     .context("")
     .parse(source)?;

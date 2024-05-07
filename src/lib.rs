@@ -104,6 +104,7 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(&output(&children));
             }
         }
+
         Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
 
         Node::Checklist {
@@ -161,6 +162,31 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(format!("<!-- comment-{}-{} -->", bounds, r#type).as_str());
             } else if bounds == "start" {
                 response.push_str(format!("<!-- comment-{}-{} -->", bounds, r#type).as_str());
+                response.push_str(&output(&children));
+            }
+        }
+
+        Node::Generic {
+            bounds,
+            children,
+            kind,
+            r#type,
+            ..
+        } => {
+            if bounds == "full" {
+                response
+                    .push_str(format!("<div class=\"{}-{}-{}\">", kind, bounds, r#type).as_str());
+                response.push_str(&output(&children));
+                response.push_str("</div>");
+            }
+            if bounds == "start" {
+                response
+                    .push_str(format!("<div class=\"{}-{}-{}\">", kind, bounds, r#type).as_str());
+                response.push_str(&output(&children));
+            }
+            if bounds == "end" {
+                response.push_str(format!("<!-- {}-{}-{} -->", kind, bounds, r#type).as_str());
+                response.push_str("</div>");
                 response.push_str(&output(&children));
             }
         }

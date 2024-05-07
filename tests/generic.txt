@@ -1,12 +1,167 @@
-skip
+solo Generic Test
 
 ------------------------------------------------
 
--- p
+-- misc
 
-todo
+here
 
 ------------------------------------------------
 
-<div class="basic-full-p"><p>todo</p></div>
+<div class="generic-full-misc">
+    <p>here</p>
+</div>
+
+################################################
+
+solo Generic Start/End
+
+------------------------------------------------
+
+-- misc/
+
+here
+
+-- /misc
+
+------------------------------------------------
+
+<div class="generic-start-misc">
+    <p>here</p>
+<!-- generic-end-misc -->
+</div>
+
+
+################################################
+
+Generic Start/End With Extra Content
+
+------------------------------------------------
+
+-- div/
+
+a
+
+-- /div
+
+b
+
+------------------------------------------------
+
+<div class="generic-start-div">
+    <p>a</p>
+<!-- generic-end-div -->
+</div>
+<p>b</p>
+
+
+
+################################################
+
+Nested Generic Start/End
+
+------------------------------------------------
+
+-- div/
+
+-- div
+
+here
+
+-- /div
+
+
+------------------------------------------------
+
+<div class="generic-start-div">
+    <div class="generic-full-div">
+        <p>here</p>
+    </div>
+<!-- generic-end-div -->
+</div>
+
+
+
+################################################
+
+
+    Generic Start/End Inside Generic Start/End"
+
+------------------------------------------------
+
+-- div/
+
+echo
+
+-- div/
+
+foxtrot
+
+-- /div
+
+golf
+
+-- /div
+
+------------------------------------------------
+
+<div class="generic-start-div">
+    <p>echo</p>
+    <div class="generic-start-div">
+        <p>foxtrot</p>
+    <!-- generic-end-div -->
+    </div>
+    <p>golf</p>
+<!-- generic-end-div -->
+</div>
+
+
+
+
+################################################
+
+Three levels of Generic Start/End
+
+------------------------------------------------
+
+-- div/
+
+a
+
+    -- div/
+
+    b
+
+        -- div/
+
+        c
+
+        -- /div
+
+    d
+
+    -- /div
+
+e
+
+-- /div
+
+
+------------------------------------------------
+
+<div class="generic-start-div">
+    <p>a</p>
+    <div class="generic-start-div">
+        <p>b</p>
+        <div class="generic-start-div">
+            <p>c</p>
+        <!-- generic-end-div -->
+        </div>
+        <p>d</p>
+    <!-- generic-end-div -->
+    </div>
+    <p>e</p>
+<!-- generic-end-div -->
+</div>
+
 
