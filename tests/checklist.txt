@@ -47,8 +47,45 @@ Basic Start/End
     <li class="status-false">
         <p>b</p>
     </li>
-</ul>
 <!-- checklist-end-todo -->
+</ul>
+
+
+
+
+################################################
+
+Basic Start/End With Following Content
+
+------------------------------------------------
+
+
+-- todo/
+
+[] a
+
+[] b
+
+-- /todo
+
+here
+
+------------------------------------------------
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>a</p>
+    </li>
+    <li class="status-false">
+        <p>b</p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>
+<p>here</p>
+
+
+
+
 
 
 
