@@ -14,10 +14,8 @@ use nom_supreme::parser_ext::ParserExt;
 
 pub fn comment_section_end<'a>(
     source: &'a str,
-    mut inside: Vec<&'a str>,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.pop();
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -57,12 +55,7 @@ pub fn comment_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>
     ))
 }
 
-pub fn comment_section_start<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let kind = "comment";
-    inside.push(kind);
+pub fn comment_section_start<'a>(source: &'a str) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = comment_section_tag.context("").parse(source)?;
     let end_key = format!("-- /{}", r#type);
@@ -74,7 +67,7 @@ pub fn comment_section_start<'a>(
         .parse(source)?;
     let (source, text) = take_until(end_key.as_str()).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, end_section) = comment_section_end(source, inside.clone(), r#type)?;
+    let (source, end_section) = comment_section_end(source, r#type)?;
     Ok((
         source,
         Node::Comment {

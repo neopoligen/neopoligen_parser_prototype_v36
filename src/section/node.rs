@@ -3,7 +3,6 @@ use crate::span::Span;
 #[derive(Debug)]
 pub enum Node {
     Basic {
-        kind: String,
         r#type: String,
         children: Vec<Node>,
         bounds: String,
@@ -28,14 +27,12 @@ pub enum Node {
         children: Vec<Node>,
     },
     Generic {
-        kind: String,
         r#type: String,
         children: Vec<Node>,
         bounds: String,
     },
     Json {
         bounds: String,
-        kind: String,
         r#type: String,
         data: Option<String>,
         children: Vec<Node>,
@@ -50,14 +47,12 @@ pub enum Node {
     },
     Raw {
         bounds: String,
-        kind: String,
         r#type: String,
         text: Option<String>,
         children: Vec<Node>,
     },
     Yaml {
         bounds: String,
-        kind: String,
         r#type: String,
         data: Option<String>,
         children: Vec<Node>,

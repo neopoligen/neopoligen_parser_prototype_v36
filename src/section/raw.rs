@@ -14,11 +14,8 @@ use nom_supreme::parser_ext::ParserExt;
 
 pub fn raw_section_end<'a>(
     source: &'a str,
-    mut inside: Vec<&'a str>,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.pop();
-    let kind = "raw";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -31,7 +28,6 @@ pub fn raw_section_end<'a>(
         Node::Raw {
             bounds: "end".to_string(),
             children,
-            kind: kind.to_string(),
             r#type: r#type.to_string(),
             text: None,
         },
@@ -39,7 +35,6 @@ pub fn raw_section_end<'a>(
 }
 
 pub fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let kind = "raw";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = raw_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -54,19 +49,13 @@ pub fn raw_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Raw {
             bounds: "full".to_string(),
             children: vec![],
-            kind: kind.to_string(),
             r#type: r#type.to_string(),
             text: Some(text.trim_end().to_string()),
         },
     ))
 }
 
-pub fn raw_section_start<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let kind = "raw";
-    inside.push(kind);
+pub fn raw_section_start<'a>(source: &'a str) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = raw_section_tag.context("").parse(source)?;
     let end_key = format!("-- /{}", r#type);
@@ -78,13 +67,12 @@ pub fn raw_section_start<'a>(
         .parse(source)?;
     let (source, text) = take_until(end_key.as_str()).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, end_section) = raw_section_end(source, inside.clone(), r#type)?;
+    let (source, end_section) = raw_section_end(source, r#type)?;
     Ok((
         source,
         Node::Raw {
             bounds: "start".to_string(),
             children: vec![end_section],
-            kind: kind.to_string(),
             r#type: r#type.to_string(),
             text: Some(text.trim_end().to_string()),
         },

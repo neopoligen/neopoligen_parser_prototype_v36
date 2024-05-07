@@ -12,11 +12,8 @@ use nom_supreme::parser_ext::ParserExt;
 
 pub fn basic_section_end<'a>(
     source: &'a str,
-    mut inside: Vec<&'a str>,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.pop();
-    let kind = "basic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -27,7 +24,6 @@ pub fn basic_section_end<'a>(
     Ok((
         source,
         Node::Basic {
-            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "end".to_string(),
@@ -36,7 +32,6 @@ pub fn basic_section_end<'a>(
 }
 
 pub fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let kind = "basic";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -46,7 +41,6 @@ pub fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> 
     Ok((
         source,
         Node::Basic {
-            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -54,29 +48,21 @@ pub fn basic_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> 
     ))
 }
 
-pub fn basic_section_start<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let kind = "basic";
-    inside.push(kind);
+pub fn basic_section_start<'a>(source: &'a str) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = basic_section_tag.context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(alt((block_of_anything, |src| {
-        start_or_full_section(src, inside.clone())
-    })))
-    .context("")
-    .parse(source)?;
-    let (source, end_section) = basic_section_end(source, inside.clone(), r#type)?;
+    let (source, mut children) = many0(alt((block_of_anything, |src| start_or_full_section(src))))
+        .context("")
+        .parse(source)?;
+    let (source, end_section) = basic_section_end(source, r#type)?;
     children.push(end_section);
     Ok((
         source,
         Node::Basic {
-            kind: kind.to_string(),
             r#type: r#type.to_string(),
             children,
             bounds: "start".to_string(),

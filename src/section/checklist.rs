@@ -38,11 +38,10 @@ pub fn checklist_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 
 pub fn checklist_item_with_sections<'a>(
     source: &'a str,
-    inside: Vec<&'a str>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("[] ").context("").parse(source)?;
     let (source, children) = many0(alt((checklist_item_block, |src| {
-        start_or_full_section(src, inside.clone())
+        start_or_full_section(src)
     })))
     .context("")
     .parse(source)?;
@@ -59,10 +58,8 @@ pub fn checklist_item_with_sections<'a>(
 
 pub fn checklist_section_end<'a>(
     source: &'a str,
-    mut inside: Vec<&'a str>,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.pop();
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -80,10 +77,7 @@ pub fn checklist_section_end<'a>(
     ))
 }
 
-pub fn checklist_section_full<'a>(
-    source: &'a str,
-    mut _inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn checklist_section_full<'a>(source: &'a str) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = checklist_section_tag.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -100,21 +94,17 @@ pub fn checklist_section_full<'a>(
     ))
 }
 
-pub fn checklist_section_start<'a>(
-    source: &'a str,
-    mut inside: Vec<&'a str>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.push("checklist");
+pub fn checklist_section_start<'a>(source: &'a str) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = checklist_section_tag.context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(|src| checklist_item_with_sections(src, inside.clone()))
+    let (source, mut children) = many0(|src| checklist_item_with_sections(src))
         .context("")
         .parse(source)?;
-    let (source, end_section) = checklist_section_end(source, inside.clone(), r#type)?;
+    let (source, end_section) = checklist_section_end(source, r#type)?;
     children.push(end_section);
     Ok((
         source,
