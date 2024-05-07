@@ -125,30 +125,24 @@ Basic Full Inside List Item Start/End
 
 ################################################
 
-skip List With Start/End Item
+Empty checklist
 
 ------------------------------------------------
 
--- checklist/
+-- todo 
 
-- charlie
+-- p
 
-- delta
-
--- /list
-
+a
 
 ------------------------------------------------
 
-<ul class="list-start-list">
-    <li>
-        <p>charlie</p>
-    </li>
-    <li>
-        <p>delta</p>
-    </li>
+<ul class="checklist-full-todo">
 </ul>
-<!-- list-end-list -->
+<div class="basic-full-p">
+    <p>a</p>
+</div>
+
 
 
 
