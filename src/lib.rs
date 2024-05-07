@@ -112,8 +112,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             ..
         } => {
             if bounds == "full" {
-                response.push_str("<ul class=\"checklist");
-                response.push_str("-");
+                response.push_str("<ul class=\"checklist-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
@@ -121,8 +120,7 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(&output(&children));
                 response.push_str("</ul>");
             } else if bounds == "start" {
-                response.push_str("<ul class=\"checklist");
-                response.push_str("-");
+                response.push_str("<ul class=\"checklist-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
@@ -130,14 +128,12 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(&output(&children));
             } else if bounds == "end" {
                 response.push_str("</ul>");
-                response.push_str("<div class=\"");
-                response.push_str("-");
+                response.push_str("<!-- checklist-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(" -->");
                 response.push_str(&output(&children));
-                response.push_str("</div>");
             }
         }
 

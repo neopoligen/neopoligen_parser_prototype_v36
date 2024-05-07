@@ -12,6 +12,7 @@ use nom_supreme::error::ErrorTree;
 use nom_supreme::parser_ext::ParserExt;
 
 pub fn checklist_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let (source, _) = not(tag("--")).context("").parse(source)?;
     let (source, _) = not(tag("[")).context("").parse(source)?;
     // using take_until isn't robust but works for this prototype
     let (source, text) = take_until("\n\n").context("").parse(source)?;
@@ -108,7 +109,7 @@ pub fn checklist_section_start<'a>(
     source: &'a str,
     mut inside: Vec<&'a str>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.push("list");
+    inside.push("checklist");
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = checklist_section_tag.context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;

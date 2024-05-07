@@ -65,6 +65,7 @@ pub fn start_or_full_section<'a>(
         |src| basic_section_full(src),
         |src| basic_section_start(src, inside.clone()),
         |src| checklist_section_full(src, inside.clone()),
+        |src| checklist_section_start(src, inside.clone()),
         //        |src| json_section_full(src),
         //       |src| json_section_start(src, inside.clone()),
         |src| list_section_full(src, inside.clone()),
