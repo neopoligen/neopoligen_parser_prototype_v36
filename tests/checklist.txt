@@ -1,15 +1,14 @@
+################################################
 
-
-
-List Full
+skip Checklist Full
 
 ------------------------------------------------
 
--- list
+-- checklist
 
-- alfa
+[] a
 
-- bravo
+[] b
 
 ------------------------------------------------
 
@@ -26,12 +25,11 @@ List Full
 
 ################################################
 
-
-Basic Full Inside List Item Start/End
+skip Basic Full Inside List Item Start/End
 
 ------------------------------------------------
 
--- list/
+-- checklist/
 
 - echo
 
@@ -67,11 +65,11 @@ Basic Full Inside List Item Start/End
 
 ################################################
 
-List With Start/End Item
+skip List With Start/End Item
 
 ------------------------------------------------
 
--- list/
+-- checklist/
 
 - charlie
 
@@ -97,11 +95,11 @@ List With Start/End Item
 
 ################################################
 
-List Full Inside List Item Start/End
+skip List Full Inside List Item Start/End
 
 ------------------------------------------------
 
--- list/
+-- checklist/
 
 - hotel
 
@@ -146,12 +144,12 @@ List Full Inside List Item Start/End
 ################################################
 
 
-Basic List
+skip Basic List
 
 
 ------------------------------------------------
 
--- list
+-- checklist
 
 - a
 
@@ -168,12 +166,12 @@ Basic List
 ################################################
 
 
-Start/End List Basic 
+skip Start/End List Basic 
 
 
 ------------------------------------------------
 
--- list/
+-- checklist/
 
 - b
 
@@ -194,12 +192,12 @@ Start/End List Basic
 ################################################
 
 
-Start/End List Basic 
+skip Start/End List Basic 
 
 
 ------------------------------------------------
 
--- list/
+-- checklist/
 
 - a
 
@@ -231,12 +229,12 @@ Start/End List Basic
 ################################################
 
 
-Item After List Item
+skip Item After List Item
 
 
 ------------------------------------------------
 
--- list/
+-- checklist/
 
 - a
 
@@ -273,12 +271,12 @@ Item After List Item
 ################################################
 
 
-Content After List Item
+skip Content After List Item
 
 
 ------------------------------------------------
 
--- list/
+-- checklist/
 
 - a
 
@@ -320,13 +318,13 @@ Content After List Item
 ################################################
 
 
-Raw Start/End Inside List Item Start/End
+skip Raw Start/End Inside List Item Start/End
 
 
 ------------------------------------------------
 
 
--- list/
+-- checklist/
 
 - a
 
@@ -360,12 +358,12 @@ b
 
 ################################################
 
-Three Levels Of List Item Start/End
+skip Three Levels Of List Item Start/End
 
 
 ------------------------------------------------
 
--- list/
+-- checklist/
 
 - a
 

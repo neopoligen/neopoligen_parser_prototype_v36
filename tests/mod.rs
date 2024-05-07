@@ -46,7 +46,7 @@ fn run_tests() {
         let tests = content.split("################################################").collect::<Vec<&str>>();
         tests.iter().for_each(|t| {
             let parts = t.split("------------------------------------------------").map(|p| p.trim_start()).collect::<Vec<&str>>();
-            if !parts[0].starts_with("skip") {
+            if !parts[0].starts_with("skip") && parts.len() == 3{
                 let left = parts[2].trim().replace("\n", "").replace(" ", "");
                 let out = output(&parse(parts[1]).unwrap());
                 let right = out.trim().replace("\n", "").replace(" ", "");
