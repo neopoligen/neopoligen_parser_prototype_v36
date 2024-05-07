@@ -37,6 +37,11 @@ pub enum Span {
     },
 }
 
+pub enum SpanAttr {
+    KeyValue { key: String, value: String },
+    Flat { key: String },
+}
+
 pub fn span_finder(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     let (source, span) = alt((known_span, newline, space, word_part))
         .context("")
@@ -73,6 +78,7 @@ pub fn known_span(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     let (source, r#type) = known_span_type.context("").parse(source)?;
     let (source, _) = tag("|").context("").parse(source)?;
     let (source, spans) = many0(span_finder).context("").parse(source)?;
+    let (source, raw_attrs) = many0(span_attr).context("").parse(source)?;
     let (source, _) = tag(">>").context("").parse(source)?;
     Ok((
         source,
@@ -85,8 +91,22 @@ pub fn known_span(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     ))
 }
 
+pub fn span_attr(source: &str) -> IResult<&str, SpanAttr, ErrorTree<&str>> {
+    let (source, _) = tag("|").context("").parse(source)?;
+    let (source, key) = is_not(" |\n:").context("").parse(source)?;
+    let (source, _) = tag(":").context("").parse(source)?;
+    let (source, value) = is_not(">|").context("").parse(source)?;
+    Ok((
+        source,
+        SpanAttr::KeyValue {
+            key: key.trim().to_string(),
+            value: value.trim().to_string(),
+        },
+    ))
+}
+
 pub fn word_part(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
-    let (source, text) = is_not(" \n<>").context("").parse(source)?;
+    let (source, text) = is_not(" \n<>|").context("").parse(source)?;
     Ok((
         source,
         Span::WordPart {
