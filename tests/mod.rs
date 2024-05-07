@@ -13,44 +13,8 @@ use std::fs;
 
 
 
-// #[case(
-//     "Raw Start/End Inside List Item Start/End",
-//     r#"-- list
 
-// -/ a
 
-// -- pre/
-
-// b
-
-// -- /pre
-
-// //
-
-// - c
-
-// "#,
-//     "<ul><li><p>a</p><h2>pre</h2><pre>b</pre></li><li><p>c</p></li></ul>"
-// )]
-// #[case(
-//     "Checklist with start/end",
-//     r#"-- checklist
-
-// []/ a
-
-//     -- pre/
-
-// b
-
-//     -- /pre
-
-// //
-
-// [] c
-
-// "#,
-//     "<ul><li><p>a</p><h2>pre</h2><pre>b</pre></li><li><p>c</p></li></ul>"
-// )]
 // #[case(
 //     "Generic Tag",
 //     r#"-- unknown-tag

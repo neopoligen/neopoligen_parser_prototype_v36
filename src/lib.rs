@@ -46,11 +46,26 @@ pub enum Node {
     Block {
         spans: String,
     },
+    Checklist {
+        r#type: String,
+        children: Vec<Node>,
+        bounds: String,
+    },
+    ChecklistItem {
+        r#type: String,
+        children: Vec<Node>,
+        bounds: String,
+    },
     Json {
         bounds: String,
         kind: String,
         r#type: String,
         data: String,
+    },
+    List {
+        r#type: String,
+        children: Vec<Node>,
+        bounds: String,
     },
     Raw {
         bounds: String,
@@ -177,8 +192,7 @@ fn checklist_item_end(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
-        Node::Basic {
-            kind: kind.to_string(),
+        Node::ChecklistItem {
             r#type: "checklist_item".to_string(),
             children: vec![],
             bounds: "end".to_string(),
@@ -194,8 +208,7 @@ fn checklist_item_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
-        Node::Basic {
-            kind: kind.to_string(),
+        Node::Checklist {
             r#type: "checklist_item".to_string(),
             children,
             bounds: "full".to_string(),
@@ -219,8 +232,7 @@ fn checklist_item_start<'a>(
     children.push(ending);
     Ok((
         source,
-        Node::Basic {
-            kind: kind.to_string(),
+        Node::Checklist {
             r#type: "checklist_item".to_string(),
             children,
             bounds: "start".to_string(),
@@ -247,8 +259,7 @@ fn checklist_section_full<'a>(
     .parse(source)?;
     Ok((
         source,
-        Node::Basic {
-            kind: kind.to_string(),
+        Node::Checklist {
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -533,8 +544,7 @@ fn list_section_full<'a>(
     .parse(source)?;
     Ok((
         source,
-        Node::Basic {
-            kind: kind.to_string(),
+        Node::List {
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -660,9 +670,88 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
         Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
+
+        Node::Checklist {
+            bounds,
+            children,
+            r#type,
+            ..
+        } => {
+            if bounds == "full" {
+                response.push_str("<ul class=\"checklist");
+                response.push_str("-");
+                response.push_str(bounds);
+                response.push_str("-");
+                response.push_str(r#type);
+                response.push_str("\">");
+                response.push_str(&output(&children));
+                response.push_str("</ul>");
+            } else if bounds == "start" {
+                response.push_str("<ul class=\"checklist");
+                response.push_str("-");
+                response.push_str(bounds);
+                response.push_str("-");
+                response.push_str(r#type);
+                response.push_str("\">");
+                response.push_str(&output(&children));
+            } else if bounds == "end" {
+                response.push_str("</ul>");
+                response.push_str("<div class=\"");
+                response.push_str("-");
+                response.push_str(bounds);
+                response.push_str("-");
+                response.push_str(r#type);
+                response.push_str("\">");
+                response.push_str(&output(&children));
+                response.push_str("</div>");
+            }
+        }
+
+        Node::ChecklistItem {
+            ..
+        } => {
+            response.push_str("TODO: ChecklistItem");
+        }
+        
         Node::Json { data, r#type, .. } => {
             response.push_str(format!("<h2>{}</h2><pre>{}</pre>", r#type, data).as_str())
         }
+
+        Node::List {
+            bounds, children, r#type, 
+        } => {
+            if bounds == "full" {
+                response.push_str("<ul class=\"list");
+                response.push_str("-");
+                response.push_str(bounds);
+                response.push_str("-");
+                response.push_str(r#type);
+                response.push_str("\">");
+                response.push_str(&output(&children));
+                response.push_str("</ul>");
+            }
+            if bounds == "start" {
+                response.push_str("<ul class=\"list");
+                response.push_str("-");
+                response.push_str(bounds);
+                response.push_str("-");
+                response.push_str(r#type);
+                response.push_str("\">");
+                response.push_str(&output(&children));
+            }
+            if bounds == "end" {
+                response.push_str("</ul>");
+                response.push_str("<div class=\"");
+                response.push_str("-");
+                response.push_str(bounds);
+                response.push_str("-");
+                response.push_str(r#type);
+                response.push_str("\">");
+                response.push_str(&output(&children));
+                response.push_str("</div>");
+            }
+        }
+
         Node::Raw {
             text,
             r#type,
