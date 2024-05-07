@@ -42,13 +42,13 @@ d
 
 -- /pre
 
-some content
+e
 
 ------------------------------------------------
 
 <pre class="raw-start-pre">d</pre>
 <!-- raw-end-pre -->
-<p>some content</p>
+<p>e</p>
 
 
 ################################################
