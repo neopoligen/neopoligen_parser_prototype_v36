@@ -338,83 +338,75 @@ Raw Start/End Inside List Item Start/End
 
 
 
-
 ################################################
 
-skip Three Levels Of List Item Start/End
+Three Levels Of List Item Start/End
 
 
 ------------------------------------------------
 
--- checklist/
+-- todo/
 
-- a
+[] a
 
-    -- list/
+    -- todo/
 
-    - c
+    [] c
 
-    - d
+    [] d
 
-        -- list
+        -- todo/ 
 
-        - e
+        [] e
 
-    -- div
+        -- /todo
 
-    here
+    -- /todo
 
-    -- /list
+[] b
 
-- b
-
-f
-
--- /list
+-- /todo
 
 
 ------------------------------------------------
 
-<ul class="checklist-start-list">
-    <li>
+<ul class="checklist-start-todo">
+    <li class="status-false">
         <p>a</p>
-        <ul class="checklist-start-list">
-            <li>
+        <ul class="checklist-start-todo">
+            <li class="status-false">
                 <p>c</p>
             </li>
-            <li>
+            <li class="status-false">
                 <p>d</p>
-                <ul class="list-full-list">
-                    <li>
+                <ul class="checklist-start-todo">
+                    <li class="status-false">
                         <p>e</p>
                     </li>
+                    <!-- checklist-end-todo -->
                 </ul>
-                <div class="basic-full-div">
-                    <p>here</p>
-                </div>
             </li>
+        <!-- checklist-end-todo -->
         </ul>
-        <!-- list-end-list -->
     </li>
-    <li>
+    <li class="status-false">
         <p>b</p>
-        <p>f</p>
     </li>
+<!-- checklist-end-todo -->
 </ul>
-<!-- list-end-list -->
 
 
 
 
 ################################################
 
-skip Items After Closing List
+Items After Closing List
 
 ------------------------------------------------
 
--- checklist/
+-- todo/
 
-- a
+[] a
 
     -- div/
 
@@ -430,32 +422,33 @@ skip Items After Closing List
 
     -- /div
 
-- e
+[] e
 
--- /list
+-- /todo
+
 
 
 ------------------------------------------------
 
 
-<ul class="checklist-start-list">
-    <li>
+<ul class="checklist-start-todo">
+    <li class="status-false">
         <p>a</p>
         <div class="basic-start-div">
             <p>b</p>
             <div class="basic-start-div">
                 <p>c</p>
-            </div>
             <!-- basic-end-div -->
+            </div>
             <p>d</p>
-        </div>
         <!-- basic-end-div -->
+        </div>
     </li>
-    <li>
+    <li class="status-false">
         <p>e</p>
     </li>
+<!-- checklist-end-todo -->
 </ul>
-<!-- list-end-list -->
 
 
 
