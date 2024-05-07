@@ -323,8 +323,8 @@ pub fn output(ast: &Vec<Node>) -> String {
 pub fn output_spans(spans: &Vec<Span>) -> String {
     let mut response = String::from("");
     spans.iter().for_each(|span| match span {
-        Span::KnownSpan { r#type, .. } => {
-            response.push_str(format!("<{}></{}>", r#type, r#type).as_str());
+        Span::KnownSpan { r#type, spans, .. } => {
+            response.push_str(format!("<{}>{}</{}>", r#type, output_spans(spans), r#type).as_str());
         }
         Span::Newline { .. } => {
             response.push_str(" ");
