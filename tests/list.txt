@@ -477,8 +477,6 @@ Items After Closing List
 <!-- list-end-list -->
 
 
-
-
 ################################################
 
 Multiple Paragraphs
@@ -495,11 +493,7 @@ c
 
 - d
 
-
-
-
 ------------------------------------------------
-
 
 <ul class="list-full-list">
     <li>
@@ -511,5 +505,51 @@ c
         <p>d</p>
     </li>
 </ul>
+
+
+################################################
+
+Checklist Inside List
+
+------------------------------------------------
+
+-- list/
+
+- a
+
+    -- todo/
+
+    [] b
+
+    [] c
+
+    -- /todo
+
+- d
+
+-- /list
+
+
+
+------------------------------------------------
+
+<ul class="list-start-list">
+    <li>
+        <p>a</p>
+        <ul class="checklist-start-todo">
+            <li class="status-false">
+                <p>b</p>
+            </li>
+            <li class="status-false">
+                <p>c</p>
+            </li>
+        <!-- checklist-end-todo -->
+        </ul>
+    </li>
+    <li>
+        <p>d</p>
+    </li>
+</ul>
+<!-- list-end-list-->
 
 
