@@ -1,34 +1,8 @@
 use neopoligen_parser_prototype_v36::*;
 use pretty_assertions::assert_eq;
-// use rstest::rstest;
 use std::fs;
 use std::path::PathBuf;
 use walkdir::WalkDir;
-
-// #[case(
-//     "Generic Tag",
-//     r#"-- unknown-tag
-
-// a
-
-// "#,
-//     "<unknown-tag><p>a</p></unknown-tag>"
-// )]
-// #[case(
-//     "JSON Start/End",
-//     r#"-- metadata/
-
-// {}
-
-// -- /metadata
-
-// "#,
-//     "<h2>metadata</h2><pre>{}</pre>"
-// )]
-// fn run_tests(#[case] _x: &str, #[case] input: &str, #[case] left: &str) {
-//     let right = output(&parse(input).unwrap());
-//     assert_eq!(left, right);
-// }
 
 #[test]
 fn run_tests() {
@@ -43,6 +17,7 @@ fn run_tests() {
                 .split("------------------------------------------------")
                 .map(|p| p.trim_start())
                 .collect::<Vec<&str>>();
+            // if parts[0].starts_with("solo") && parts.len() == 3 {
             if !parts[0].starts_with("skip") && parts.len() == 3 {
                 let left = parts[2].trim().replace("\n", "").replace(" ", "");
                 let out = output(&parse(parts[1]).unwrap());

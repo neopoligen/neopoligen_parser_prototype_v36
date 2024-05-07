@@ -23,6 +23,43 @@ Content Before And After Comment
 
 a
 
+-- comment/
+
+nothing here
+
+-- /comment
+
+b
+
+-- div
+
+c
+
+------------------------------------------------
+
+<div class="basic-full-div">
+    <p>a</p>
+</div>
+<!-- comment-start-comment -->
+<!-- comment-end-comment -->
+<p>b</p>
+<div class="basic-full-div">
+    <p>c</p>
+</div>
+
+
+
+
+################################################
+
+Content Before And After Comment
+
+------------------------------------------------
+
+-- div
+
+a
+
 -- comment
 
 nothing here
