@@ -92,3 +92,35 @@ Raw Inside List With End Content
 
 
 
+################################################
+
+
+Nest One Type Of Raw Inside Another Type
+
+
+------------------------------------------------
+
+-- code/
+
+-- pre/
+
+b
+
+-- /pre
+
+-- /code
+
+------------------------------------------------
+
+
+<pre class="raw-start-code">-- pre/
+
+b
+
+-- /pre
+</pre>
+<!-- raw-end-code -->
+
+
+
+
