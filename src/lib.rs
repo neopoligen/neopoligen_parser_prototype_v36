@@ -81,7 +81,21 @@ pub enum Node {
 
 fn basic_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = not(tag("--")).context("").parse(source)?;
-    let (source, _) = not(tag("//")).context("").parse(source)?;
+    // let (source, _) = not(tag("//")).context("").parse(source)?;
+    // using take_until isn't robust but works for this prototype
+    let (source, text) = take_until("\n\n").context("").parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    Ok((
+        source,
+        Node::Block {
+            spans: text.to_string(),
+        },
+    ))
+}
+
+fn basic_block_not_list_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+    let (source, _) = not(tag("-")).context("").parse(source)?;
+    // let (source, _) = not(tag("//")).context("").parse(source)?;
     // using take_until isn't robust but works for this prototype
     let (source, text) = take_until("\n\n").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
@@ -453,7 +467,6 @@ fn json_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<
     Ok((source, r#type))
 }
 
-
 // fn list_item_end<'a>(
 //     source: &'a str,
 //     mut inside: Vec<&'a str>,
@@ -516,10 +529,9 @@ fn json_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<
 //     ))
 // }
 
-
 fn list_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = not(tag("-")).context("").parse(source)?;
-    let (source, _) = not(tag("//")).context("").parse(source)?;
+    // let (source, _) = not(tag("//")).context("").parse(source)?;
     // using take_until isn't robust but works for this prototype
     let (source, text) = take_until("\n\n").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
@@ -535,26 +547,34 @@ fn list_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     let (source, _) = tag("- ").context("").parse(source)?;
     let (source, children) = many0(list_item_block).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((
-        source,
-        Node::ListItem {
-            children,
-        },
-    ))
+    Ok((source, Node::ListItem { children }))
+}
+
+fn list_item_with_sections<'a>(source: &'a str, inside: Vec<&'a str>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    let (source, _) = tag("- ").context("").parse(source)?;
+    let (source, children) = many0(alt((list_item_block, |src| {
+        start_or_full_section(src, inside.clone())
+    })))
+    .context("")
+    .parse(source)?;
+    let (source, _) = multispace0.context("").parse(source)?;
+    Ok((source, Node::ListItem { children }))
 }
 
 fn list_section_end<'a>(
     source: &'a str,
-    mut _inside: Vec<&'a str>,
+    mut inside: Vec<&'a str>,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    inside.pop();
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(basic_block).context("").parse(source)?;
+
+    let (source, children) = many0(basic_block_not_list_item).context("").parse(source)?;
     Ok((
         source,
         Node::List {
@@ -563,8 +583,31 @@ fn list_section_end<'a>(
             bounds: "end".to_string(),
         },
     ))
-}
 
+
+    // if *inside.last().unwrap() == "list" {
+    //     let (source, children) = many0(list_item).context("").parse(source)?;
+    //     Ok((
+    //         source,
+    //         Node::List {
+    //             r#type: r#type.to_string(),
+    //             children,
+    //             bounds: "end".to_string(),
+    //         },
+    //     ))
+    // } else {
+    //     let (source, children) = many0(basic_block).context("").parse(source)?;
+    //     Ok((
+    //         source,
+    //         Node::List {
+    //             r#type: r#type.to_string(),
+    //             children,
+    //             bounds: "end".to_string(),
+    //         },
+    //     ))
+    // }
+
+}
 
 fn list_section_full<'a>(
     source: &'a str,
@@ -575,9 +618,7 @@ fn list_section_full<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(list_item)
-    .context("")
-    .parse(source)?;
+    let (source, children) = many0(list_item).context("").parse(source)?;
     Ok((
         source,
         Node::List {
@@ -588,22 +629,21 @@ fn list_section_full<'a>(
     ))
 }
 
-
 fn list_section_start<'a>(
     source: &'a str,
     mut inside: Vec<&'a str>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+    inside.push("list");
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = list_section_tag.context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(alt((list_item, |src| {
-        start_or_full_section(src, inside.clone())
-    })))
-    .context("")
-    .parse(source)?;
+    // let (source, mut children) = many0(alt((|src| {
+    //     start_or_full_section(src, inside.clone())
+    // }, list_item)))
+    let (source, mut children) = many0(|src| list_item_with_sections(src, inside.clone())).context("").parse(source)?;
     let (source, end_section) = list_section_end(source, inside.clone(), r#type)?;
     children.push(end_section);
     Ok((
@@ -615,7 +655,6 @@ fn list_section_start<'a>(
         },
     ))
 }
-
 
 fn list_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
     let (source, r#type) = alt((tag("list"),)).context("").parse(source)?;
@@ -656,15 +695,14 @@ pub fn output(ast: &Vec<Node>) -> String {
                 }
                 if bounds == "end" {
                     response.push_str("</div>");
-                    response.push_str("<div class=\"");
+                    response.push_str("<!-- ");
                     response.push_str(kind);
                     response.push_str("-");
                     response.push_str(bounds);
                     response.push_str("-");
                     response.push_str(r#type);
-                    response.push_str("\">");
+                    response.push_str(" -->");
                     response.push_str(&output(&children));
-                    response.push_str("</div>");
                 }
             // } else if kind == "list" {
             //     if bounds == "full" {
@@ -772,18 +810,18 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::ChecklistItem {
-            ..
-        } => {
+        Node::ChecklistItem { .. } => {
             response.push_str("TODO: ChecklistItem");
         }
-        
+
         Node::Json { data, r#type, .. } => {
             response.push_str(format!("<h2>{}</h2><pre>{}</pre>", r#type, data).as_str())
         }
 
         Node::List {
-            bounds, children, r#type, 
+            bounds,
+            children,
+            r#type,
         } => {
             if bounds == "full" {
                 response.push_str("<ul class=\"list");
@@ -806,21 +844,17 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
             if bounds == "end" {
                 response.push_str("</ul>");
-                response.push_str("<div class=\"list");
+                response.push_str("<!-- list ");
                 response.push_str("-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(" -->");
                 response.push_str(&output(&children));
-                response.push_str("</div>");
             }
         }
 
-
-        Node::ListItem {
-            children
-        } => {
+        Node::ListItem { children } => {
             response.push_str("<li>");
             response.push_str(&output(&children));
             response.push_str("</li>");

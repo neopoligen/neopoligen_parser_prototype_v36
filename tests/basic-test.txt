@@ -29,8 +29,7 @@ here
 <div class="basic-start-div">
     <p>here</p>
 </div>
-<div class="basic-end-div">
-</div>
+<!-- basic-end-div -->
 
 ################################################
 
@@ -55,8 +54,7 @@ here
         <p>here</p>
     </div>
 </div>
-<div class="basic-end-div">
-</div>
+<!-- basic-end-div -->
 
 
 
@@ -88,12 +86,10 @@ golf
     <div class="basic-start-div">
         <p>foxtrot</p>
     </div>
-    <div class="basic-end-div">
-        <p>golf</p>
-    </div>
+    <!-- basic-end-div -->
+    <p>golf</p>
 </div>
-<div class="basic-end-div">
-</div>
+<!-- basic-end-div -->
 
 
 
@@ -136,16 +132,13 @@ e
         <div class="basic-start-div">
             <p>c</p>
         </div>
-        <div class="basic-end-div">
+        <!-- basic-end-div -->
         <p>d</p>
-        </div>
     </div>
-    <div class="basic-end-div">
+    <!-- basic-end-div -->
     <p>e</p>
-    </div>
 </div>
-<div class="basic-end-div">
-</div>
+<!-- basic-end-div -->
 
 
 
@@ -249,5 +242,130 @@ Start/End List Basic
         <p>b</p>
     </li>
 </ul>
-<div class="list-end-list"></div>
+<!-- list-end-list -->
+
+
+
+################################################
+
+
+Start/End List Basic 
+
+
+------------------------------------------------
+
+-- list/
+
+- a
+
+    -- list/
+
+    - b
+
+    -- /list
+
+-- /list
+
+
+------------------------------------------------
+
+<ul class="list-start-list">
+    <li>
+        <p>a</p>
+        <ul class="list-start-list">
+            <li>
+                <p>b</p>
+            </li>
+        </ul>
+        <!-- list-end-list -->
+    </li>
+</ul>
+<!-- list-end-list -->
+
+
+################################################
+
+
+Item After List Item
+
+
+------------------------------------------------
+
+-- list/
+
+- a
+
+    -- list/
+
+    - b
+
+    -- /list
+
+- c
+
+-- /list
+
+------------------------------------------------
+
+
+<ul class="list-start-list">
+    <li>
+        <p>a</p>
+        <ul class="list-start-list">
+            <li>
+                <p>b</p>
+            </li>
+        </ul>
+        <!-- list-end-list -->
+    </li>
+    <li>
+        <p>c</p>
+    </li>
+</ul>
+<!-- list-end-list -->
+
+
+################################################
+
+
+Content After List Item
+
+
+------------------------------------------------
+
+-- list/
+
+- a
+
+    -- list/
+
+    - b
+
+    -- /list
+    
+    c
+
+- d
+
+-- /list
+
+------------------------------------------------
+
+
+<ul class="list-start-list">
+    <li>
+        <p>a</p>
+        <ul class="list-start-list">
+            <li>
+                <p>b</p>
+            </li>
+        </ul>
+        <!-- list-end-list -->
+        <p>c</p>
+    </li>
+    <li>
+        <p>d</p>
+    </li>
+</ul>
+<!-- list-end-list -->
 
