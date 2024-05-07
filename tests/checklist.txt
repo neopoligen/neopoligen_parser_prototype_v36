@@ -190,66 +190,36 @@ List Inside Checklist
 
 
 
-
 ################################################
 
 
-skip Basic List
+Empty Start End
+
+------------------------------------------------
+
+-- todo/
+
+-- /todo
 
 
 ------------------------------------------------
 
--- checklist
-
-- a
-
-
-------------------------------------------------
-
-<ul class="list-full-list">
-    <li>
-        <p>a</p>
-    </li>
+<ul class="checklist-start-todo">
+<!-- checklist-end-todo-->
 </ul>
 
 
 ################################################
 
 
-skip Start/End List Basic 
+Item After List Item
 
 
 ------------------------------------------------
 
--- checklist/
+-- todo/
 
-- b
-
--- /list
-
-
-------------------------------------------------
-
-<ul class="list-start-list">
-    <li>
-        <p>b</p>
-    </li>
-</ul>
-<!-- list-end-list -->
-
-
-
-################################################
-
-
-skip Start/End List Basic 
-
-
-------------------------------------------------
-
--- checklist/
-
-- a
+[] a
 
     -- list/
 
@@ -257,13 +227,15 @@ skip Start/End List Basic
 
     -- /list
 
--- /list
+[] c
 
+-- /todo
 
 ------------------------------------------------
 
-<ul class="list-start-list">
-    <li>
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
         <p>a</p>
         <ul class="list-start-list">
             <li>
@@ -272,50 +244,11 @@ skip Start/End List Basic
         </ul>
         <!-- list-end-list -->
     </li>
-</ul>
-<!-- list-end-list -->
-
-
-################################################
-
-
-skip Item After List Item
-
-
-------------------------------------------------
-
--- checklist/
-
-- a
-
-    -- list/
-
-    - b
-
-    -- /list
-
-- c
-
--- /list
-
-------------------------------------------------
-
-
-<ul class="list-start-list">
-    <li>
-        <p>a</p>
-        <ul class="list-start-list">
-            <li>
-                <p>b</p>
-            </li>
-        </ul>
-        <!-- list-end-list -->
-    </li>
-    <li>
+    <li class="status-false">
         <p>c</p>
     </li>
+<!-- checklist-end-todo -->
 </ul>
-<!-- list-end-list -->
 
 
 ################################################
