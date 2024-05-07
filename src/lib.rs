@@ -141,8 +141,14 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::ChecklistItem { .. } => {
-            response.push_str("TODO: ChecklistItem");
+        Node::ChecklistItem {
+            children, status, ..
+        } => {
+            response.push_str(
+                format!("<li class=\"status-{}\">", status.to_string().as_str()).as_str(),
+            );
+            response.push_str(&output(&children));
+            response.push_str("</li>");
         }
 
         Node::Json { data, r#type, .. } => {

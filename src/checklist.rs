@@ -13,7 +13,7 @@ use nom_supreme::error::ErrorTree;
 use nom_supreme::parser_ext::ParserExt;
 
 pub fn checklist_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let (source, _) = not(tag("-")).context("").parse(source)?;
+    let (source, _) = not(tag("[")).context("").parse(source)?;
     // using take_until isn't robust but works for this prototype
     let (source, text) = take_until("\n\n").context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
@@ -26,24 +26,40 @@ pub fn checklist_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>
 }
 
 pub fn checklist_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let (source, _) = tag("- ").context("").parse(source)?;
+    // NOTE: this prototype doesn't not distinguish between checked
+    // and unchecked. Everything is targeted to unchecked
+    let (source, _) = tag("[]").context("").parse(source)?;
     let (source, children) = many0(checklist_item_block).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((source, Node::ListItem { children }))
+    Ok((
+        source,
+        Node::ChecklistItem {
+            children,
+            status: false,
+            status_value: None,
+        },
+    ))
 }
 
 pub fn checklist_item_with_sections<'a>(
     source: &'a str,
     inside: Vec<&'a str>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let (source, _) = tag("- ").context("").parse(source)?;
+    let (source, _) = tag("[] ").context("").parse(source)?;
     let (source, children) = many0(alt((checklist_item_block, |src| {
         start_or_full_section(src, inside.clone())
     })))
     .context("")
     .parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((source, Node::ListItem { children }))
+    Ok((
+        source,
+        Node::ChecklistItem {
+            children,
+            status: false,
+            status_value: None,
+        },
+    ))
 }
 
 pub fn checklist_section_end<'a>(
@@ -61,34 +77,12 @@ pub fn checklist_section_end<'a>(
     let (source, children) = many0(basic_block_not_list_item).context("").parse(source)?;
     Ok((
         source,
-        Node::List {
+        Node::Checklist {
             r#type: r#type.to_string(),
             children,
             bounds: "end".to_string(),
         },
     ))
-
-    // if *inside.last().unwrap() == "list" {
-    //     let (source, children) = many0(list_item).context("").parse(source)?;
-    //     Ok((
-    //         source,
-    //         Node::List {
-    //             r#type: r#type.to_string(),
-    //             children,
-    //             bounds: "end".to_string(),
-    //         },
-    //     ))
-    // } else {
-    //     let (source, children) = many0(basic_block).context("").parse(source)?;
-    //     Ok((
-    //         source,
-    //         Node::List {
-    //             r#type: r#type.to_string(),
-    //             children,
-    //             bounds: "end".to_string(),
-    //         },
-    //     ))
-    // }
 }
 
 pub fn checklist_section_full<'a>(
@@ -103,7 +97,7 @@ pub fn checklist_section_full<'a>(
     let (source, children) = many0(checklist_item).context("").parse(source)?;
     Ok((
         source,
-        Node::List {
+        Node::Checklist {
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -122,9 +116,6 @@ pub fn checklist_section_start<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    // let (source, mut children) = many0(alt((|src| {
-    //     start_or_full_section(src, inside.clone())
-    // }, list_item)))
     let (source, mut children) = many0(|src| checklist_item_with_sections(src, inside.clone()))
         .context("")
         .parse(source)?;
@@ -132,7 +123,7 @@ pub fn checklist_section_start<'a>(
     children.push(end_section);
     Ok((
         source,
-        Node::List {
+        Node::Checklist {
             r#type: r#type.to_string(),
             children,
             bounds: "start".to_string(),

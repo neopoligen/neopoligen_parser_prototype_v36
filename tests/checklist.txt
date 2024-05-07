@@ -1,6 +1,6 @@
 ################################################
 
-skip Checklist Full
+Checklist Full
 
 ------------------------------------------------
 
@@ -13,11 +13,11 @@ skip Checklist Full
 ------------------------------------------------
 
 <ul class="checklist-full-todo">
-    <li>
-        <p>alfa</p>
+    <li class="status-false">
+        <p>a</p>
     </li>
-    <li>
-        <p>bravo</p>
+    <li class="status-false">
+        <p>b</p>
     </li>
 </ul>
 

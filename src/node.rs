@@ -15,9 +15,9 @@ pub enum Node {
         bounds: String,
     },
     ChecklistItem {
-        r#type: String,
         children: Vec<Node>,
-        bounds: String,
+        status: bool,
+        status_value: Option<String>,
     },
     Json {
         bounds: String,
