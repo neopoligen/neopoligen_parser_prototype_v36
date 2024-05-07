@@ -78,7 +78,7 @@ pub fn known_span(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
         source,
         Span::KnownSpan {
             r#type: r#type.to_string(),
-            spans: spans,
+            spans,
             flags: vec![],
             attrs: BTreeMap::new(),
         },
@@ -96,6 +96,6 @@ pub fn word_part(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
 }
 
 pub fn known_span_type(source: &str) -> IResult<&str, &str, ErrorTree<&str>> {
-    let (source, r#type) = alt((tag("em"),)).context("").parse(source)?;
+    let (source, r#type) = alt((tag("em"), tag("strong"))).context("").parse(source)?;
     Ok((source, r#type))
 }
