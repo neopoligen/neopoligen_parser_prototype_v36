@@ -123,44 +123,44 @@ Three levels of Generic Start/End
 
 ------------------------------------------------
 
--- div/
+-- misc/
 
 a
 
-    -- div/
+    -- misc/
 
     b
 
-        -- div/
+        -- misc/
 
         c
 
-        -- /div
+        -- /misc
 
     d
 
-    -- /div
+    -- /misc
 
 e
 
--- /div
+-- /misc
 
 
 ------------------------------------------------
 
-<div class="generic-start-div">
+<div class="generic-start-misc">
     <p>a</p>
-    <div class="generic-start-div">
+    <div class="generic-start-misc">
         <p>b</p>
-        <div class="generic-start-div">
+        <div class="generic-start-misc">
             <p>c</p>
-        <!-- generic-end-div -->
+        <!-- generic-end-misc -->
         </div>
         <p>d</p>
-    <!-- generic-end-div -->
+    <!-- generic-end-misc -->
     </div>
     <p>e</p>
-<!-- generic-end-div -->
+<!-- generic-end-misc -->
 </div>
 
 
