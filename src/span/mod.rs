@@ -42,8 +42,11 @@ pub enum SpanAttr {
     Flag { key: String },
 }
 
-pub fn span_finder(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
-    let (source, span) = alt((known_span, newline, space, word_part))
+pub fn span_finder<'a>(
+    source: &'a str,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Span, ErrorTree<&'a str>> {
+    let (source, span) = alt((|src| known_span(src, spans), newline, space, word_part))
         .context("")
         .parse(source)?;
     Ok((source, span))
@@ -72,12 +75,17 @@ pub fn space(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     ))
 }
 
-pub fn known_span(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
+pub fn known_span<'a>(
+    source: &'a str,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Span, ErrorTree<&'a str>> {
     let (source, _) = tag("<<").context("").parse(source)?;
     let (source, _) = space0.context("").parse(source)?;
     let (source, r#type) = known_span_type.context("").parse(source)?;
     let (source, _) = tag("|").context("").parse(source)?;
-    let (source, spans) = many0(span_finder).context("").parse(source)?;
+    let (source, spans) = many0(|src| span_finder(src, spans))
+        .context("")
+        .parse(source)?;
     let (source, raw_attrs) = many0(alt((span_key_value_attr, span_flag_attr)))
         .context("")
         .parse(source)?;

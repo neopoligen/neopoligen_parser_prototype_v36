@@ -11,20 +11,30 @@ use nom::Parser;
 use nom_supreme::error::ErrorTree;
 use nom_supreme::parser_ext::ParserExt;
 
-pub fn checklist_item_block(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+pub fn checklist_item_block<'a>(
+    source: &'a str,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = not(tag("--")).context("").parse(source)?;
     let (source, _) = not(tag("[")).context("").parse(source)?;
     let (source, _) = not(eof).context("").parse(source)?;
-    let (source, spans) = many0(span_finder).context("").parse(source)?;
+    let (source, spans) = many0(|src| span_finder(src, spans))
+        .context("")
+        .parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((source, Node::Block { spans }))
 }
 
-pub fn checklist_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+pub fn checklist_item<'a>(
+    source: &'a str,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     // NOTE: this prototype doesn't not distinguish between checked
     // and unchecked. Everything is targeted to unchecked
     let (source, _) = tag("[]").context("").parse(source)?;
-    let (source, children) = many0(checklist_item_block).context("").parse(source)?;
+    let (source, children) = many0(|src| checklist_item_block(src, spans))
+        .context("")
+        .parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
@@ -42,9 +52,10 @@ pub fn checklist_item_with_sections<'a>(
     spans: &'a Vec<String>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("[] ").context("").parse(source)?;
-    let (source, children) = many0(alt((checklist_item_block, |src| {
-        start_or_full_section(src, &sections, &spans)
-    })))
+    let (source, children) = many0(alt((
+        |src| checklist_item_block(src, spans),
+        |src| start_or_full_section(src, &sections, &spans),
+    )))
     .context("")
     .parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
@@ -94,7 +105,9 @@ pub fn checklist_section_full<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(checklist_item).context("").parse(source)?;
+    let (source, children) = many0(|src| checklist_item(src, spans))
+        .context("")
+        .parse(source)?;
     Ok((
         source,
         Node::Checklist {

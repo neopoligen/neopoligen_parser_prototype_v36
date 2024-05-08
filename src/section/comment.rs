@@ -40,7 +40,7 @@ pub fn comment_section_end<'a>(
 pub fn comment_section_full<'a>(
     source: &'a str,
     sections: &'a Sections,
-    spans: &'a Vec<String>,
+    _spans: &'a Vec<String>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.comment))
