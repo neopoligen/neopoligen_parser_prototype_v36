@@ -34,7 +34,10 @@ pub fn block_of_anything<'a>(
     Ok((source, Node::Block { spans }))
 }
 
-pub fn block_of_end_content(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+pub fn block_of_end_content<'a>(
+    source: &'a str,
+    _spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = not(eof).context("").parse(source)?;
     let (source, _) = not(tag("-")).context("").parse(source)?;
     let (source, _) = not(tag("[")).context("").parse(source)?;

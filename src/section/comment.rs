@@ -14,6 +14,7 @@ use nom_supreme::parser_ext::ParserExt;
 
 pub fn comment_section_end<'a>(
     source: &'a str,
+    spans: &'a Vec<String>,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
@@ -22,7 +23,9 @@ pub fn comment_section_end<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(block_of_end_content).context("").parse(source)?;
+    let (source, children) = many0(|src| block_of_end_content(src, spans))
+        .context("")
+        .parse(source)?;
     Ok((
         source,
         Node::Comment {
@@ -79,7 +82,7 @@ pub fn comment_section_start<'a>(
         .parse(source)?;
     let (source, text) = take_until(end_key.as_str()).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, end_section) = comment_section_end(source, r#type)?;
+    let (source, end_section) = comment_section_end(source, spans, r#type)?;
     Ok((
         source,
         Node::Comment {

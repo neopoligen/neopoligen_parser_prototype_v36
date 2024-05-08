@@ -60,6 +60,7 @@ pub fn checklist_item_with_sections<'a>(
 
 pub fn checklist_section_end<'a>(
     source: &'a str,
+    spans: &'a Vec<String>,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
@@ -68,7 +69,9 @@ pub fn checklist_section_end<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(block_of_end_content).context("").parse(source)?;
+    let (source, children) = many0(|src| block_of_end_content(src, spans))
+        .context("")
+        .parse(source)?;
     Ok((
         source,
         Node::Checklist {
@@ -118,7 +121,7 @@ pub fn checklist_section_start<'a>(
     let (source, mut children) = many0(|src| checklist_item_with_sections(src, &sections, &spans))
         .context("")
         .parse(source)?;
-    let (source, end_section) = checklist_section_end(source, r#type)?;
+    let (source, end_section) = checklist_section_end(source, spans, r#type)?;
     children.push(end_section);
     Ok((
         source,
