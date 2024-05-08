@@ -81,7 +81,9 @@ pub fn known_span<'a>(
 ) -> IResult<&'a str, Span, ErrorTree<&'a str>> {
     let (source, _) = tag("<<").context("").parse(source)?;
     let (source, _) = space0.context("").parse(source)?;
-    let (source, r#type) = known_span_type.context("").parse(source)?;
+    let (source, r#type) = (|src| known_span_type(src, spans))
+        .context("")
+        .parse(source)?;
     let (source, _) = tag("|").context("").parse(source)?;
     let (source, spans) = many0(|src| span_finder(src, spans))
         .context("")
@@ -145,7 +147,29 @@ pub fn word_part(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     ))
 }
 
-pub fn known_span_type(source: &str) -> IResult<&str, &str, ErrorTree<&str>> {
-    let (source, r#type) = alt((tag("em"), tag("strong"))).context("").parse(source)?;
-    Ok((source, r#type))
+// pub fn known_span_type(source: &str) -> IResult<&str, &str, ErrorTree<&str>> {
+//     let (source, r#type) = alt((tag("em"), tag("strong"))).context("").parse(source)?;
+//     Ok((source, r#type))
+// }
+
+pub fn known_span_type<'a>(
+    source: &'a str,
+    spans: &Vec<String>,
+) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    let (source, result) = spans
+        .iter()
+        .fold(span_initial_error(), |acc, item| match acc {
+            Ok(v) => Ok(v),
+            _ => tag(item.as_str()).parse(source),
+        })?;
+    Ok((source, result))
+}
+
+pub fn span_initial_error<'a>() -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    // the purpose of this function is just to put an
+    // error in the accumulator. There's a way to do that
+    // with just making an error, but I haven't solved all
+    // the parts to that yet.
+    let (_, _) = tag("asdf").parse("fdsa")?;
+    Ok(("", ""))
 }
