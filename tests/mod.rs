@@ -15,9 +15,9 @@ fn run_tests() {
         generic: vec!["misc".to_string()],
         json: vec!["json-example".to_string()],
         list: vec!["list".to_string()],
-        raw: vec!["pre".to_string()],
+        raw: vec!["pre".to_string(), "code".to_string()],
         table: vec![],
-        yaml: vec![],
+        yaml: vec!["yaml-example".to_string()],
     };
     let spans = vec!["em".to_string(), "strong".to_string()];
     get_files(&dir, vec!["txt"]).iter().for_each(|f| {
