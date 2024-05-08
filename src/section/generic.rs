@@ -44,7 +44,9 @@ pub fn generic_section_full<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, children) = many0(block_of_anything).context("").parse(source)?;
+    let (source, children) = many0(|src| block_of_anything(src, &spans))
+        .context("")
+        .parse(source)?;
     Ok((
         source,
         Node::Generic {
@@ -68,9 +70,10 @@ pub fn generic_section_start<'a>(
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(alt((block_of_anything, |src| {
-        start_or_full_section(src, &sections, &spans)
-    })))
+    let (source, mut children) = many0(alt((
+        |src| block_of_anything(src, &spans),
+        |src| start_or_full_section(src, &sections, &spans),
+    )))
     .context("")
     .parse(source)?;
     let (source, end_section) = generic_section_end(source, r#type)?;

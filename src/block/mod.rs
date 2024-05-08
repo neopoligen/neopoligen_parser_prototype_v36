@@ -23,7 +23,10 @@ use nom::Parser;
 use nom_supreme::error::ErrorTree;
 use nom_supreme::parser_ext::ParserExt;
 
-pub fn block_of_anything(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
+pub fn block_of_anything<'a>(
+    source: &'a str,
+    _spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = not(eof).context("").parse(source)?;
     let (source, _) = not(tag("--")).context("").parse(source)?;
     let (source, spans) = many0(span_finder).context("").parse(source)?;
