@@ -14,11 +14,8 @@ use nom_supreme::parser_ext::ParserExt;
 
 pub fn yaml_section_end<'a>(
     source: &'a str,
-    mut inside: Vec<&'a str>,
     key: &'a str,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    inside.pop();
-    let kind = "yaml";
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -31,17 +28,21 @@ pub fn yaml_section_end<'a>(
         Node::Yaml {
             bounds: "end".to_string(),
             children,
-            kind: kind.to_string(),
             r#type: r#type.to_string(),
             data: None,
         },
     ))
 }
 
-pub fn yaml_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
-    let kind = "yaml";
+pub fn yaml_section_full<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = yaml_section_tag.context("").parse(source)?;
+    let (source, r#type) = (|src| tag_finder(src, &sections.yaml))
+        .context("")
+        .parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = many0(empty_until_newline_or_eof)
@@ -54,7 +55,6 @@ pub fn yaml_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
         Node::Yaml {
             bounds: "full".to_string(),
             children: vec![],
-            kind: kind.to_string(),
             r#type: r#type.to_string(),
             data: Some(text.trim_end().to_string()),
         },
@@ -63,12 +63,13 @@ pub fn yaml_section_full(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
 
 pub fn yaml_section_start<'a>(
     source: &'a str,
-    mut inside: Vec<&'a str>,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
-    let kind = "yaml";
-    inside.push(kind);
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = yaml_section_tag.context("").parse(source)?;
+    let (source, r#type) = (|src| tag_finder(src, &sections.yaml))
+        .context("")
+        .parse(source)?;
     let end_key = format!("-- /{}", r#type);
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -78,20 +79,14 @@ pub fn yaml_section_start<'a>(
         .parse(source)?;
     let (source, text) = take_until(end_key.as_str()).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, end_section) = yaml_section_end(source, inside.clone(), r#type)?;
+    let (source, end_section) = yaml_section_end(source, r#type)?;
     Ok((
         source,
         Node::Yaml {
             bounds: "start".to_string(),
             children: vec![end_section],
-            kind: kind.to_string(),
             r#type: r#type.to_string(),
             data: Some(text.trim_end().to_string()),
         },
     ))
-}
-
-pub fn yaml_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = alt((tag("yaml-example"),)).context("").parse(source)?;
-    Ok((source, r#type))
 }

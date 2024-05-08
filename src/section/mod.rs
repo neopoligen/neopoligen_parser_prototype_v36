@@ -18,8 +18,9 @@ use crate::section::json::*;
 use crate::section::list::*;
 use crate::span::*;
 use crate::yaml::*;
+use crate::Sections;
 use nom::branch::alt;
-// use nom::bytes::complete::tag;
+use nom::bytes::complete::tag;
 // use nom::bytes::complete::take_until;
 use nom::character::complete::multispace0;
 use nom::character::complete::newline;
@@ -47,28 +48,51 @@ pub fn empty_until_newline_or_eof<'a>(
 
 pub fn start_or_full_section<'a>(
     source: &'a str,
-    inside: Vec<&'a str>,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, results) = alt((
-        |src| basic_section_full(src),
-        |src| basic_section_start(src, inside.clone()),
-        |src| checklist_section_full(src, inside.clone()),
-        |src| checklist_section_start(src, inside.clone()),
-        |src| comment_section_full(src),
-        |src| comment_section_start(src, inside.clone()),
-        |src| json_section_full(src),
-        |src| json_section_start(src, inside.clone()),
-        |src| list_section_full(src, inside.clone()),
-        |src| list_section_start(src, inside.clone()),
-        |src| raw_section_full(src),
-        |src| raw_section_start(src, inside.clone()),
-        |src| yaml_section_full(src),
-        |src| yaml_section_start(src, inside.clone()),
+        |src| basic_section_full(src, &sections, &spans),
+        |src| basic_section_start(src, &sections, &spans),
+        |src| checklist_section_full(src, &sections, &spans),
+        |src| checklist_section_start(src, &sections, &spans),
+        |src| comment_section_full(src, &sections, &spans),
+        |src| comment_section_start(src, &sections, &spans),
+        |src| json_section_full(src, &sections, &spans),
+        |src| json_section_start(src, &sections, &spans),
+        |src| list_section_full(src, &sections, &spans),
+        |src| list_section_start(src, &sections, &spans),
+        |src| raw_section_full(src, &sections, &spans),
+        |src| raw_section_start(src, &sections, &spans),
+        |src| yaml_section_full(src, &sections, &spans),
+        |src| yaml_section_start(src, &sections, &spans),
         // make sure generic is last
-        |src| generic_section_full(src),
-        |src| generic_section_start(src, inside.clone()),
+        |src| generic_section_full(src, &sections, &spans),
+        |src| generic_section_start(src, &sections, &spans),
     ))
     .context("")
     .parse(source)?;
     Ok((source, results))
+}
+
+pub fn initial_error<'a>() -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    // the purpose of this function is just to put an
+    // error in the accumulator. There's a way to do that
+    // with just making an error, but I haven't solved all
+    // the parts to that yet.
+    let (_, _) = tag("asdf").parse("fdsa")?;
+    Ok(("", ""))
+}
+
+pub fn tag_finder<'a>(
+    source: &'a str,
+    section: &Vec<String>,
+) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    let (source, result) = section
+        .iter()
+        .fold(initial_error(), |acc, item| match acc {
+            Ok(v) => Ok(v),
+            _ => tag(item.as_str()).parse(source),
+        })?;
+    Ok((source, result))
 }

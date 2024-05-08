@@ -21,6 +21,20 @@ use nom_supreme::parser_ext::ParserExt;
 // remove after everything else is done if it's not needed
 
 #[derive(Debug)]
+pub struct Sections {
+    pub basic: Vec<String>,
+    pub checklist: Vec<String>,
+    pub comment: Vec<String>,
+    pub detail: Vec<String>,
+    pub generic: Vec<String>,
+    pub json: Vec<String>,
+    pub list: Vec<String>,
+    pub raw: Vec<String>,
+    pub table: Vec<String>,
+    pub yaml: Vec<String>,
+}
+
+#[derive(Debug)]
 pub struct ParserError {
     pub line: usize,
     pub column: usize,
@@ -63,14 +77,12 @@ pub fn output(ast: &Vec<Node>) -> String {
         Node::Basic {
             bounds,
             children,
-            kind,
             r#type,
             ..
         } => {
             if bounds == "full" {
                 response.push_str("<div class=\"");
-                response.push_str(kind);
-                response.push_str("-");
+                response.push_str("basic-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
@@ -80,8 +92,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
             if bounds == "start" {
                 response.push_str("<div class=\"");
-                response.push_str(kind);
-                response.push_str("-");
+                response.push_str("basic-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
@@ -90,8 +101,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
             if bounds == "end" {
                 response.push_str("<!-- ");
-                response.push_str(kind);
-                response.push_str("-");
+                response.push_str("basic-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
@@ -169,23 +179,22 @@ pub fn output(ast: &Vec<Node>) -> String {
         Node::Generic {
             bounds,
             children,
-            kind,
             r#type,
             ..
         } => {
             if bounds == "full" {
                 response
-                    .push_str(format!("<div class=\"{}-{}-{}\">", kind, bounds, r#type).as_str());
+                    .push_str(format!("<div class=\"generic-{}-{}\">", bounds, r#type).as_str());
                 response.push_str(&output(&children));
                 response.push_str("</div>");
             }
             if bounds == "start" {
                 response
-                    .push_str(format!("<div class=\"{}-{}-{}\">", kind, bounds, r#type).as_str());
+                    .push_str(format!("<div class=\"generic-{}-{}\">", bounds, r#type).as_str());
                 response.push_str(&output(&children));
             }
             if bounds == "end" {
-                response.push_str(format!("<!-- {}-{}-{} -->", kind, bounds, r#type).as_str());
+                response.push_str(format!("<!-- generic-{}-{} -->", bounds, r#type).as_str());
                 response.push_str("</div>");
                 response.push_str(&output(&children));
             }
@@ -258,14 +267,12 @@ pub fn output(ast: &Vec<Node>) -> String {
         Node::Raw {
             text,
             r#type,
-            kind,
             bounds,
             children,
         } => {
             if bounds == "full" {
                 response.push_str("<pre class=\"");
-                response.push_str(kind);
-                response.push_str("-");
+                response.push_str("raw-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
@@ -274,8 +281,7 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str("</pre>");
             } else if bounds == "start" {
                 response.push_str("<pre class=\"");
-                response.push_str(kind);
-                response.push_str("-");
+                response.push_str("raw-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
@@ -285,8 +291,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             } else if bounds == "end" {
                 response.push_str("</pre>");
                 response.push_str("<!-- ");
-                response.push_str(kind);
-                response.push_str("-");
+                response.push_str("raw-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
@@ -294,7 +299,7 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(&output(&children));
             }
         }
-
+        Node::TagFinderInit => {}
         Node::Yaml {
             bounds,
             children,
@@ -351,16 +356,23 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
     response
 }
 
-pub fn parse(source: &str) -> Result<Vec<Node>, ParserError> {
-    match final_parser(parse_runner)(source) {
+pub fn parse(
+    source: &str,
+    sections: &Sections,
+    spans: &Vec<String>,
+) -> Result<Vec<Node>, ParserError> {
+    match final_parser(|src| parse_runner(src, sections, spans))(source) {
         Ok(ast) => Ok(ast),
         Err(e) => Err(get_error(source, &e)),
     }
 }
 
-fn parse_runner(source: &str) -> IResult<&str, Vec<Node>, ErrorTree<&str>> {
-    let inside = vec!["root"];
-    let (source, results) = many1(|src| start_or_full_section(src, inside.clone()))
+fn parse_runner<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Vec<Node>, ErrorTree<&'a str>> {
+    let (source, results) = many1(|src| start_or_full_section(src, &sections, &spans))
         .context("")
         .parse(source)?;
     Ok((source, results))
