@@ -32,9 +32,15 @@ pub fn generic_section_end<'a>(
     ))
 }
 
-pub fn generic_section_full<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn generic_section_full<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = is_not(" /\n").context("").parse(source)?;
+    let (source, r#type) = (|src| tag_finder(src, &sections.generic))
+        .context("")
+        .parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
@@ -49,16 +55,24 @@ pub fn generic_section_full<'a>(source: &'a str, sections: &'a Sections, spans: 
     ))
 }
 
-pub fn generic_section_start<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn generic_section_start<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = is_not(" /\n").context("").parse(source)?;
+    let (source, r#type) = (|src| tag_finder(src, &sections.generic))
+        .context("")
+        .parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    let (source, mut children) = many0(alt((block_of_anything, |src| start_or_full_section(src, &sections, &spans))))
-        .context("")
-        .parse(source)?;
+    let (source, mut children) = many0(alt((block_of_anything, |src| {
+        start_or_full_section(src, &sections, &spans)
+    })))
+    .context("")
+    .parse(source)?;
     let (source, end_section) = generic_section_end(source, r#type)?;
     children.push(end_section);
     Ok((

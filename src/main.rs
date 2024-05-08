@@ -8,7 +8,7 @@ fn main() {
         checklist: vec!["todo".to_string()],
         comment: vec!["comment".to_string()],
         detail: vec![],
-        generic: vec![],
+        generic: vec!["misc".to_string()],
         json: vec!["json-example".to_string()],
         list: vec!["list".to_string()],
         raw: vec!["pre".to_string()],
