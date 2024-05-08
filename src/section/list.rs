@@ -26,11 +26,17 @@ pub fn list_item(source: &str) -> IResult<&str, Node, ErrorTree<&str>> {
     Ok((source, Node::ListItem { children }))
 }
 
-pub fn list_item_with_sections<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn list_item_with_sections<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("- ").context("").parse(source)?;
-    let (source, children) = many0(alt((list_item_block, |src| start_or_full_section(src, &sections, &spans))))
-        .context("")
-        .parse(source)?;
+    let (source, children) = many0(alt((list_item_block, |src| {
+        start_or_full_section(src, &sections, &spans)
+    })))
+    .context("")
+    .parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((source, Node::ListItem { children }))
 }
@@ -56,9 +62,15 @@ pub fn list_section_end<'a>(
     ))
 }
 
-pub fn list_section_full<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn list_section_full<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = list_section_tag.context("").parse(source)?;
+    let (source, r#type) = (|src| tag_finder(src, &sections.list))
+        .context("")
+        .parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
@@ -73,9 +85,15 @@ pub fn list_section_full<'a>(source: &'a str, sections: &'a Sections, spans: &'a
     ))
 }
 
-pub fn list_section_start<'a>(source: &'a str, sections: &'a Sections, spans: &'a Vec<String>) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+pub fn list_section_start<'a>(
+    source: &'a str,
+    sections: &'a Sections,
+    spans: &'a Vec<String>,
+) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
-    let (source, r#type) = list_section_tag.context("").parse(source)?;
+    let (source, r#type) = (|src| tag_finder(src, &sections.list))
+        .context("")
+        .parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
@@ -93,9 +111,4 @@ pub fn list_section_start<'a>(source: &'a str, sections: &'a Sections, spans: &'
             bounds: "start".to_string(),
         },
     ))
-}
-
-pub fn list_section_tag<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    let (source, r#type) = alt((tag("list"),)).context("").parse(source)?;
-    Ok((source, r#type))
 }
