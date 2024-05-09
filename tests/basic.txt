@@ -197,12 +197,14 @@ Basic With Key Value Attrs
 ------------------------------------------------
 
 -- div
--- key: value
+-- key1: value1
+-- key2: value2
+-- flag1
 
 here
 
 ------------------------------------------------
 
-<div class="basic-full-div" key="value">
+<div class="basic-full-div" key1="value1" key2="value2" flag1>
     <p>here</p>
 </div>

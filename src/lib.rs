@@ -87,6 +87,10 @@ pub fn output(ast: &Vec<Section>) -> String {
                         format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
                     )
                 });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+
                 response.push_str(">");
                 response.push_str(&output(&children));
                 response.push_str("</div>");
