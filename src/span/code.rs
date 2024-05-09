@@ -10,23 +10,15 @@ use nom_supreme::parser_ext::ParserExt;
 use std::collections::BTreeMap;
 
 pub fn code_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
-    let (source, _) = tag("`").context("").parse(source)?;
-    let (source, text) = is_not("`").context("").parse(source)?;
-    let (source, _) = tag("`").context("").parse(source)?;
-    let (source, mut raw_attrs) = many0(alt((
-        code_shorthand_first_key_value_attr,
-        code_shorthand_first_flag_attr,
-    )))
-    .context("")
-    .parse(source)?;
-    let (source, secondary_attrs) = many0(alt((
+    let (source, _) = tag("``").context("").parse(source)?;
+    let (source, text) = is_not("`|").context("").parse(source)?;
+    let (source, raw_attrs) = many0(alt((
         code_shorthand_key_value_attr,
         code_shorthand_flag_attr,
     )))
     .context("")
     .parse(source)?;
-    let (source, _) = tag("`").context("").parse(source)?;
-    raw_attrs.extend(secondary_attrs);
+    let (source, _) = tag("``").context("").parse(source)?;
     let mut flags: Vec<String> = vec![];
     let mut attrs = BTreeMap::new();
     raw_attrs.iter().for_each(|attr| match attr {
@@ -44,6 +36,7 @@ pub fn code_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
         },
     ))
 }
+
 
 pub fn code_shorthand_first_key_value_attr(
     source: &str,

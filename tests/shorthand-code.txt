@@ -6,7 +6,7 @@ Shorthand Code Span
 
 -- div
 
-`alfa``
+``alfa``
 
 ------------------------------------------------
 
@@ -23,7 +23,7 @@ Shorthand Code Span With Key Value
 
 -- div
 
-`alfa`key1: value1`
+``alfa|key1: value1``
 
 ------------------------------------------------
 
@@ -39,7 +39,7 @@ Shorthand Code Span With Multiple Key Value
 
 -- div
 
-`alfa`key1: value1|key2: value2`
+``alfa|key1: value1|key2: value2``
 
 ------------------------------------------------
 
@@ -56,7 +56,7 @@ Shorthand Code Span With Flag
 
 -- div
 
-`alfa`flag1`
+``alfa|flag1``
 
 ------------------------------------------------
 
@@ -74,7 +74,7 @@ Shorthand Code Span With Multiple Flags
 
 -- div
 
-`alfa`flag1|flag2`
+``alfa|flag1|flag2``
 
 ------------------------------------------------
 
