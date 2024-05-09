@@ -165,3 +165,26 @@ e
 </div>
 
 
+################################################
+
+Nested Spans With Multiple Key Value Attrs
+
+------------------------------------------------
+
+-- div
+
+<<em|<<strong|alfa|key1: value1|flag1>>|key2: value2|flag2>>
+
+
+------------------------------------------------
+
+<div class="basic-full-div">
+    <p>
+        <em key2="value2" flag2>
+            <strong key1="value1" flag1>
+                alfa
+            </strong>
+        </em>
+    </p>
+</div>
+

@@ -56,8 +56,8 @@ Basic Full Inside List Item Start/End
     <li>
         <p>golf</p>
     </li>
-</ul>
 <!-- list-end-list -->
+</ul>
 
 
 
@@ -86,8 +86,8 @@ List With Start/End Item
     <li>
         <p>delta</p>
     </li>
-</ul>
 <!-- list-end-list -->
+</ul>
 
 
 
@@ -127,14 +127,14 @@ List Full Inside List Item Start/End
             <li>
                 <p>juliet</p>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
     </li>
     <li>
         <p>kilo</p>
     </li>
-</ul>
 <!-- list-end-list -->
+</ul>
 
 
 
@@ -183,8 +183,8 @@ Start/End List Basic
     <li>
         <p>b</p>
     </li>
-</ul>
 <!-- list-end-list -->
+</ul>
 
 
 
@@ -218,11 +218,11 @@ Start/End List Basic
             <li>
                 <p>b</p>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
     </li>
-</ul>
 <!-- list-end-list -->
+</ul>
 
 
 ################################################
@@ -257,14 +257,14 @@ Item After List Item
             <li>
                 <p>b</p>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
     </li>
     <li>
         <p>c</p>
     </li>
-</ul>
 <!-- list-end-list -->
+</ul>
 
 
 ################################################
@@ -301,15 +301,15 @@ Content After List Item
             <li>
                 <p>b</p>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
         <p>c</p>
     </li>
     <li>
         <p>d</p>
     </li>
-</ul>
 <!-- list-end-list -->
+</ul>
 
 
 
@@ -349,8 +349,8 @@ b
     <li>
         <p>c</p>
     </li>
-</ul>
 <!-- list-end-list -->
+</ul>
 
 
 
@@ -409,15 +409,15 @@ f
                     <p>here</p>
                 </div>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
     </li>
     <li>
         <p>b</p>
         <p>f</p>
     </li>
-</ul>
 <!-- list-end-list -->
+</ul>
 
 
 
@@ -470,8 +470,8 @@ Items After Closing List
     <li>
         <p>e</p>
     </li>
-</ul>
 <!-- list-end-list -->
+</ul>
 
 
 ################################################
@@ -546,7 +546,62 @@ Checklist Inside List
     <li>
         <p>d</p>
     </li>
-</ul>
 <!-- list-end-list-->
+</ul>
 
 
+
+################################################
+
+Span In Full List 
+
+------------------------------------------------
+
+-- list 
+
+- <<em|<<strong|alfa|key1: value1|flag1>>|key2: value2|flag2>>
+
+------------------------------------------------
+
+
+<ul class="list-full-list">
+    <li>
+        <p>
+        <em key2="value2" flag2>
+            <strong key1="value1" flag1>
+                alfa
+            </strong>
+        </em>
+        </p>
+    </li>
+</ul>
+
+
+################################################
+
+Span In Start/End Checklist
+
+
+------------------------------------------------
+
+-- list/
+
+- <<em|<<strong|alfa|key1: value1|flag1>>|key2: value2|flag2>>
+
+-- /list
+
+------------------------------------------------
+
+
+<ul class="list-start-list">
+    <li>
+        <p>
+            <em key2="value2" flag2>
+                <strong key1="value1" flag1>
+                    alfa
+                </strong>
+            </em>
+        </p>
+    </li>
+<!-- list-end-list -->
+</ul>

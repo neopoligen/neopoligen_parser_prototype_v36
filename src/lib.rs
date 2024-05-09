@@ -247,13 +247,13 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(&output(&children));
             }
             if bounds == "end" {
-                response.push_str("</ul>");
                 response.push_str("<!-- list ");
                 response.push_str("-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
                 response.push_str(" -->");
+                response.push_str("</ul>");
                 response.push_str(&output(&children));
             }
         }
@@ -348,6 +348,21 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
         }
         Span::Space { .. } => {
             response.push_str(" ");
+        }
+        Span::UnknownSpan {
+            r#type,
+            spans,
+            attrs,
+            flags,
+        } => {
+            response.push_str(format!("<span").as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</span>", output_spans(spans)).as_str());
         }
         Span::WordPart { text } => {
             response.push_str(text);

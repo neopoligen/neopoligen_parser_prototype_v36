@@ -178,8 +178,8 @@ List Inside Checklist
             <li>
                 <p>juliet</p>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
     </li>
     <li class="status-false">
         <p>kilo</p>
@@ -241,8 +241,8 @@ Item After List Item
             <li>
                 <p>b</p>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
     </li>
     <li class="status-false">
         <p>c</p>
@@ -285,8 +285,8 @@ Content After List Item In Nested List
             <li>
                 <p>b</p>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
         <p>c</p>
     </li>
     <li class="status-false">
@@ -450,5 +450,57 @@ Items After Closing List
 <!-- checklist-end-todo -->
 </ul>
 
+################################################
+
+Span In Full Checklist
+
+------------------------------------------------
+
+-- todo 
+
+[] <<em|<<strong|alfa|key1: value1|flag1>>|key2: value2|flag2>>
+
+------------------------------------------------
 
 
+<ul class="checklist-full-todo">
+    <li class="status-false">
+        <p>
+        <em key2="value2" flag2>
+            <strong key1="value1" flag1>
+                alfa
+            </strong>
+        </em>
+        </p>
+    </li>
+</ul>
+
+
+################################################
+
+Span In Start/End Checklist
+
+
+------------------------------------------------
+
+-- todo/
+
+[] <<em|<<strong|alfa|key1: value1|flag1>>|key2: value2|flag2>>
+
+-- /todo
+
+------------------------------------------------
+
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>
+        <em key2="value2" flag2>
+            <strong key1="value1" flag1>
+                alfa
+            </strong>
+        </em>
+        </p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>

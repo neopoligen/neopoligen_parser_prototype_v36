@@ -19,7 +19,9 @@ fn run_tests() {
         table: vec![],
         yaml: vec!["yaml-example".to_string()],
     };
+
     let spans = vec!["em".to_string(), "strong".to_string()];
+
     get_files(&dir, vec!["txt"]).iter().for_each(|f| {
         let content = fs::read_to_string(f).unwrap();
         let tests = content
