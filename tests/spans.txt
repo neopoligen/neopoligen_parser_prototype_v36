@@ -257,6 +257,27 @@ Span With Multiple Attrs
 
 
 
+################################################
+
+Nested Spans With Multiple Attrs
+
+------------------------------------------------
+
+-- div
+
+<<em|<<strong|alfa|key3: value3|flag3>>|key1: value1|key2: value2|flag1|flag2>>
+       
+------------------------------------------------
+
+<div class="basic-full-div">
+<p><em key1="value1" key2="value2" flag1 flag2>
+    <strong key3="value3" flag3>
+    alfa
+    </strong>
+</em></p>
+</div>
+
+
 
 
 
