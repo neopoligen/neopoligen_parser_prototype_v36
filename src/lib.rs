@@ -328,6 +328,36 @@ pub fn output(ast: &Vec<Node>) -> String {
 pub fn output_spans(spans: &Vec<Span>) -> String {
     let mut response = String::from("");
     spans.iter().for_each(|span| match span {
+        Span::Button { attrs, flags, text } => {
+            response.push_str(format!("<button").as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</button>", text).as_str());
+        }
+        Span::Code { attrs, flags, text } => {
+            response.push_str(format!("<code").as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</code>", text).as_str());
+        }
+        Span::Em { attrs, flags, text } => {
+            response.push_str(format!("<em").as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</em>", text).as_str());
+        }
         Span::KnownSpan {
             r#type,
             spans,
@@ -343,17 +373,41 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
             });
             response.push_str(format!(">{}</{}>", output_spans(spans), r#type).as_str());
         }
+        Span::Link { attrs, flags, text, href } => {
+            response.push_str(format!("<a href=\"").as_str());
+            if let Some(h) = href {
+                response.push_str(h);
+            }
+            response.push_str(format!("\"").as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</a>", text).as_str());
+        }
         Span::Newline { .. } => {
             response.push_str(" ");
         }
         Span::Space { .. } => {
             response.push_str(" ");
         }
+        Span::Strong { attrs, flags, text } => {
+            response.push_str(format!("<strong").as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</strong>", text).as_str());
+        }
         Span::UnknownSpan {
-            r#type,
             spans,
             attrs,
             flags,
+            ..
         } => {
             response.push_str(format!("<span").as_str());
             attrs.iter().for_each(|attr| {
