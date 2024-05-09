@@ -359,6 +359,16 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
         Span::Space { .. } => {
             response.push_str(" ");
         }
+        Span::Strong { attrs, flags, text } => {
+            response.push_str(format!("<strong").as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</strong>", text).as_str());
+        }
         Span::UnknownSpan {
             r#type,
             spans,

@@ -1,16 +1,14 @@
-// use crate::node::Node;
-// use crate::section::*;
+pub mod strong;
+
+use crate::span::strong::*;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-// use nom::character::complete::multispace0;
 use nom::bytes::complete::is_not;
 use nom::character::complete::line_ending;
 use nom::character::complete::multispace0;
 use nom::multi::many0;
-// use nom::character::complete::not_line_ending;
 use nom::character::complete::space0;
 use nom::character::complete::space1;
-// use nom::combinator::eof;
 use nom::combinator::not;
 use nom::sequence::tuple;
 use nom::IResult;
@@ -36,6 +34,11 @@ pub enum Span {
         text: String,
     },
     Space {
+        text: String,
+    },
+    Strong {
+        attrs: BTreeMap<String, String>,
+        flags: Vec<String>,
         text: String,
     },
     UnknownSpan {
@@ -71,9 +74,7 @@ pub fn code_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     .context("")
     .parse(source)?;
     let (source, _) = tag("`").context("").parse(source)?;
-
     raw_attrs.extend(secondary_attrs);
-
     let mut flags: Vec<String> = vec![];
     let mut attrs = BTreeMap::new();
     raw_attrs.iter().for_each(|attr| match attr {
@@ -148,6 +149,7 @@ pub fn span_finder<'a>(
 ) -> IResult<&'a str, Span, ErrorTree<&'a str>> {
     let (source, span) = alt((
         code_shorthand,
+        strong_shorthand,
         |src| known_span(src, spans),
         newline,
         space,
