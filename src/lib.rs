@@ -328,6 +328,16 @@ pub fn output(ast: &Vec<Node>) -> String {
 pub fn output_spans(spans: &Vec<Span>) -> String {
     let mut response = String::from("");
     spans.iter().for_each(|span| match span {
+        Span::Code { attrs, flags, text } => {
+            response.push_str(format!("<code").as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</code>", text).as_str());
+        }
         Span::KnownSpan {
             r#type,
             spans,
