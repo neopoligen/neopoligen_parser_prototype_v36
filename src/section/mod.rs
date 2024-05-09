@@ -18,26 +18,30 @@ use crate::span::*;
 use crate::yaml::*;
 use crate::Sections;
 use nom::branch::alt;
+use nom::bytes::complete::is_not;
 use nom::bytes::complete::tag;
-// use nom::bytes::complete::take_until;
+use nom::character::complete::line_ending;
 use nom::character::complete::multispace0;
 use nom::character::complete::newline;
+use nom::character::complete::not_line_ending;
 use nom::character::complete::space0;
+use nom::character::complete::space1;
 use nom::combinator::eof;
-// use nom::combinator::not;
-// use nom::multi::many0;
 use nom::sequence::tuple;
 use nom::IResult;
 use nom::Parser;
 use nom_supreme::error::ErrorTree;
 use nom_supreme::parser_ext::ParserExt;
+use std::collections::BTreeMap;
 
 #[derive(Debug)]
 pub enum Section {
     Basic {
-        r#type: String,
-        children: Vec<Section>,
+        attrs: BTreeMap<String, String>,
         bounds: String,
+        children: Vec<Section>,
+        flags: Vec<String>,
+        r#type: String,
     },
     Block {
         spans: Vec<Span>,
@@ -92,6 +96,11 @@ pub enum Section {
     },
 }
 
+pub enum SectionAttr {
+    KeyValue { key: String, value: String },
+    Flag { key: String },
+}
+
 pub fn empty_until_newline_or_eof<'a>(
     source: &'a str,
 ) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
@@ -102,6 +111,53 @@ pub fn empty_until_newline_or_eof<'a>(
     .context("")
     .parse(source)?;
     Ok((source, ""))
+}
+
+pub fn initial_error<'a>() -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+    // the purpose of this function is just to put an
+    // error in the accumulator. There's a way to do that
+    // with just making an error, but I haven't solved all
+    // the parts to that yet.
+    let (_, _) = tag("asdf").parse("fdsa")?;
+    Ok(("", ""))
+}
+
+pub fn section_attr<'a>(source: &'a str) -> IResult<&'a str, SectionAttr, ErrorTree<&'a str>> {
+    let (source, attr) = alt((section_key_value_attr, section_flag_attr))
+        .context("")
+        .parse(source)?;
+    Ok((source, attr))
+}
+
+pub fn section_key_value_attr<'a>(
+    source: &'a str,
+) -> IResult<&'a str, SectionAttr, ErrorTree<&'a str>> {
+    let (source, _) = tag("--").context("").parse(source)?;
+    let (source, _) = space1.context("").parse(source)?;
+    let (source, key) = is_not(": \n").context("").parse(source)?;
+    let (source, _) = tag(":").context("").parse(source)?;
+    let (source, value) = not_line_ending.context("").parse(source)?;
+    let (source, _) = line_ending.context("").parse(source)?;
+    Ok((
+        source,
+        SectionAttr::KeyValue {
+            key: key.trim().to_string(),
+            value: value.trim().to_string(),
+        },
+    ))
+}
+
+pub fn section_flag_attr<'a>(source: &'a str) -> IResult<&'a str, SectionAttr, ErrorTree<&'a str>> {
+    let (source, _) = tag("--").context("").parse(source)?;
+    let (source, _) = space1.context("").parse(source)?;
+    let (source, key) = is_not(":\n").context("").parse(source)?;
+    let (source, _) = line_ending.context("").parse(source)?;
+    Ok((
+        source,
+        SectionAttr::Flag {
+            key: key.trim().to_string(),
+        },
+    ))
 }
 
 pub fn start_or_full_section<'a>(
@@ -132,29 +188,6 @@ pub fn start_or_full_section<'a>(
     .parse(source)?;
     Ok((source, results))
 }
-
-pub fn initial_error<'a>() -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-    // the purpose of this function is just to put an
-    // error in the accumulator. There's a way to do that
-    // with just making an error, but I haven't solved all
-    // the parts to that yet.
-    let (_, _) = tag("asdf").parse("fdsa")?;
-    Ok(("", ""))
-}
-
-// pub fn section_attr<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-//     let (source, attr) = alt((section_key_value_attr, section_flag_attr))
-//         .context("")
-//         .parse(source)?;
-//     Ok((source, attr))
-// }
-
-// pub fn section_key_value_attr<'a>(
-//     source: &'a str,
-// ) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
-// }
-
-// pub fn section_flag_attr<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {}
 
 pub fn tag_finder<'a>(
     source: &'a str,

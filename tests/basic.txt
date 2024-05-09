@@ -192,7 +192,7 @@ Nested Spans With Multiple Key Value Attrs
 
 ################################################
 
-skip Basic With Key Value Attrs
+Basic With Key Value Attrs
 
 ------------------------------------------------
 
@@ -203,6 +203,6 @@ here
 
 ------------------------------------------------
 
-<div class="basic-full-div">
+<div class="basic-full-div" key="value">
     <p>here</p>
 </div>

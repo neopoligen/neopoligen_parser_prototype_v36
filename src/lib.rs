@@ -74,18 +74,20 @@ pub fn output(ast: &Vec<Section>) -> String {
     let mut response = String::from("");
     ast.iter().for_each(|a| match a {
         Section::Basic {
+            attrs,
             bounds,
             children,
+            flags,
             r#type,
-            ..
         } => {
             if bounds == "full" {
-                response.push_str("<div class=\"");
-                response.push_str("basic-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<div class=\"basic-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                response.push_str(">");
                 response.push_str(&output(&children));
                 response.push_str("</div>");
             }
