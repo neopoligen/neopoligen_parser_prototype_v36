@@ -1,5 +1,4 @@
 use crate::block::*;
-use crate::node::Node;
 use crate::section::*;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -14,7 +13,7 @@ pub fn basic_section_end<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
     key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -26,7 +25,7 @@ pub fn basic_section_end<'a>(
         .parse(source)?;
     Ok((
         source,
-        Node::Basic {
+        Section::Basic {
             r#type: r#type.to_string(),
             children,
             bounds: "end".to_string(),
@@ -38,7 +37,7 @@ pub fn basic_section_full<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.basic))
         .context("")
@@ -51,7 +50,7 @@ pub fn basic_section_full<'a>(
         .parse(source)?;
     Ok((
         source,
-        Node::Basic {
+        Section::Basic {
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -63,7 +62,7 @@ pub fn basic_section_start<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.basic))
         .context("")
@@ -82,7 +81,7 @@ pub fn basic_section_start<'a>(
     children.push(end_section);
     Ok((
         source,
-        Node::Basic {
+        Section::Basic {
             r#type: r#type.to_string(),
             children,
             bounds: "start".to_string(),

@@ -2,7 +2,6 @@ pub mod block;
 pub mod section;
 pub mod span;
 
-use crate::node::Node;
 use crate::section::*;
 use crate::span::Span;
 use nom::multi::many1;
@@ -71,10 +70,10 @@ fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
     }
 }
 
-pub fn output(ast: &Vec<Node>) -> String {
+pub fn output(ast: &Vec<Section>) -> String {
     let mut response = String::from("");
     ast.iter().for_each(|a| match a {
-        Node::Basic {
+        Section::Basic {
             bounds,
             children,
             r#type,
@@ -111,13 +110,13 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        //Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
-        Node::Block { spans } => {
+        //Section::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
+        Section::Block { spans } => {
             response.push_str("<p>");
             response.push_str(output_spans(spans).as_str());
             response.push_str("</p>");
         }
-        Node::Checklist {
+        Section::Checklist {
             bounds,
             children,
             r#type,
@@ -149,7 +148,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::ChecklistItem {
+        Section::ChecklistItem {
             children, status, ..
         } => {
             response.push_str(
@@ -159,7 +158,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             response.push_str("</li>");
         }
 
-        Node::Comment {
+        Section::Comment {
             bounds,
             r#type,
             children,
@@ -176,7 +175,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::Generic {
+        Section::Generic {
             bounds,
             children,
             r#type,
@@ -200,7 +199,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::Json {
+        Section::Json {
             bounds,
             children,
             data,
@@ -222,7 +221,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::List {
+        Section::List {
             bounds,
             children,
             r#type,
@@ -258,13 +257,13 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::ListItem { children } => {
+        Section::ListItem { children } => {
             response.push_str("<li>");
             response.push_str(&output(&children));
             response.push_str("</li>");
         }
 
-        Node::Raw {
+        Section::Raw {
             text,
             r#type,
             bounds,
@@ -299,8 +298,8 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(&output(&children));
             }
         }
-        Node::TagFinderInit => {}
-        Node::Yaml {
+        Section::TagFinderInit => {}
+        Section::Yaml {
             bounds,
             children,
             data,
@@ -373,7 +372,12 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
             });
             response.push_str(format!(">{}</{}>", output_spans(spans), r#type).as_str());
         }
-        Span::Link { attrs, flags, text, href } => {
+        Span::Link {
+            attrs,
+            flags,
+            text,
+            href,
+        } => {
             response.push_str(format!("<a href=\"").as_str());
             if let Some(h) = href {
                 response.push_str(h);
@@ -429,7 +433,7 @@ pub fn parse(
     source: &str,
     sections: &Sections,
     spans: &Vec<String>,
-) -> Result<Vec<Node>, ParserError> {
+) -> Result<Vec<Section>, ParserError> {
     match final_parser(|src| parse_runner(src, sections, spans))(source) {
         Ok(ast) => Ok(ast),
         Err(e) => Err(get_error(source, &e)),
@@ -440,7 +444,7 @@ fn parse_runner<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Vec<Node>, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Vec<Section>, ErrorTree<&'a str>> {
     let (source, results) = many1(|src| start_or_full_section(src, &sections, &spans))
         .context("")
         .parse(source)?;

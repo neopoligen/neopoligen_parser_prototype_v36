@@ -1,5 +1,4 @@
 use crate::block::*;
-use crate::node::Node;
 use crate::section::*;
 use nom::branch::alt;
 use nom::bytes::complete::is_not;
@@ -15,7 +14,7 @@ pub fn generic_section_end<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
     key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -27,7 +26,7 @@ pub fn generic_section_end<'a>(
         .parse(source)?;
     Ok((
         source,
-        Node::Generic {
+        Section::Generic {
             r#type: r#type.to_string(),
             children,
             bounds: "end".to_string(),
@@ -39,7 +38,7 @@ pub fn generic_section_full<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.generic))
         .context("")
@@ -52,7 +51,7 @@ pub fn generic_section_full<'a>(
         .parse(source)?;
     Ok((
         source,
-        Node::Generic {
+        Section::Generic {
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -64,7 +63,7 @@ pub fn generic_section_start<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.generic))
         .context("")
@@ -83,7 +82,7 @@ pub fn generic_section_start<'a>(
     children.push(end_section);
     Ok((
         source,
-        Node::Generic {
+        Section::Generic {
             r#type: r#type.to_string(),
             children,
             bounds: "start".to_string(),

@@ -1,5 +1,4 @@
 use crate::block::*;
-use crate::node::Node;
 use crate::section::*;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -14,7 +13,7 @@ use nom_supreme::parser_ext::ParserExt;
 pub fn checklist_item_block<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = not(tag("--")).context("").parse(source)?;
     let (source, _) = not(tag("[")).context("").parse(source)?;
     let (source, _) = not(eof).context("").parse(source)?;
@@ -22,13 +21,13 @@ pub fn checklist_item_block<'a>(
         .context("")
         .parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((source, Node::Block { spans }))
+    Ok((source, Section::Block { spans }))
 }
 
 pub fn checklist_item<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     // NOTE: this prototype doesn't not distinguish between checked
     // and unchecked. Everything is targeted to unchecked
     let (source, _) = tag("[]").context("").parse(source)?;
@@ -38,7 +37,7 @@ pub fn checklist_item<'a>(
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
-        Node::ChecklistItem {
+        Section::ChecklistItem {
             children,
             status: false,
             status_value: None,
@@ -50,7 +49,7 @@ pub fn checklist_item_with_sections<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("[] ").context("").parse(source)?;
     let (source, children) = many0(alt((
         |src| checklist_item_block(src, spans),
@@ -61,7 +60,7 @@ pub fn checklist_item_with_sections<'a>(
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
-        Node::ChecklistItem {
+        Section::ChecklistItem {
             children,
             status: false,
             status_value: None,
@@ -73,7 +72,7 @@ pub fn checklist_section_end<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
     key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -85,7 +84,7 @@ pub fn checklist_section_end<'a>(
         .parse(source)?;
     Ok((
         source,
-        Node::Checklist {
+        Section::Checklist {
             r#type: r#type.to_string(),
             children,
             bounds: "end".to_string(),
@@ -97,7 +96,7 @@ pub fn checklist_section_full<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.checklist))
         .context("")
@@ -110,7 +109,7 @@ pub fn checklist_section_full<'a>(
         .parse(source)?;
     Ok((
         source,
-        Node::Checklist {
+        Section::Checklist {
             r#type: r#type.to_string(),
             children,
             bounds: "full".to_string(),
@@ -122,7 +121,7 @@ pub fn checklist_section_start<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.checklist))
         .context("")
@@ -138,7 +137,7 @@ pub fn checklist_section_start<'a>(
     children.push(end_section);
     Ok((
         source,
-        Node::Checklist {
+        Section::Checklist {
             r#type: r#type.to_string(),
             children,
             bounds: "start".to_string(),

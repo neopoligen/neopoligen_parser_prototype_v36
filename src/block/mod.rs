@@ -1,4 +1,4 @@
-use crate::node::Node;
+use crate::section::Section;
 // use crate::raw::*;
 // use crate::section::basic::*;
 // use crate::section::checklist::*;
@@ -26,20 +26,20 @@ use nom_supreme::parser_ext::ParserExt;
 pub fn block_of_anything<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = not(eof).context("").parse(source)?;
     let (source, _) = not(tag("--")).context("").parse(source)?;
     let (source, spans) = many0(|src| span_finder(src, spans))
         .context("")
         .parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((source, Node::Block { spans }))
+    Ok((source, Section::Block { spans }))
 }
 
 pub fn block_of_end_content<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = not(eof).context("").parse(source)?;
     let (source, _) = not(tag("-")).context("").parse(source)?;
     let (source, _) = not(tag("[")).context("").parse(source)?;
@@ -47,5 +47,5 @@ pub fn block_of_end_content<'a>(
         .context("")
         .parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((source, Node::Block { spans }))
+    Ok((source, Section::Block { spans }))
 }

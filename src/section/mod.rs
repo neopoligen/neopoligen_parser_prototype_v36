@@ -4,11 +4,9 @@ pub mod comment;
 pub mod generic;
 pub mod json;
 pub mod list;
-pub mod node;
 pub mod raw;
 pub mod yaml;
 
-use crate::node::Node;
 use crate::raw::*;
 use crate::section::basic::*;
 use crate::section::checklist::*;
@@ -34,6 +32,66 @@ use nom::Parser;
 use nom_supreme::error::ErrorTree;
 use nom_supreme::parser_ext::ParserExt;
 
+#[derive(Debug)]
+pub enum Section {
+    Basic {
+        r#type: String,
+        children: Vec<Section>,
+        bounds: String,
+    },
+    Block {
+        spans: Vec<Span>,
+    },
+    Checklist {
+        r#type: String,
+        children: Vec<Section>,
+        bounds: String,
+    },
+    ChecklistItem {
+        children: Vec<Section>,
+        status: bool,
+        status_value: Option<String>,
+    },
+    Comment {
+        bounds: String,
+        r#type: String,
+        text: Option<String>,
+        children: Vec<Section>,
+    },
+    Generic {
+        r#type: String,
+        children: Vec<Section>,
+        bounds: String,
+    },
+    Json {
+        bounds: String,
+        r#type: String,
+        data: Option<String>,
+        children: Vec<Section>,
+    },
+    List {
+        r#type: String,
+        children: Vec<Section>,
+        bounds: String,
+    },
+    ListItem {
+        children: Vec<Section>,
+    },
+    Raw {
+        bounds: String,
+        r#type: String,
+        text: Option<String>,
+        children: Vec<Section>,
+    },
+    TagFinderInit,
+    Yaml {
+        bounds: String,
+        r#type: String,
+        data: Option<String>,
+        children: Vec<Section>,
+    },
+}
+
 pub fn empty_until_newline_or_eof<'a>(
     source: &'a str,
 ) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
@@ -50,7 +108,7 @@ pub fn start_or_full_section<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, results) = alt((
         |src| basic_section_full(src, &sections, &spans),
         |src| basic_section_start(src, &sections, &spans),
@@ -83,6 +141,20 @@ pub fn initial_error<'a>() -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
     let (_, _) = tag("asdf").parse("fdsa")?;
     Ok(("", ""))
 }
+
+// pub fn section_attr<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+//     let (source, attr) = alt((section_key_value_attr, section_flag_attr))
+//         .context("")
+//         .parse(source)?;
+//     Ok((source, attr))
+// }
+
+// pub fn section_key_value_attr<'a>(
+//     source: &'a str,
+// ) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {
+// }
+
+// pub fn section_flag_attr<'a>(source: &'a str) -> IResult<&'a str, &'a str, ErrorTree<&'a str>> {}
 
 pub fn tag_finder<'a>(
     source: &'a str,
