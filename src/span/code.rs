@@ -37,32 +37,6 @@ pub fn code_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     ))
 }
 
-
-pub fn code_shorthand_first_key_value_attr(
-    source: &str,
-) -> IResult<&str, SpanAttr, ErrorTree<&str>> {
-    let (source, key) = is_not(" |\n\t:`").context("").parse(source)?;
-    let (source, _) = tag(":").context("").parse(source)?;
-    let (source, value) = is_not("|`").context("").parse(source)?;
-    Ok((
-        source,
-        SpanAttr::KeyValue {
-            key: key.trim().to_string(),
-            value: value.trim().to_string(),
-        },
-    ))
-}
-
-pub fn code_shorthand_first_flag_attr(source: &str) -> IResult<&str, SpanAttr, ErrorTree<&str>> {
-    let (source, key) = is_not(" |\n\t:`").context("").parse(source)?;
-    Ok((
-        source,
-        SpanAttr::Flag {
-            key: key.trim().to_string(),
-        },
-    ))
-}
-
 pub fn code_shorthand_key_value_attr(source: &str) -> IResult<&str, SpanAttr, ErrorTree<&str>> {
     let (source, _) = tag("|").context("").parse(source)?;
     let (source, key) = is_not(" |\n\t:`").context("").parse(source)?;

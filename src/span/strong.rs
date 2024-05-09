@@ -10,23 +10,15 @@ use nom_supreme::parser_ext::ParserExt;
 use std::collections::BTreeMap;
 
 pub fn strong_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
-    let (source, _) = tag("*").context("").parse(source)?;
-    let (source, text) = is_not("*").context("").parse(source)?;
-    let (source, _) = tag("*").context("").parse(source)?;
-    let (source, mut raw_attrs) = many0(alt((
-        strong_shorthand_first_key_value_attr,
-        strong_shorthand_first_flag_attr,
-    )))
-    .context("")
-    .parse(source)?;
-    let (source, secondary_attrs) = many0(alt((
+    let (source, _) = tag("**").context("").parse(source)?;
+    let (source, text) = is_not("|*").context("").parse(source)?;
+    let (source, raw_attrs) = many0(alt((
         strong_shorthand_key_value_attr,
         strong_shorthand_flag_attr,
     )))
     .context("")
     .parse(source)?;
-    let (source, _) = tag("*").context("").parse(source)?;
-    raw_attrs.extend(secondary_attrs);
+    let (source, _) = tag("**").context("").parse(source)?;
     let mut flags: Vec<String> = vec![];
     let mut attrs = BTreeMap::new();
     raw_attrs.iter().for_each(|attr| match attr {
@@ -37,35 +29,10 @@ pub fn strong_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     });
     Ok((
         source,
-        Span::Code {
+        Span::Strong {
             attrs,
             flags,
             text: text.to_string(),
-        },
-    ))
-}
-
-pub fn strong_shorthand_first_key_value_attr(
-    source: &str,
-) -> IResult<&str, SpanAttr, ErrorTree<&str>> {
-    let (source, key) = is_not(" |\n\t:*").context("").parse(source)?;
-    let (source, _) = tag(":").context("").parse(source)?;
-    let (source, value) = is_not("|*").context("").parse(source)?;
-    Ok((
-        source,
-        SpanAttr::KeyValue {
-            key: key.trim().to_string(),
-            value: value.trim().to_string(),
-        },
-    ))
-}
-
-pub fn strong_shorthand_first_flag_attr(source: &str) -> IResult<&str, SpanAttr, ErrorTree<&str>> {
-    let (source, key) = is_not(" |\n\t:*").context("").parse(source)?;
-    Ok((
-        source,
-        SpanAttr::Flag {
-            key: key.trim().to_string(),
         },
     ))
 }
