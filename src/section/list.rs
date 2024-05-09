@@ -17,6 +17,7 @@ pub fn list_item_block<'a>(
 ) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
     let (source, _) = not(tag("-")).context("").parse(source)?;
     let (source, _) = not(eof).context("").parse(source)?;
+    // dbg!(&source);
     let (source, spans) = many0(|src| span_finder(src, spans))
         .context("")
         .parse(source)?;

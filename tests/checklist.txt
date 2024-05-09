@@ -452,3 +452,57 @@ Items After Closing List
 
 
 
+################################################
+
+Span In Full Checklist
+
+------------------------------------------------
+
+-- todo 
+
+[] <<em|<<strong|alfa|key1: value1|flag1>>|key2: value2|flag2>>
+
+------------------------------------------------
+
+
+<ul class="checklist-full-todo">
+    <li class="status-false">
+        <p>
+        <em key2="value2" flag2>
+            <strong key1="value1" flag1>
+                alfa
+            </strong>
+        </em>
+        </p>
+    </li>
+</ul>
+
+
+################################################
+
+Span In Start/End Checklist
+
+
+------------------------------------------------
+
+-- todo/
+
+[] <<em|<<strong|alfa|key1: value1|flag1>>|key2: value2|flag2>>
+
+-- /todo
+
+------------------------------------------------
+
+
+<ul class="checklist-start-todo">
+    <li class="status-false">
+        <p>
+        <em key2="value2" flag2>
+            <strong key1="value1" flag1>
+                alfa
+            </strong>
+        </em>
+        </p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>
