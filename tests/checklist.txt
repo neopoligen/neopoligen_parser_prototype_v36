@@ -178,8 +178,8 @@ List Inside Checklist
             <li>
                 <p>juliet</p>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
     </li>
     <li class="status-false">
         <p>kilo</p>
@@ -241,8 +241,8 @@ Item After List Item
             <li>
                 <p>b</p>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
     </li>
     <li class="status-false">
         <p>c</p>
@@ -285,8 +285,8 @@ Content After List Item In Nested List
             <li>
                 <p>b</p>
             </li>
-        </ul>
         <!-- list-end-list -->
+        </ul>
         <p>c</p>
     </li>
     <li class="status-false">
@@ -449,8 +449,6 @@ Items After Closing List
     </li>
 <!-- checklist-end-todo -->
 </ul>
-
-
 
 ################################################
 

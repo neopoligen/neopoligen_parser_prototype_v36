@@ -247,13 +247,13 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(&output(&children));
             }
             if bounds == "end" {
-                response.push_str("</ul>");
                 response.push_str("<!-- list ");
                 response.push_str("-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
                 response.push_str(" -->");
+                response.push_str("</ul>");
                 response.push_str(&output(&children));
             }
         }
