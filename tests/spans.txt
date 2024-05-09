@@ -239,6 +239,22 @@ Generic Spans Flag
 </div>
 
 
+################################################
+
+Span With Multiple Attrs
+
+------------------------------------------------
+
+-- div
+
+<<em|alfa|key1: value1|key2: value2|flag1|flag2>>
+       
+------------------------------------------------
+
+<div class="basic-full-div">
+<p><em key1="value1" key2="value2" flag1 flag2>alfa</em></p>
+</div>
+
 
 
 
