@@ -1,7 +1,9 @@
 pub mod code;
 pub mod strong;
+pub mod em;
 
 use crate::span::code::*;
+use crate::span::em::*;
 use crate::span::strong::*;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -22,6 +24,11 @@ use std::collections::BTreeMap;
 #[derive(Debug)]
 pub enum Span {
     Code {
+        attrs: BTreeMap<String, String>,
+        flags: Vec<String>,
+        text: String,
+    },
+    Em {
         attrs: BTreeMap<String, String>,
         flags: Vec<String>,
         text: String,
@@ -65,6 +72,7 @@ pub fn span_finder<'a>(
 ) -> IResult<&'a str, Span, ErrorTree<&'a str>> {
     let (source, span) = alt((
         code_shorthand,
+        em_shorthand,
         strong_shorthand,
         |src| known_span(src, spans),
         newline,
