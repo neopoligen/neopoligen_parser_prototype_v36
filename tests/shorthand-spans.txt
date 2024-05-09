@@ -32,6 +32,30 @@ Shorthand Code Span With Key Value
 </div>
 
 
+################################################
+
+Shorthand Code Span With Multiple Key Value
+
+------------------------------------------------
+
+-- div
+
+`alfa`key1: value1|key2: value2`
+
+------------------------------------------------
+
+<div class="basic-full-div">
+    <p><code key1="value1" key2="value2">alfa</code></p>
+</div>
+
+
+
+
+
+
+
+
+
 
 
 

@@ -64,7 +64,15 @@ pub fn code_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     )))
     .context("")
     .parse(source)?;
+    let (source, secondary_attrs) = many0(alt((
+        code_shorthand_key_value_attr,
+        code_shorthand_flag_attr,
+    )))
+    .context("")
+    .parse(source)?;
     let (source, _) = tag("`").context("").parse(source)?;
+
+    raw_attrs.extend(secondary_attrs);
 
     let mut flags: Vec<String> = vec![];
     let mut attrs = BTreeMap::new();
