@@ -1,7 +1,8 @@
 pub mod code;
 pub mod button;
-pub mod strong;
 pub mod em;
+pub mod strong;
+
 
 use crate::span::button::*;
 use crate::span::code::*;

@@ -390,10 +390,10 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
             response.push_str(format!(">{}</strong>", text).as_str());
         }
         Span::UnknownSpan {
-            r#type,
             spans,
             attrs,
             flags,
+            ..
         } => {
             response.push_str(format!("<span").as_str());
             attrs.iter().for_each(|attr| {
