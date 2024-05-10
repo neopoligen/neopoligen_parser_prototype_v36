@@ -90,7 +90,6 @@ pub fn output(ast: &Vec<Section>) -> String {
                 flags
                     .iter()
                     .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
-
                 response.push_str(">");
                 response.push_str(&output(&children));
                 response.push_str("</div>");
@@ -105,7 +104,6 @@ pub fn output(ast: &Vec<Section>) -> String {
                 flags
                     .iter()
                     .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
-
                 response.push_str(">");
                 response.push_str(&output(&children));
             }
@@ -128,17 +126,28 @@ pub fn output(ast: &Vec<Section>) -> String {
             response.push_str("</p>");
         }
         Section::Checklist {
+            attrs,
             bounds,
             children,
+            flags,
             r#type,
-            ..
         } => {
             if bounds == "full" {
                 response.push_str("<ul class=\"checklist-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str("\"");
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+
+                    response.push_str(">");
                 response.push_str(&output(&children));
                 response.push_str("</ul>");
             } else if bounds == "start" {
@@ -146,7 +155,17 @@ pub fn output(ast: &Vec<Section>) -> String {
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str("\"");
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+
+                    response.push_str(">");
                 response.push_str(&output(&children));
             } else if bounds == "end" {
                 response.push_str("<!-- checklist-");

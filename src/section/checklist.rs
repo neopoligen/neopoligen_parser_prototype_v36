@@ -77,17 +77,29 @@ pub fn checklist_section_end<'a>(
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, raw_attrs) = many0(section_attr).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(|src| block_of_end_content(src, spans))
         .context("")
         .parse(source)?;
+    let mut attrs: BTreeMap<String, String> = BTreeMap::new();
+    let mut flags: Vec<String> = vec![];
+    raw_attrs.iter().for_each(|attr| match attr {
+        SectionAttr::KeyValue { key, value } => {
+            attrs.insert(key.to_string(), value.to_string());
+            ()
+        }
+        SectionAttr::Flag { key } => flags.push(key.to_string()),
+    });
     Ok((
         source,
         Section::Checklist {
-            r#type: r#type.to_string(),
-            children,
+            attrs,
             bounds: "end".to_string(),
+            children,
+            flags,
+            r#type: r#type.to_string(),
         },
     ))
 }
@@ -102,17 +114,29 @@ pub fn checklist_section_full<'a>(
         .context("")
         .parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, raw_attrs) = many0(section_attr).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(|src| checklist_item(src, spans))
         .context("")
         .parse(source)?;
+    let mut attrs: BTreeMap<String, String> = BTreeMap::new();
+    let mut flags: Vec<String> = vec![];
+    raw_attrs.iter().for_each(|attr| match attr {
+        SectionAttr::KeyValue { key, value } => {
+            attrs.insert(key.to_string(), value.to_string());
+            ()
+        }
+        SectionAttr::Flag { key } => flags.push(key.to_string()),
+    });
     Ok((
         source,
         Section::Checklist {
-            r#type: r#type.to_string(),
-            children,
+            attrs,
             bounds: "full".to_string(),
+            children,
+            flags,
+            r#type: r#type.to_string(),
         },
     ))
 }
@@ -128,19 +152,31 @@ pub fn checklist_section_start<'a>(
         .parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, raw_attrs) = many0(section_attr).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, mut children) = many0(|src| checklist_item_with_sections(src, &sections, &spans))
         .context("")
         .parse(source)?;
     let (source, end_section) = checklist_section_end(source, spans, r#type)?;
-    children.push(end_section);
+    children.push(end_section);    
+    let mut attrs: BTreeMap<String, String> = BTreeMap::new();
+    let mut flags: Vec<String> = vec![];
+    raw_attrs.iter().for_each(|attr| match attr {
+        SectionAttr::KeyValue { key, value } => {
+            attrs.insert(key.to_string(), value.to_string());
+            ()
+        }
+        SectionAttr::Flag { key } => flags.push(key.to_string()),
+    });
     Ok((
         source,
         Section::Checklist {
-            r#type: r#type.to_string(),
-            children,
+            attrs,
             bounds: "start".to_string(),
+            children,
+            flags,
+            r#type: r#type.to_string(),
         },
     ))
 }
