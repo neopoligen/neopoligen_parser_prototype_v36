@@ -285,27 +285,37 @@ pub fn output(ast: &Vec<Section>) -> String {
         }
 
         Section::List {
+            attrs,
             bounds,
             children,
+            flags,
             r#type,
         } => {
             if bounds == "full" {
-                response.push_str("<ul class=\"list");
-                response.push_str("-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<ul class=\"list-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(&output(&children));
                 response.push_str("</ul>");
             }
             if bounds == "start" {
-                response.push_str("<ul class=\"list");
-                response.push_str("-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<ul class=\"list-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(&output(&children));
             }
             if bounds == "end" {

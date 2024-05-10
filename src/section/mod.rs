@@ -80,9 +80,11 @@ pub enum Section {
         children: Vec<Section>,
     },
     List {
-        r#type: String,
-        children: Vec<Section>,
+        attrs: BTreeMap<String, String>,
         bounds: String,
+        children: Vec<Section>,
+        flags: Vec<String>,
+        r#type: String,
     },
     ListItem {
         children: Vec<Section>,
