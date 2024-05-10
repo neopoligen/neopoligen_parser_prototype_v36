@@ -72,9 +72,11 @@ pub enum Section {
         r#type: String,
     },
     Json {
+        attrs: BTreeMap<String, String>,
         bounds: String,
         r#type: String,
         data: Option<String>,
+        flags: Vec<String>,
         children: Vec<Section>,
     },
     List {
