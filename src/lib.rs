@@ -368,6 +368,16 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
             });
             response.push_str(format!(">{}</em>", text).as_str());
         }
+        Span::Footnote { attrs, flags, text } => {
+            response.push_str(format!("<sup").as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</sup>", text).as_str());
+        }
         Span::Html { text } => {
             response.push_str(text);
         }

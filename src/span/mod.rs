@@ -1,6 +1,7 @@
 pub mod button;
 pub mod code;
 pub mod em;
+pub mod footnote;
 pub mod html;
 pub mod link;
 pub mod strong;
@@ -8,6 +9,7 @@ pub mod strong;
 use crate::span::button::*;
 use crate::span::code::*;
 use crate::span::em::*;
+use crate::span::footnote::*;
 use crate::span::html::*;
 use crate::span::link::*;
 use crate::span::strong::*;
@@ -40,6 +42,11 @@ pub enum Span {
         text: String,
     },
     Em {
+        attrs: BTreeMap<String, String>,
+        flags: Vec<String>,
+        text: String,
+    },
+    Footnote {
         attrs: BTreeMap<String, String>,
         flags: Vec<String>,
         text: String,
@@ -94,6 +101,7 @@ pub fn span_finder<'a>(
         button_shorthand,
         code_shorthand,
         em_shorthand,
+        footnote_shorthand,
         link_shorthand,
         strong_shorthand,
         html_shorthand,
