@@ -1,3 +1,5 @@
+################################################
+
 List Full
 
 ------------------------------------------------
@@ -343,8 +345,9 @@ b
 <ul class="list-start-list">
     <li>
         <p>a</p>
-        <pre class="raw-start-pre">b</pre>
+        <pre class="raw-start-pre">b
         <!-- raw-end-pre -->
+        </pre>
     </li>
     <li>
         <p>c</p>
@@ -605,3 +608,58 @@ Span In Start/End Checklist
     </li>
 <!-- list-end-list -->
 </ul>
+
+
+################################################
+
+List Full Attrs
+
+------------------------------------------------
+
+-- list
+-- key1: value1
+-- flag1
+
+- alfa
+
+- bravo
+
+------------------------------------------------
+
+<ul class="list-full-list" key1="value1" flag1>
+    <li>
+        <p>alfa</p>
+    </li>
+    <li>
+        <p>bravo</p>
+    </li>
+</ul>
+
+################################################
+
+List Start Attrs
+
+------------------------------------------------
+
+-- list/
+-- key1: value1
+-- flag1
+
+- alfa
+
+- bravo
+
+-- /list
+
+------------------------------------------------
+
+<ul class="list-start-list" key1="value1" flag1>
+    <li>
+        <p>alfa</p>
+    </li>
+    <li>
+        <p>bravo</p>
+    </li>
+<!-- list-end-list -->
+</ul>
+

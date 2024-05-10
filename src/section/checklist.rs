@@ -1,5 +1,4 @@
 use crate::block::*;
-use crate::node::Node;
 use crate::section::*;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -14,7 +13,7 @@ use nom_supreme::parser_ext::ParserExt;
 pub fn checklist_item_block<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = not(tag("--")).context("").parse(source)?;
     let (source, _) = not(tag("[")).context("").parse(source)?;
     let (source, _) = not(eof).context("").parse(source)?;
@@ -22,13 +21,13 @@ pub fn checklist_item_block<'a>(
         .context("")
         .parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((source, Node::Block { spans }))
+    Ok((source, Section::Block { spans }))
 }
 
 pub fn checklist_item<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     // NOTE: this prototype doesn't not distinguish between checked
     // and unchecked. Everything is targeted to unchecked
     let (source, _) = tag("[]").context("").parse(source)?;
@@ -38,7 +37,7 @@ pub fn checklist_item<'a>(
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
-        Node::ChecklistItem {
+        Section::ChecklistItem {
             children,
             status: false,
             status_value: None,
@@ -50,7 +49,7 @@ pub fn checklist_item_with_sections<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("[] ").context("").parse(source)?;
     let (source, children) = many0(alt((
         |src| checklist_item_block(src, spans),
@@ -61,7 +60,7 @@ pub fn checklist_item_with_sections<'a>(
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
-        Node::ChecklistItem {
+        Section::ChecklistItem {
             children,
             status: false,
             status_value: None,
@@ -73,22 +72,34 @@ pub fn checklist_section_end<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
     key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, raw_attrs) = many0(section_attr).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(|src| block_of_end_content(src, spans))
         .context("")
         .parse(source)?;
+    let mut attrs: BTreeMap<String, String> = BTreeMap::new();
+    let mut flags: Vec<String> = vec![];
+    raw_attrs.iter().for_each(|attr| match attr {
+        SectionAttr::KeyValue { key, value } => {
+            attrs.insert(key.to_string(), value.to_string());
+            ()
+        }
+        SectionAttr::Flag { key } => flags.push(key.to_string()),
+    });
     Ok((
         source,
-        Node::Checklist {
-            r#type: r#type.to_string(),
-            children,
+        Section::Checklist {
+            attrs,
             bounds: "end".to_string(),
+            children,
+            flags,
+            r#type: r#type.to_string(),
         },
     ))
 }
@@ -97,23 +108,35 @@ pub fn checklist_section_full<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.checklist))
         .context("")
         .parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, raw_attrs) = many0(section_attr).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(|src| checklist_item(src, spans))
         .context("")
         .parse(source)?;
+    let mut attrs: BTreeMap<String, String> = BTreeMap::new();
+    let mut flags: Vec<String> = vec![];
+    raw_attrs.iter().for_each(|attr| match attr {
+        SectionAttr::KeyValue { key, value } => {
+            attrs.insert(key.to_string(), value.to_string());
+            ()
+        }
+        SectionAttr::Flag { key } => flags.push(key.to_string()),
+    });
     Ok((
         source,
-        Node::Checklist {
-            r#type: r#type.to_string(),
-            children,
+        Section::Checklist {
+            attrs,
             bounds: "full".to_string(),
+            children,
+            flags,
+            r#type: r#type.to_string(),
         },
     ))
 }
@@ -122,26 +145,38 @@ pub fn checklist_section_start<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.checklist))
         .context("")
         .parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, raw_attrs) = many0(section_attr).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, mut children) = many0(|src| checklist_item_with_sections(src, &sections, &spans))
         .context("")
         .parse(source)?;
     let (source, end_section) = checklist_section_end(source, spans, r#type)?;
-    children.push(end_section);
+    children.push(end_section);    
+    let mut attrs: BTreeMap<String, String> = BTreeMap::new();
+    let mut flags: Vec<String> = vec![];
+    raw_attrs.iter().for_each(|attr| match attr {
+        SectionAttr::KeyValue { key, value } => {
+            attrs.insert(key.to_string(), value.to_string());
+            ()
+        }
+        SectionAttr::Flag { key } => flags.push(key.to_string()),
+    });
     Ok((
         source,
-        Node::Checklist {
-            r#type: r#type.to_string(),
-            children,
+        Section::Checklist {
+            attrs,
             bounds: "start".to_string(),
+            children,
+            flags,
+            r#type: r#type.to_string(),
         },
     ))
 }

@@ -1,5 +1,4 @@
 use crate::block::*;
-use crate::node::Node;
 use crate::section::*;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -16,23 +15,35 @@ pub fn json_section_end<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
     key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, raw_attrs) = many0(section_attr).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, children) = many0(|src| block_of_end_content(src, spans))
         .context("")
         .parse(source)?;
+    let mut attrs: BTreeMap<String, String> = BTreeMap::new();
+    let mut flags: Vec<String> = vec![];
+    raw_attrs.iter().for_each(|attr| match attr {
+        SectionAttr::KeyValue { key, value } => {
+            attrs.insert(key.to_string(), value.to_string());
+            ()
+        }
+        SectionAttr::Flag { key } => flags.push(key.to_string()),
+    });
     Ok((
         source,
-        Node::Json {
+        Section::Json {
+            attrs,
             bounds: "end".to_string(),
             children,
-            r#type: r#type.to_string(),
             data: None,
+            flags,
+            r#type: r#type.to_string(),
         },
     ))
 }
@@ -41,25 +52,37 @@ pub fn json_section_full<'a>(
     source: &'a str,
     sections: &'a Sections,
     _spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.json))
         .context("")
         .parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, raw_attrs) = many0(section_attr).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = many0(empty_until_newline_or_eof)
         .context("")
         .parse(source)?;
     let (source, text) = alt((take_until("\n--"), rest)).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
+    let mut attrs: BTreeMap<String, String> = BTreeMap::new();
+    let mut flags: Vec<String> = vec![];
+    raw_attrs.iter().for_each(|attr| match attr {
+        SectionAttr::KeyValue { key, value } => {
+            attrs.insert(key.to_string(), value.to_string());
+            ()
+        }
+        SectionAttr::Flag { key } => flags.push(key.to_string()),
+    });
     Ok((
         source,
-        Node::Json {
+        Section::Json {
+            attrs,
             bounds: "full".to_string(),
             children: vec![],
-            r#type: r#type.to_string(),
             data: Some(text.trim_end().to_string()),
+            flags,
+            r#type: r#type.to_string(),
         },
     ))
 }
@@ -68,7 +91,7 @@ pub fn json_section_start<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.json))
         .context("")
@@ -76,6 +99,7 @@ pub fn json_section_start<'a>(
     let end_key = format!("-- /{}", r#type);
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
+    let (source, raw_attrs) = many0(section_attr).context("").parse(source)?;
     let (source, _) = empty_until_newline_or_eof.context("").parse(source)?;
     let (source, _) = many0(empty_until_newline_or_eof)
         .context("")
@@ -83,13 +107,24 @@ pub fn json_section_start<'a>(
     let (source, text) = take_until(end_key.as_str()).context("").parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
     let (source, end_section) = json_section_end(source, spans, r#type)?;
+    let mut attrs: BTreeMap<String, String> = BTreeMap::new();
+    let mut flags: Vec<String> = vec![];
+    raw_attrs.iter().for_each(|attr| match attr {
+        SectionAttr::KeyValue { key, value } => {
+            attrs.insert(key.to_string(), value.to_string());
+            ()
+        }
+        SectionAttr::Flag { key } => flags.push(key.to_string()),
+    });
     Ok((
         source,
-        Node::Json {
+        Section::Json {
+            attrs,
             bounds: "start".to_string(),
             children: vec![end_section],
-            r#type: r#type.to_string(),
             data: Some(text.trim_end().to_string()),
+            flags,
+            r#type: r#type.to_string(),
         },
     ))
 }

@@ -2,7 +2,6 @@ pub mod block;
 pub mod section;
 pub mod span;
 
-use crate::node::Node;
 use crate::section::*;
 use crate::span::Span;
 use nom::multi::many1;
@@ -71,32 +70,41 @@ fn get_error(content: &str, tree: &ErrorTree<&str>) -> ParserError {
     }
 }
 
-pub fn output(ast: &Vec<Node>) -> String {
+pub fn output(ast: &Vec<Section>) -> String {
     let mut response = String::from("");
     ast.iter().for_each(|a| match a {
-        Node::Basic {
+        Section::Basic {
+            attrs,
             bounds,
             children,
+            flags,
             r#type,
-            ..
         } => {
             if bounds == "full" {
-                response.push_str("<div class=\"");
-                response.push_str("basic-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<div class=\"basic-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(&output(&children));
                 response.push_str("</div>");
             }
             if bounds == "start" {
-                response.push_str("<div class=\"");
-                response.push_str("basic-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<div class=\"basic-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(&output(&children));
             }
             if bounds == "end" {
@@ -111,24 +119,35 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        //Node::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
-        Node::Block { spans } => {
+        //Section::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
+        Section::Block { spans } => {
             response.push_str("<p>");
             response.push_str(output_spans(spans).as_str());
             response.push_str("</p>");
         }
-        Node::Checklist {
+        Section::Checklist {
+            attrs,
             bounds,
             children,
+            flags,
             r#type,
-            ..
         } => {
             if bounds == "full" {
                 response.push_str("<ul class=\"checklist-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str("\"");
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+
+                response.push_str(">");
                 response.push_str(&output(&children));
                 response.push_str("</ul>");
             } else if bounds == "start" {
@@ -136,7 +155,17 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str("\"");
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+
+                response.push_str(">");
                 response.push_str(&output(&children));
             } else if bounds == "end" {
                 response.push_str("<!-- checklist-");
@@ -149,7 +178,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::ChecklistItem {
+        Section::ChecklistItem {
             children, status, ..
         } => {
             response.push_str(
@@ -159,7 +188,7 @@ pub fn output(ast: &Vec<Node>) -> String {
             response.push_str("</li>");
         }
 
-        Node::Comment {
+        Section::Comment {
             bounds,
             r#type,
             children,
@@ -176,21 +205,38 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::Generic {
+        Section::Generic {
+            attrs,
             bounds,
             children,
+            flags,
             r#type,
-            ..
         } => {
             if bounds == "full" {
-                response
-                    .push_str(format!("<div class=\"generic-{}-{}\">", bounds, r#type).as_str());
+                response.push_str(format!("<div class=\"generic-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(&output(&children));
                 response.push_str("</div>");
             }
             if bounds == "start" {
-                response
-                    .push_str(format!("<div class=\"generic-{}-{}\">", bounds, r#type).as_str());
+                response.push_str(format!("<div class=\"generic-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(&output(&children));
             }
             if bounds == "end" {
@@ -200,50 +246,76 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::Json {
+        Section::Json {
+            attrs,
             bounds,
             children,
             data,
+            flags,
             r#type,
-            ..
         } => {
             if bounds == "end" {
-                response.push_str(format!("<!-- json-end-{} -->", r#type).as_str());
+                response.push_str(format!("<!-- json-end-{} ", r#type).as_str());
+                response.push_str(" -->");
                 response.push_str(&output(&children));
             } else if bounds == "full" {
-                response.push_str(
-                    format!("<!-- json-full-{} -->{}", r#type, data.clone().unwrap()).as_str(),
-                );
+                response.push_str(format!("<!-- json-full-{}", r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}: {}", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(format!("-->{}", data.clone().unwrap()).as_str());
             } else if bounds == "start" {
-                response.push_str(
-                    format!("<!-- json-start-{} -->{}", r#type, data.clone().unwrap()).as_str(),
-                );
+                response.push_str(format!("<!-- json-start-{}", r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}: {}", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(format!("-->{}", data.clone().unwrap()).as_str());
                 response.push_str(&output(&children));
             }
         }
 
-        Node::List {
+        Section::List {
+            attrs,
             bounds,
             children,
+            flags,
             r#type,
         } => {
             if bounds == "full" {
-                response.push_str("<ul class=\"list");
-                response.push_str("-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<ul class=\"list-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(&output(&children));
                 response.push_str("</ul>");
             }
             if bounds == "start" {
-                response.push_str("<ul class=\"list");
-                response.push_str("-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<ul class=\"list-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(&output(&children));
             }
             if bounds == "end" {
@@ -258,52 +330,64 @@ pub fn output(ast: &Vec<Node>) -> String {
             }
         }
 
-        Node::ListItem { children } => {
+        Section::ListItem { children } => {
             response.push_str("<li>");
             response.push_str(&output(&children));
             response.push_str("</li>");
         }
 
-        Node::Raw {
-            text,
-            r#type,
+        Section::Raw {
+            attrs,
             bounds,
             children,
+            flags,
+            text,
+            r#type,
         } => {
             if bounds == "full" {
-                response.push_str("<pre class=\"");
-                response.push_str("raw-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<pre class=\"raw-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(text.clone().unwrap().as_str());
                 response.push_str("</pre>");
             } else if bounds == "start" {
-                response.push_str("<pre class=\"");
-                response.push_str("raw-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<pre class=\"raw-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(text.clone().unwrap().as_str());
                 response.push_str(&output(&children));
             } else if bounds == "end" {
-                response.push_str("</pre>");
                 response.push_str("<!-- ");
                 response.push_str("raw-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
                 response.push_str(" -->");
+                response.push_str("</pre>");
                 response.push_str(&output(&children));
             }
         }
-        Node::TagFinderInit => {}
-        Node::Yaml {
+        Section::TagFinderInit => {}
+        Section::Yaml {
+            attrs,
             bounds,
             children,
             data,
+            flags,
             r#type,
             ..
         } => {
@@ -311,13 +395,27 @@ pub fn output(ast: &Vec<Node>) -> String {
                 response.push_str(format!("<!-- yaml-end-{} -->", r#type).as_str());
                 response.push_str(&output(&children));
             } else if bounds == "full" {
-                response.push_str(
-                    format!("<!-- yaml-full-{} -->{}", r#type, data.clone().unwrap()).as_str(),
-                );
+                response.push_str(format!("<!-- yaml-full-{}", r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}: {}", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(format!("-->{}", data.clone().unwrap()).as_str());
             } else if bounds == "start" {
-                response.push_str(
-                    format!("<!-- yaml-start-{} -->{}", r#type, data.clone().unwrap()).as_str(),
-                );
+                response.push_str(format!("<!-- yaml-start-{}", r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}: {}", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(format!("-->{}", data.clone().unwrap()).as_str());
                 response.push_str(&output(&children));
             }
         }
@@ -358,6 +456,19 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
             });
             response.push_str(format!(">{}</em>", text).as_str());
         }
+        Span::Footnote { attrs, flags, text } => {
+            response.push_str(format!("<sup").as_str());
+            attrs.iter().for_each(|attr| {
+                response.push_str(format!(" {}=\"{}\"", attr.0.as_str(), attr.1.as_str()).as_str());
+            });
+            flags.iter().for_each(|flag| {
+                response.push_str(format!(" {}", flag).as_str());
+            });
+            response.push_str(format!(">{}</sup>", text).as_str());
+        }
+        Span::Html { text } => {
+            response.push_str(text);
+        }
         Span::KnownSpan {
             r#type,
             spans,
@@ -373,7 +484,12 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
             });
             response.push_str(format!(">{}</{}>", output_spans(spans), r#type).as_str());
         }
-        Span::Link { attrs, flags, text, href } => {
+        Span::Link {
+            attrs,
+            flags,
+            text,
+            href,
+        } => {
             response.push_str(format!("<a href=\"").as_str());
             if let Some(h) = href {
                 response.push_str(h);
@@ -429,7 +545,7 @@ pub fn parse(
     source: &str,
     sections: &Sections,
     spans: &Vec<String>,
-) -> Result<Vec<Node>, ParserError> {
+) -> Result<Vec<Section>, ParserError> {
     match final_parser(|src| parse_runner(src, sections, spans))(source) {
         Ok(ast) => Ok(ast),
         Err(e) => Err(get_error(source, &e)),
@@ -440,7 +556,7 @@ fn parse_runner<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Vec<Node>, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Vec<Section>, ErrorTree<&'a str>> {
     let (source, results) = many1(|src| start_or_full_section(src, &sections, &spans))
         .context("")
         .parse(source)?;

@@ -9,16 +9,16 @@ use nom_supreme::error::ErrorTree;
 use nom_supreme::parser_ext::ParserExt;
 use std::collections::BTreeMap;
 
-pub fn code_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
-    let (source, _) = tag("``").context("").parse(source)?;
-    let (source, text) = is_not("`|").context("").parse(source)?;
+pub fn footnote_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
+    let (source, _) = tag("^^").context("").parse(source)?;
+    let (source, text) = is_not("^|").context("").parse(source)?;
     let (source, raw_attrs) = many0(alt((
-        code_shorthand_key_value_attr,
-        code_shorthand_flag_attr,
+        footnote_shorthand_key_value_attr,
+        footnote_shorthand_flag_attr,
     )))
     .context("")
     .parse(source)?;
-    let (source, _) = tag("``").context("").parse(source)?;
+    let (source, _) = tag("^^").context("").parse(source)?;
     let mut flags: Vec<String> = vec![];
     let mut attrs = BTreeMap::new();
     raw_attrs.iter().for_each(|attr| match attr {
@@ -29,7 +29,7 @@ pub fn code_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     });
     Ok((
         source,
-        Span::Code {
+        Span::Footnote {
             attrs,
             flags,
             text: text.to_string(),
@@ -37,11 +37,11 @@ pub fn code_shorthand(source: &str) -> IResult<&str, Span, ErrorTree<&str>> {
     ))
 }
 
-pub fn code_shorthand_key_value_attr(source: &str) -> IResult<&str, SpanAttr, ErrorTree<&str>> {
+pub fn footnote_shorthand_key_value_attr(source: &str) -> IResult<&str, SpanAttr, ErrorTree<&str>> {
     let (source, _) = tag("|").context("").parse(source)?;
-    let (source, key) = is_not(" |\n\t:`").context("").parse(source)?;
+    let (source, key) = is_not(" |\n\t:^").context("").parse(source)?;
     let (source, _) = tag(":").context("").parse(source)?;
-    let (source, value) = is_not("|`").context("").parse(source)?;
+    let (source, value) = is_not("|^").context("").parse(source)?;
     Ok((
         source,
         SpanAttr::KeyValue {
@@ -51,9 +51,9 @@ pub fn code_shorthand_key_value_attr(source: &str) -> IResult<&str, SpanAttr, Er
     ))
 }
 
-pub fn code_shorthand_flag_attr(source: &str) -> IResult<&str, SpanAttr, ErrorTree<&str>> {
+pub fn footnote_shorthand_flag_attr(source: &str) -> IResult<&str, SpanAttr, ErrorTree<&str>> {
     let (source, _) = tag("|").context("").parse(source)?;
-    let (source, key) = is_not(" |\n\t:`").context("").parse(source)?;
+    let (source, key) = is_not(" |\n\t:^").context("").parse(source)?;
     Ok((
         source,
         SpanAttr::Flag {

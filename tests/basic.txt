@@ -188,3 +188,47 @@ Nested Spans With Multiple Key Value Attrs
     </p>
 </div>
 
+
+
+################################################
+
+Basic With Key Value Attrs
+
+------------------------------------------------
+
+-- div
+-- key1: value1
+-- key2: value2
+-- flag1
+
+here
+
+------------------------------------------------
+
+<div class="basic-full-div" key1="value1" key2="value2" flag1>
+    <p>here</p>
+</div>
+
+
+################################################
+
+Basic With Key Value Attrs
+
+------------------------------------------------
+
+-- div/
+-- key1: value1
+-- key2: value2
+-- flag1
+
+here
+
+-- /div
+
+------------------------------------------------
+
+<div class="basic-start-div" key1="value1" key2="value2" flag1>
+    <p>here</p>
+<!-- basic-end-div -->
+</div>
+

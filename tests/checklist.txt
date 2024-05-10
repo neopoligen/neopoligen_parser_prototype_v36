@@ -327,8 +327,9 @@ Raw Start/End Inside List Item Start/End
 <ul class="checklist-start-todo">
     <li class="status-false">
         <p>a</p>
-        <pre class="raw-start-pre">b</pre>
+        <pre class="raw-start-pre">b
         <!-- raw-end-pre -->
+        </pre>
     </li>
     <li class="status-false">
         <p>c</p>
@@ -501,6 +502,61 @@ Span In Start/End Checklist
             </strong>
         </em>
         </p>
+    </li>
+<!-- checklist-end-todo -->
+</ul>
+
+
+################################################
+
+Checklist Full With Attrs
+
+------------------------------------------------
+
+-- todo
+-- key1: value1
+-- flag1
+
+[] a
+
+[] b
+
+------------------------------------------------
+
+<ul class="checklist-full-todo" key1="value1" flag1>
+    <li class="status-false">
+        <p>a</p>
+    </li>
+    <li class="status-false">
+        <p>b</p>
+    </li>
+</ul>
+
+
+################################################
+
+Checklist Start With Attrs
+
+------------------------------------------------
+
+-- todo/
+-- key1: value1
+-- flag1
+
+[] a
+
+[] b
+
+-- /todo
+
+------------------------------------------------
+
+<ul class="checklist-start-todo" key1="value1" flag1>
+    <li class="status-false">
+        <p>a</p>
+    </li>
+    <li class="status-false">
+        <p>b</p>
     </li>
 <!-- checklist-end-todo -->
 </ul>

@@ -1,5 +1,4 @@
 use crate::block::*;
-use crate::node::Node;
 use crate::section::*;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -16,7 +15,7 @@ pub fn comment_section_end<'a>(
     source: &'a str,
     spans: &'a Vec<String>,
     key: &'a str,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, _) = tag("/").context("").parse(source)?;
     let (source, r#type) = tag(key).context("").parse(source)?;
@@ -28,7 +27,7 @@ pub fn comment_section_end<'a>(
         .parse(source)?;
     Ok((
         source,
-        Node::Comment {
+        Section::Comment {
             bounds: "end".to_string(),
             children,
             r#type: r#type.to_string(),
@@ -41,7 +40,7 @@ pub fn comment_section_full<'a>(
     source: &'a str,
     sections: &'a Sections,
     _spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.comment))
         .context("")
@@ -55,7 +54,7 @@ pub fn comment_section_full<'a>(
     let (source, _) = multispace0.context("").parse(source)?;
     Ok((
         source,
-        Node::Comment {
+        Section::Comment {
             bounds: "full".to_string(),
             children: vec![],
             r#type: r#type.to_string(),
@@ -68,7 +67,7 @@ pub fn comment_section_start<'a>(
     source: &'a str,
     sections: &'a Sections,
     spans: &'a Vec<String>,
-) -> IResult<&'a str, Node, ErrorTree<&'a str>> {
+) -> IResult<&'a str, Section, ErrorTree<&'a str>> {
     let (source, _) = tag("-- ").context("").parse(source)?;
     let (source, r#type) = (|src| tag_finder(src, &sections.comment))
         .context("")
@@ -85,7 +84,7 @@ pub fn comment_section_start<'a>(
     let (source, end_section) = comment_section_end(source, spans, r#type)?;
     Ok((
         source,
-        Node::Comment {
+        Section::Comment {
             bounds: "start".to_string(),
             children: vec![end_section],
             r#type: r#type.to_string(),

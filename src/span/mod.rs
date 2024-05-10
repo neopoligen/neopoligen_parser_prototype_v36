@@ -1,23 +1,27 @@
-pub mod code;
 pub mod button;
+pub mod code;
 pub mod em;
+pub mod footnote;
+pub mod html;
 pub mod link;
 pub mod strong;
 
 use crate::span::button::*;
 use crate::span::code::*;
 use crate::span::em::*;
+use crate::span::footnote::*;
+use crate::span::html::*;
 use crate::span::link::*;
 use crate::span::strong::*;
 use nom::branch::alt;
-use nom::bytes::complete::tag;
 use nom::bytes::complete::is_not;
+use nom::bytes::complete::tag;
 use nom::character::complete::line_ending;
 use nom::character::complete::multispace0;
-use nom::multi::many0;
 use nom::character::complete::space0;
 use nom::character::complete::space1;
 use nom::combinator::not;
+use nom::multi::many0;
 use nom::sequence::tuple;
 use nom::IResult;
 use nom::Parser;
@@ -40,6 +44,14 @@ pub enum Span {
     Em {
         attrs: BTreeMap<String, String>,
         flags: Vec<String>,
+        text: String,
+    },
+    Footnote {
+        attrs: BTreeMap<String, String>,
+        flags: Vec<String>,
+        text: String,
+    },
+    Html {
         text: String,
     },
     KnownSpan {
@@ -89,8 +101,10 @@ pub fn span_finder<'a>(
         button_shorthand,
         code_shorthand,
         em_shorthand,
+        footnote_shorthand,
         link_shorthand,
         strong_shorthand,
+        html_shorthand,
         |src| known_span(src, spans),
         newline,
         space,
@@ -251,5 +265,3 @@ pub fn span_initial_error<'a>() -> IResult<&'a str, &'a str, ErrorTree<&'a str>>
     let (_, _) = tag("asdf").parse("fdsa")?;
     Ok(("", ""))
 }
-
-
