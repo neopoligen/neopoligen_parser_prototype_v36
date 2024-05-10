@@ -65,9 +65,11 @@ pub enum Section {
         children: Vec<Section>,
     },
     Generic {
-        r#type: String,
-        children: Vec<Section>,
+        attrs: BTreeMap<String, String>,
         bounds: String,
+        children: Vec<Section>,
+        flags: Vec<String>,
+        r#type: String,
     },
     Json {
         bounds: String,
