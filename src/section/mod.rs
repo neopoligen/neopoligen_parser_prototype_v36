@@ -90,10 +90,12 @@ pub enum Section {
         children: Vec<Section>,
     },
     Raw {
+        attrs: BTreeMap<String, String>,
         bounds: String,
+        children: Vec<Section>,
+        flags: Vec<String>,
         r#type: String,
         text: Option<String>,
-        children: Vec<Section>,
     },
     TagFinderInit,
     Yaml {

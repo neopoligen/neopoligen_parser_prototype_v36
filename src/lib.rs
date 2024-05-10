@@ -337,37 +337,47 @@ pub fn output(ast: &Vec<Section>) -> String {
         }
 
         Section::Raw {
-            text,
-            r#type,
+            attrs,
             bounds,
             children,
+            flags,
+            text,
+            r#type,
         } => {
             if bounds == "full" {
-                response.push_str("<pre class=\"");
-                response.push_str("raw-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<pre class=\"raw-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(text.clone().unwrap().as_str());
                 response.push_str("</pre>");
             } else if bounds == "start" {
-                response.push_str("<pre class=\"");
-                response.push_str("raw-");
-                response.push_str(bounds);
-                response.push_str("-");
-                response.push_str(r#type);
-                response.push_str("\">");
+                response.push_str(format!("<pre class=\"raw-{}-{}\"", bounds, r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}=\"{}\"", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(">");
                 response.push_str(text.clone().unwrap().as_str());
                 response.push_str(&output(&children));
             } else if bounds == "end" {
-                response.push_str("</pre>");
                 response.push_str("<!-- ");
                 response.push_str("raw-");
                 response.push_str(bounds);
                 response.push_str("-");
                 response.push_str(r#type);
                 response.push_str(" -->");
+                response.push_str("</pre>");
                 response.push_str(&output(&children));
             }
         }

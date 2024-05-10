@@ -1,3 +1,5 @@
+################################################
+
 Raw Full
 
 ------------------------------------------------    
@@ -45,8 +47,9 @@ e
 
 ------------------------------------------------
 
-<pre class="raw-start-pre">d</pre>
+<pre class="raw-start-pre">d
 <!-- raw-end-pre -->
+</pre>
 <p>e</p>
 
 
@@ -79,8 +82,9 @@ Raw Inside List With End Content
 <ul class="list-start-list">
     <li>
         <p>a</p>
-        <pre class="raw-start-pre">b</pre>
+        <pre class="raw-start-pre">b
         <!-- raw-end-pre -->
+        </pre>
         <p>c</p>
     </li>
     <li>
@@ -117,9 +121,46 @@ b
 b
 
 -- /pre
-</pre>
 <!-- raw-end-code -->
+</pre>
 
 
+################################################
+
+Raw Full Attrs
+
+------------------------------------------------    
+
+-- pre
+-- key1: value1
+-- flag1
+
+b
+
+------------------------------------------------
+
+<pre class="raw-full-pre" key1="value1" flag1>b</pre>
+
+
+
+################################################
+
+Raw Full Attrs
+
+------------------------------------------------    
+
+-- pre/
+-- key1: value1
+-- flag1
+
+b
+
+-- /pre
+
+------------------------------------------------
+
+<pre class="raw-start-pre" key1="value1" flag1>b
+<!-- raw-end-pre -->
+</pre>
 
 

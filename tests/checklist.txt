@@ -327,8 +327,9 @@ Raw Start/End Inside List Item Start/End
 <ul class="checklist-start-todo">
     <li class="status-false">
         <p>a</p>
-        <pre class="raw-start-pre">b</pre>
+        <pre class="raw-start-pre">b
         <!-- raw-end-pre -->
+        </pre>
     </li>
     <li class="status-false">
         <p>c</p>
