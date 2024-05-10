@@ -99,10 +99,12 @@ pub enum Section {
     },
     TagFinderInit,
     Yaml {
+        attrs: BTreeMap<String, String>,
         bounds: String,
-        r#type: String,
-        data: Option<String>,
         children: Vec<Section>,
+        data: Option<String>,
+        flags: Vec<String>,
+        r#type: String,
     },
 }
 

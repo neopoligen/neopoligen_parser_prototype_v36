@@ -383,9 +383,11 @@ pub fn output(ast: &Vec<Section>) -> String {
         }
         Section::TagFinderInit => {}
         Section::Yaml {
+            attrs,
             bounds,
             children,
             data,
+            flags,
             r#type,
             ..
         } => {
@@ -393,13 +395,27 @@ pub fn output(ast: &Vec<Section>) -> String {
                 response.push_str(format!("<!-- yaml-end-{} -->", r#type).as_str());
                 response.push_str(&output(&children));
             } else if bounds == "full" {
-                response.push_str(
-                    format!("<!-- yaml-full-{} -->{}", r#type, data.clone().unwrap()).as_str(),
-                );
+                response.push_str(format!("<!-- yaml-full-{}", r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}: {}", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(format!("-->{}", data.clone().unwrap()).as_str());
             } else if bounds == "start" {
-                response.push_str(
-                    format!("<!-- yaml-start-{} -->{}", r#type, data.clone().unwrap()).as_str(),
-                );
+                response.push_str(format!("<!-- yaml-start-{}", r#type).as_str());
+                attrs.iter().for_each(|attr| {
+                    response.push_str(
+                        format!(" {}: {}", attr.0.to_string(), attr.1.to_string()).as_str(),
+                    )
+                });
+                flags
+                    .iter()
+                    .for_each(|flag| response.push_str(format!(" {}", flag).as_str()));
+                response.push_str(format!("-->{}", data.clone().unwrap()).as_str());
                 response.push_str(&output(&children));
             }
         }
