@@ -368,6 +368,9 @@ pub fn output_spans(spans: &Vec<Span>) -> String {
             });
             response.push_str(format!(">{}</em>", text).as_str());
         }
+        Span::Html { text } => {
+            response.push_str(text);
+        }
         Span::KnownSpan {
             r#type,
             spans,
