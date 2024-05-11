@@ -120,7 +120,7 @@ pub fn output(ast: &Vec<Section>) -> String {
         }
 
         //Section::Block { spans } => response.push_str(format!("<p>{}</p>", spans).as_str()),
-        Section::Block { spans } => {
+        Section::Block { spans, .. } => {
             response.push_str("<p>");
             response.push_str(output_spans(spans).as_str());
             response.push_str("</p>");

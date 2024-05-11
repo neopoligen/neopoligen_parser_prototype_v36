@@ -44,6 +44,7 @@ pub enum Section {
         r#type: String,
     },
     Block {
+        bounds: String,
         spans: Vec<Span>,
     },
     Checklist {
