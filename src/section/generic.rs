@@ -1,7 +1,6 @@
 use crate::block::*;
 use crate::section::*;
 use nom::branch::alt;
-use nom::bytes::complete::is_not;
 use nom::bytes::complete::tag;
 use nom::character::complete::multispace0;
 use nom::multi::many0;
