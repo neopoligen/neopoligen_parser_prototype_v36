@@ -21,7 +21,7 @@ pub fn list_item_block<'a>(
         .context("")
         .parse(source)?;
     let (source, _) = multispace0.context("").parse(source)?;
-    Ok((source, Section::Block { spans }))
+    Ok((source, Section::Block { bounds: "full".to_string(),  spans }))
 }
 
 pub fn list_item<'a>(
